@@ -2,7 +2,7 @@ import math
 
 import numpy as np
 
-from Function import Function
+from NeuralNetworkCore.Function import Function
 
 
 def linear_lr_decay(curr_lr, base_lr, final_lr, curr_step, limit_step, **kwargs):

@@ -8,14 +8,14 @@ class Function:
 
     def __init__(self, name, function):
         self.__name = name
-        self.function = function
+        self.__function = function
 
     @property
     def name(self):
         return self.__name
 
     @property
-    def func(self):
+    def function(self):
         return self.__function
 
 

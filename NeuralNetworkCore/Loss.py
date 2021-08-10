@@ -1,6 +1,6 @@
 import numpy as np
 
-from Function import DerivableFunction
+from NeuralNetworkCore.Function import DerivableFunction
 
 
 def squared_loss(predicted, target):

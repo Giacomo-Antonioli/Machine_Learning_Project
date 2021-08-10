@@ -1,5 +1,7 @@
 import numpy as np
-from Function import DerivableFunction
+
+from NeuralNetworkCore.Function import DerivableFunction
+
 
 def identity_function(x):
     """ identity (linear) activation function """

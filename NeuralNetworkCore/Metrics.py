@@ -1,6 +1,6 @@
 import numpy as np
 
-from Function import Function
+from NeuralNetworkCore.Function import Function
 
 
 def binary_class_accuracy(predicted, target):
@@ -27,8 +27,8 @@ def euclidean_loss(predicted, target):
     return np.linalg.norm(np.subtract(predicted, target))
 
 
-BinClassAcc = Function(binary_class_accuracy, 'bin_class_acc')
-Euclidean = Function(euclidean_loss, 'euclidean')
+BinClassAcc = Function( 'bin_class_acc',binary_class_accuracy)
+Euclidean = Function( 'euclidean',euclidean_loss)
 metrics = {
     'bin_class_acc': BinClassAcc,
     'euclidean': Euclidean

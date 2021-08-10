@@ -1,14 +1,11 @@
-import math
 from abc import ABC, abstractmethod
 
-import numpy as np
 import tqdm as tqdm
-from Loss import losses
-from Metrics import metrics
-from LearningRates import lr_decays
-from Reguralizers import regularizers
 
-
+from NeuralNetworkCore.LearningRates import *
+from NeuralNetworkCore.Reguralizers import regularizers
+from NeuralNetworkCore.Loss import losses
+from NeuralNetworkCore.Metrics import metrics
 class Optimizer(ABC):
     """
     Abstract class representing a generic optimizer
@@ -36,17 +33,13 @@ class Optimizer(ABC):
         self.__type = 'optimizer'
 
 
-
-
-
-
 class StochasticGradientDescent(Optimizer):
     """
     Stochastic Gradient Descent
     Concrete implementation of the abstract class Optimizer
     """
 
-    def __init__(self, learning_rate=0.01, momentum=0, nesterov=False, loss_function='squared', metrics='euclidean'):
+    def __init__(self, learning_rate=0.01, momentum=0, nesterov=False, loss_function='squared', metric='euclidean'):
         super().__init__()
         if learning_rate <= 0 or learning_rate > 1:
             raise ValueError('learning_rate should be a value between 0 and 1, Got:{}'.format(learning_rate))
@@ -55,31 +48,58 @@ class StochasticGradientDescent(Optimizer):
         self.__lr = learning_rate
         self.__momentum = momentum
         self.__nesterov = nesterov
-        self.__loss_function = loss_function
-        self.__metrics = metrics
+
+        if isinstance(loss_function,str):
+            self.__loss_function = losses[loss_function]
+        else:
+            self.__loss_function = loss_function
+
+        if isinstance(metric,str):
+            self.__metric = metrics[metric]
+
+        else:
+            self.__metric = metric
+
         self.__name = 'sgd'
 
     @property
     def type(self):
         return self.__type
-
+    @property
+    def lr(self):
+        return self.__lr
+    
+    @lr.setter
+    def lr(self, lr):
+        self.__lr = lr
+        
+    @property
+    def momentum(self):
+        return self.__momentum
+    
+    @momentum.setter
+    def momentum(self, momentum):
+        self.__momentum = momentum
     @property
     def name(self):
         return self.__name
+
     @property
     def loss_function(self):
         return self.__loss_function
 
     @property
-    def metrics(self):
-        return self.__metrics
+    def metric(self):
+        return self.__metric
 
     @property
     def nesterov(self):
         return self.__nesterov
 
-    def optimization_process(self, model,train_dataset, train_labels, epochs=1, batch_size=1, shuffle=False, validation=None):
-
+    def optimization_process(self, model, train_dataset, train_labels, epochs=1, batch_size=1, shuffle=False,
+                             validation=None):
+        if batch_size==None:
+            batch_size=1
         train_dataset = train_dataset[np.newaxis, :] if len(train_dataset.shape) < 2 else train_dataset
         train_labels = train_labels[np.newaxis, :] if len(train_labels.shape) < 2 else train_labels
 
@@ -104,26 +124,26 @@ class StochasticGradientDescent(Optimizer):
 
             # cycle through batches
             for batch_index in tqdm.tqdm(range(math.ceil(len(train_dataset) / batch_size)),
-                                         desc="Cycling though " + math.ceil(
-                                             len(train_dataset) / batch_size) + "batches"):
+                                         desc="Cycling though " + str(math.ceil(
+                                             len(train_dataset) / batch_size) )+ "batches"):
                 start = batch_index * batch_size
                 end = start + batch_size
                 train_batch = train_dataset[start: end]
                 targets_batch = train_labels[start: end]
                 gradient_network = model.get_empty_struct()
-
                 for current_input, current_target in zip(train_batch, targets_batch):
-                    net_outputs = model.forward(inp=current_input)
+                    net_outputs = model.forward(net_input=current_input)
 
                     # epoch training error = itself + loss + regularization
+
                     epoch_training_error = np.add(epoch_training_error,
-                                                  self.__loss_function.func(predicted=net_outputs, target=current_target))
+                                                  self.__loss_function.function(predicted=net_outputs,target=current_target))
 
                     epoch_training_error_metric = np.add(epoch_training_error_metric,
-                                                         self.__metrics.func(predicted=net_outputs, target=current_target))
+                                                         self.__metric.function(predicted=net_outputs,
+                                                                             target=current_target))
 
-
-                    dErr_dOut = self.__loss_function.deriv(predicted=net_outputs, target=current_target)
+                    dErr_dOut = self.__loss_function.derive(predicted=net_outputs, target=current_target)
                     gradient_network = model.propagate_back(dErr_dOut, gradient_network)
 
                 # # learning rate decays
@@ -149,7 +169,9 @@ class StochasticGradientDescent(Optimizer):
                     if model.layers[layer_index].regularizer != None:
                         model.layers[layer_index].weights = np.subtract(
                             np.add(model.layers[layer_index].weights, momentum_network[layer_index]['weights']),
-                            regularizers[model.layers[layer_index].regularizer].deriv(w=model.layers[layer_index].weights, lambd=smodel.layers[layer_index].regularizer_param),
+                            regularizers[model.layers[layer_index].regularizer].deriv(
+                                w=model.layers[layer_index].weights,
+                                lambd=model.layers[layer_index].regularizer_param),
                         )
                     model.layers[layer_index].biases = np.add(
                         model.layers[layer_index].biases,
@@ -162,7 +184,7 @@ class StochasticGradientDescent(Optimizer):
                 val_y = validation[1][np.newaxis, :] if len(validation[1].shape) < 2 else validation[1]
 
                 epoch_val_error, epoch_val_metric = model.evaluate(inp=val_x, targets=val_y, metr=self.__metrics.name,
-                                                                 loss=self.__loss_function.name)
+                                                                   loss=self.__loss_function.name)
                 values_dict['validation_error'].append(epoch_val_error)
                 values_dict['validation_metrics'].append(epoch_val_metric)
 
