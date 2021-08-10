@@ -1,13 +1,16 @@
 import math
 import os
-import matplotlib.pyplot as plt
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
+
+from NeuralNetworkCore.Layer import Dense,Dropout
 from NeuralNetworkCore.Model import Model
-from NeuralNetworkCore.Layer import Layer
 from NeuralNetworkCore.Optimizers import StochasticGradientDescent
+
+
 def read_cup(int_ts=False):
     """
     Reads the CUP training and test set
@@ -62,20 +65,23 @@ def read_cup(int_ts=False):
 
     return tr_data, tr_targets, cup_ts_data
 
+
 devset_x, devset_y, int_ts_x, int_ts_y, ts_data = read_cup(int_ts=True)
 
-model= Model("SimpleNet")
-model.add(Layer(10,5))
-model.add(Layer(5,1))
-optimizer=StochasticGradientDescent(metric='euclidean')
+model = Model("SimpleNet")
+
+model.add(Dense(10, 5))
+model.add(Dropout(0.3))
+model.add(Dense(5, 1))
+optimizer = StochasticGradientDescent(metric='euclidean')
 model.compile(optimizer=optimizer)
 print(type(devset_x))
 print(devset_x.shape)
 print(devset_y.shape)
-print(devset_y[:,0].shape)
+print(devset_y[:, 0].shape)
 model.showLayers()
-
-res=model.fit(devset_x,np.reshape(devset_y[:,0],(-1,1)),batch_size=10,epochs=20)
+print(model.dense_configuration)
+res = model.fit(devset_x, np.reshape(devset_y[:, 0], (-1, 1)), batch_size=10, epochs=20)
 plt.plot(res['training_error'])
 plt.show()
 print(res)

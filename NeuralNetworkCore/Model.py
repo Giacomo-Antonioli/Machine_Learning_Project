@@ -2,7 +2,7 @@ from NeuralNetworkCore.Optimizers import *
 
 
 class Model:
-    def __init__(self, name):
+    def __init__(self, name="NN"):
         self.__name = name
         self.__layers = []
         self.__optimizer = None
@@ -14,11 +14,12 @@ class Model:
         self.__epochs = 1
         self.__batch_size = None
         self.__validation_split = 0
+        self.__dense_configuration = []
 
     @property
     def layers(self):
         return self.__layers
-    
+
     @layers.setter
     def layers(self, layers):
         self.__layers = layers
@@ -103,27 +104,52 @@ class Model:
     def validation_split(self, validation_split):
         self.__validation_split = validation_split
 
+    @property
+    def dense_configuration(self):
+        return self.__dense_configuration
+
+    @dense_configuration.setter
+    def dense_configuration(self, dense_configuration):
+        self.__dense_configuration = dense_configuration
+
     def add(self, object):
-        if object.type == 'layer':
-            self.__layers.append(object)
+        if object.type == 'dense':
+            self.layers.append(object)
+            self.__dense_configuration.append(self.get_layer_depth())
+        if object.type == 'drop':
+            self.layers.append(object)
+
+    def get_layer_depth(self):
+
+        return len(self.layers)-1
 
 
     def showLayers(self):
         print("°°°°°°°°°°°°°°°°°°°°°")
         for x in self.__layers:
-            print(x.n_units)
-        print(self.__layers[-1].n_units)
+            if x.type!='drop':
+                print(x.n_units)
+
         print("°°°°°°°°°°°°°°°°°°°°°")
 
     def get_empty_struct(self):
         """ :return: a zeroed structure with the same topology of the NN to contain all the layers' gradients """
-        struct = np.array([{}] * len(self.__layers))
-        for layer_index in range(len(self.__layers)):
-            struct[layer_index] = {'weights': [], 'biases': []}
-            weights_matrix = self.__layers[layer_index].weights
-            weights_matrix = weights_matrix[np.newaxis, :] if len(weights_matrix.shape) < 2 else weights_matrix
-            struct[layer_index]['weights'] = np.zeros(shape=weights_matrix.shape)
-            struct[layer_index]['biases'] = np.zeros(shape=(len(weights_matrix[0, :])))
+        valid_layers = 0
+        for layer in self.layers:
+            if layer.type == 'dense':
+                valid_layers += 1
+        struct = np.array([{}] * valid_layers)
+        layer_index = 0
+        for index,layer in enumerate(self.layers):
+            if layer.type == 'dense':
+                struct[layer_index] = {'weights': [], 'biases': []}
+                weights_matrix = self.layers[index].weights
+                weights_matrix = weights_matrix[np.newaxis, :] if len(weights_matrix.shape) < 2 else weights_matrix
+                struct[layer_index]['weights'] = np.zeros(shape=weights_matrix.shape)
+                struct[layer_index]['biases'] = np.zeros(shape=(len(weights_matrix[0, :])))
+                layer_index += 1
+            else:
+                pass
         return struct
 
     def forward(self, net_input):
@@ -171,7 +197,7 @@ class Model:
         #                              momentum=momentum, reg_type=reg_type, lambd=lambd)
 
     def fit(self, training_data, training_targets, validation_data=None, epochs=1, batch_size=None, validation_split=0,
-            shuffle=False,** kwargs):
+            shuffle=False, **kwargs):
         """
         Execute the training of the network
         :param training_data: (numpy ndarray) input training set
@@ -278,8 +304,14 @@ class Model:
         :return: the updated grad_net
         """
         curr_delta = dErr_dOut
-        for layer_index in reversed(range(len(self.__layers))):
-            curr_delta, grad_w, grad_b = self.__layers[layer_index].backward_pass(curr_delta)
+        total_len = 0
+
+        for layer in self.layers:
+            if layer.type == 'dense':
+                total_len += 1
+
+        for layer_index in reversed(range(total_len)):
+            curr_delta, grad_w, grad_b = self.layers[self.dense_configuration[layer_index]].backward_pass(curr_delta)
             gradient_network[layer_index]['weights'] = np.add(gradient_network[layer_index]['weights'], grad_w)
             gradient_network[layer_index]['biases'] = np.add(gradient_network[layer_index]['biases'], grad_b)
         return gradient_network

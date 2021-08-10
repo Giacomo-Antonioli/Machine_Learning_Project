@@ -152,30 +152,35 @@ class StochasticGradientDescent(Optimizer):
                 #     self.lr = lr_decays[self.lr_decay].func(curr_step=step, **self.lr_params)
 
                 # weights update
-                for layer_index in range(len(model.layers)):
+
+                for grad_net_index in range(len(model.dense_configuration)):
+
+                    layer_index=model.dense_configuration[grad_net_index]
+
                     # gradient_network contains the gradients of all the layers (and units) in the network
-                    gradient_network[layer_index]['weights'] /= batch_size
-                    gradient_network[layer_index]['biases'] /= batch_size
+                    gradient_network[grad_net_index]['weights'] /= batch_size
+                    gradient_network[grad_net_index]['biases'] /= batch_size
                     # delta_w is equivalent to lrn_rate * local_grad * input_on_that_connection (local_grad = delta)
-                    delta_w = self.lr * gradient_network[layer_index]['weights']
-                    delta_b = self.lr * gradient_network[layer_index]['biases']
+                    delta_w = self.lr * gradient_network[grad_net_index]['weights']
+                    delta_b = self.lr * gradient_network[grad_net_index]['biases']
                     # momentum_network[layer_index]['weights'] is the new delta_w --> it adds the momentum
                     # Since it acts as delta_w, it multiplies itself by the momentum constant and then adds
                     # lrn_rate * local_grad * input_on_that_connection (i.e. "delta_w")
-                    momentum_network[layer_index]['weights'] *= self.momentum
-                    momentum_network[layer_index]['biases'] *= self.momentum
-                    momentum_network[layer_index]['weights'] = np.add(momentum_network[layer_index]['weights'], delta_w)
-                    momentum_network[layer_index]['biases'] = np.add(momentum_network[layer_index]['biases'], delta_b)
+                    momentum_network[grad_net_index]['weights'] *= self.momentum
+                    momentum_network[grad_net_index]['biases'] *= self.momentum
+                    momentum_network[grad_net_index]['weights'] = np.add(momentum_network[grad_net_index]['weights'], delta_w)
+                    momentum_network[grad_net_index]['biases'] = np.add(momentum_network[grad_net_index]['biases'], delta_b)
+
                     if model.layers[layer_index].regularizer != None:
                         model.layers[layer_index].weights = np.subtract(
-                            np.add(model.layers[layer_index].weights, momentum_network[layer_index]['weights']),
+                            np.add(model.layers[layer_index].weights, momentum_network[grad_net_index]['weights']),
                             regularizers[model.layers[layer_index].regularizer].deriv(
                                 w=model.layers[layer_index].weights,
                                 lambd=model.layers[layer_index].regularizer_param),
                         )
                     model.layers[layer_index].biases = np.add(
                         model.layers[layer_index].biases,
-                        momentum_network[layer_index]['biases']
+                        momentum_network[grad_net_index]['biases']
                     )
 
             # validation
