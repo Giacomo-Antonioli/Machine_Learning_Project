@@ -112,7 +112,7 @@ class StochasticGradientDescent(Optimizer):
         step = 0
 
         # cycle through epochs
-        for _ in tqdm.tqdm(range(epochs), desc="Training"):
+        for epoch in range(epochs):
             epoch_training_error = np.zeros(model.layers[-1].n_units)
             epoch_training_error_metric = np.zeros(model.layers[-1].n_units)
 
@@ -123,9 +123,7 @@ class StochasticGradientDescent(Optimizer):
                 train_labels = train_labels[indexes]
 
             # cycle through batches
-            for batch_index in tqdm.tqdm(range(math.ceil(len(train_dataset) / batch_size)),
-                                         desc="Cycling though " + str(math.ceil(
-                                             len(train_dataset) / batch_size) )+ "batches"):
+            for batch_index in range(math.ceil(len(train_dataset) / batch_size)):
                 start = batch_index * batch_size
                 end = start + batch_size
                 train_batch = train_dataset[start: end]

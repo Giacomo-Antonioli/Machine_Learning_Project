@@ -15,6 +15,7 @@ class Model:
         self.__batch_size = None
         self.__validation_split = 0
         self.__dense_configuration = []
+        self.__net_configuration_types=[]
 
     @property
     def layers(self):
@@ -112,12 +113,19 @@ class Model:
     def dense_configuration(self, dense_configuration):
         self.__dense_configuration = dense_configuration
 
+    @property
+    def net_configuration_types(self):
+        return self.__net_configuration_types
+
+    @net_configuration_types.setter
+    def net_configuration_types(self, net_configuration_types):
+        self.__net_configuration_types = net_configuration_types
+
     def add(self, object):
+        self.layers.append(object)
         if object.type == 'dense':
-            self.layers.append(object)
-            self.__dense_configuration.append(self.get_layer_depth())
-        if object.type == 'drop':
-            self.layers.append(object)
+            self.dense_configuration.append(self.get_layer_depth())
+        self.net_configuration_types.append(object.type)
 
     def get_layer_depth(self):
 

@@ -120,6 +120,7 @@ class Dense(Layer):
         :return gradient_w: gradient wrt weights
         :return gradient_b: gradient wrt biases
         """
+        print("")
         dOut_dNet = self.__activation_function.derive(self.__nets)
         delta = np.multiply(upstream_delta, dOut_dNet)
         self.__gradient_b = -delta

@@ -111,7 +111,6 @@ Giacomo Antonioli
 \end_layout
 
 \begin_layout Affiliation (alternate)
-
 \begin_inset Argument 1
 status open
 
@@ -126,8 +125,11 @@ Computer Science Department, UNIPI University.
 \end_layout
 
 \begin_layout Author Email
-
 g.antonioli3@studenti.unipi.it
+\end_layout
+
+\begin_layout In Title
+ML Course - AA:2020/2021
 \end_layout
 
 \begin_layout Date
@@ -157,14 +159,29 @@ prints the current date; should only be replaced for special cases
 \end_layout
 
 \begin_layout Abstract
-Implementation of the course contents by develpoing a simple Neural Network
- that was implemente without using libraries available on the market.
- Each aspect of the net was implementend in the given code.
- From the creation of the net, the feed-forward process, the loss calculation
- and the weight update.
- Many different optimizations and strategies were applied in order to emprove
+Implementation of the course contents by developing a simple Neural Network
+ that was implemented without using libraries available on the market.
+ Each aspect of the net was implemented in the given code.
+ From the creation of the 
+\series bold
+net
+\series default
+, the 
+\series bold
+feed-forward process
+\series default
+, the 
+\series bold
+loss calculation
+\series default
+ and the 
+\series bold
+weight update
+\series default
+.
+ Many different optimizations and strategies were applied in order to improve
  the results without losing too much generality.
- 
+ The code is written in Python.
 \end_layout
 
 \begin_layout Section
@@ -203,18 +220,6 @@ status open
 \begin_layout Plain Layout
 Figure Test
 \end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename /home/gantonioli/Pictures/jack.jpeg
-	scale 40
-	clip
 
 \end_inset
 

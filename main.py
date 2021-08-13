@@ -67,21 +67,28 @@ def read_cup(int_ts=False):
 
 
 devset_x, devset_y, int_ts_x, int_ts_y, ts_data = read_cup(int_ts=True)
+#
+# model = Model("SimpleNet")
+#
+# model.add(Dense(10, 5))
+# model.add(Dropout(0.3))
+# model.add(Dense(5, 1))
+# optimizer = StochasticGradientDescent(metric='euclidean')
+# model.compile(optimizer=optimizer)
+# print(type(devset_x))
+# print(devset_x.shape)
+# print(devset_y.shape)
+# print(devset_y[:, 0].shape)
+# model.showLayers()
+# print(model.dense_configuration)
+# res = model.fit(devset_x, np.reshape(devset_y[:, 0], (-1, 1)), batch_size=10, epochs=20)
+# plt.plot(res['training_error'])
+# plt.show()
+# print(res)
 
-model = Model("SimpleNet")
+from NeuralNetworkCore.Validation.Model_selection import Simple_Holdout,KFold
 
-model.add(Dense(10, 5))
-model.add(Dropout(0.3))
-model.add(Dense(5, 1))
-optimizer = StochasticGradientDescent(metric='euclidean')
-model.compile(optimizer=optimizer)
-print(type(devset_x))
-print(devset_x.shape)
-print(devset_y.shape)
-print(devset_y[:, 0].shape)
-model.showLayers()
-print(model.dense_configuration)
-res = model.fit(devset_x, np.reshape(devset_y[:, 0], (-1, 1)), batch_size=10, epochs=20)
-plt.plot(res['training_error'])
-plt.show()
-print(res)
+c=Simple_Holdout()
+
+
+c.split(np.array([1,2,3,4,5,6,7,8,9,0]),5)
