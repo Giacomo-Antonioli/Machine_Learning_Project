@@ -2,7 +2,8 @@ import numpy as np
 
 from NeuralNetworkCore.Activations import activation_functions
 from NeuralNetworkCore.Weight_Initializer import weights_initializers
-
+from NeuralNetworkCore.Reguralizers import regularizers
+from NeuralNetworkCore.Function import Function
 
 class Layer:
     """
@@ -26,8 +27,8 @@ class Dense(Layer):
     Class that represent a dense layer of a neural network
     """
 
-    def __init__(self, input_dimension, n_units, type='dense',weight_initializer='glorot_uniform', bias_initializer='glorot_uniform',
-                 regularizer=None, activation_function='relu'):
+    def __init__(self, n_units, type='dense',weight_initializer='glorot_uniform', bias_initializer='glorot_uniform',
+                 regularizer=None, activation_function='linear'):
         """
         Function constructor of a dense layer
         :param input_dimension:
@@ -38,9 +39,11 @@ class Dense(Layer):
         :param activation_function:
         """
         super().__init__(type)
-        self.weights = weights_initializers(init_type=weight_initializer, fan_in=input_dimension, fan_out=n_units)
-        self.biases = weights_initializers(init_type=bias_initializer, fan_in=1, fan_out=n_units)
-        self.__input_dimension = input_dimension
+        self.__weight_initializer=weight_initializer
+        self.__bias_initializer=bias_initializer
+        self.__weights=[]
+        self.__biases=[]
+        self.__input_dimension = 0
         self.__n_units = n_units
         self.__activation_function = activation_functions[activation_function]
         self.__inputs = None
@@ -53,15 +56,31 @@ class Dense(Layer):
             self.__regularizer = None
             self.__regularizer_param = None
         else:
-            self.__regularizer = regularizer[0]
-            self.__regularizer_param = regularizer[1]
-
+            if isinstance(regularizer[0],Function):
+                self.__regularizer = regularizer[0]
+                self.__regularizer_param = regularizer[1]
+            else:
+                self.__regularizer=regularizers[regularizer[0]]
+                self.__regularizer_param = regularizer[1]
     @property
     def get_dim(self):
         return self.__input_dimension
+    
+    @property
+    def weights(self):
+        return self.__weights
+    
+    @weights.setter
+    def weights(self, weights):
+        self.__weights = weights
 
-
-
+    @property
+    def biases(self):
+        return self.__biases
+    
+    @biases.setter
+    def biases(self, biases):
+        self.__biases = biases
     @property
     def activation_function(self):
         return self.__activation_function
@@ -77,6 +96,10 @@ class Dense(Layer):
     @property
     def n_units(self):
         return self.__n_units
+
+    @n_units.setter
+    def n_units(self,n_units):
+        self.__n_units=n_units
 
     @property
     def inputs(self):
@@ -97,6 +120,13 @@ class Dense(Layer):
     @property
     def regularizer_param(self):
         return self.__regularizer_param
+
+    def set_input_shape(self,value):
+        self.__input_dimension=value
+
+    def compile(self):
+        self.__weights = weights_initializers(init_type=self.__weight_initializer, fan_in=self.__input_dimension, fan_out=self.__n_units)
+        self.__biases = weights_initializers(init_type=self.__bias_initializer, fan_in=1, fan_out=self.__n_units)
 
     def forward_pass(self, input):
         """
@@ -120,7 +150,6 @@ class Dense(Layer):
         :return gradient_w: gradient wrt weights
         :return gradient_b: gradient wrt biases
         """
-        print("")
         dOut_dNet = self.__activation_function.derive(self.__nets)
         delta = np.multiply(upstream_delta, dOut_dNet)
         self.__gradient_b = -delta

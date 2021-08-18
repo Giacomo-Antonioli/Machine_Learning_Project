@@ -1,4 +1,7 @@
+import tqdm
+
 from NeuralNetworkCore.Optimizers import *
+from NeuralNetworkCore.Reguralizers import EarlyStopping
 
 
 class Model:
@@ -15,7 +18,10 @@ class Model:
         self.__batch_size = None
         self.__validation_split = 0
         self.__dense_configuration = []
-        self.__net_configuration_types=[]
+        self.__net_configuration_types = []
+        self.__early_stopping = False
+        self.__check_stop = None
+        self.__input_shape = 0
 
     @property
     def layers(self):
@@ -121,6 +127,13 @@ class Model:
     def net_configuration_types(self, net_configuration_types):
         self.__net_configuration_types = net_configuration_types
 
+    @property
+    def input_shape(self):
+        return self.__input_shape
+
+    def set_input_shape(self, input_shape):
+        self.__input_shape = input_shape
+
     def add(self, object):
         self.layers.append(object)
         if object.type == 'dense':
@@ -129,15 +142,16 @@ class Model:
 
     def get_layer_depth(self):
 
-        return len(self.layers)-1
-
+        return len(self.layers) - 1
 
     def showLayers(self):
         print("°°°°°°°°°°°°°°°°°°°°°")
+        print('° Model Configuration')
         for x in self.__layers:
-            if x.type!='drop':
-                print(x.n_units)
-
+            if x.type == 'dense':
+                print('° Dense Layer: '+str(x.n_units)+' units °')
+            elif x.type == 'drop':
+                print('° Dropout Layer: '+str(x.probability*100)+'% °')
         print("°°°°°°°°°°°°°°°°°°°°°")
 
     def get_empty_struct(self):
@@ -148,7 +162,7 @@ class Model:
                 valid_layers += 1
         struct = np.array([{}] * valid_layers)
         layer_index = 0
-        for index,layer in enumerate(self.layers):
+        for index, layer in enumerate(self.layers):
             if layer.type == 'dense':
                 struct[layer_index] = {'weights': [], 'biases': []}
                 weights_matrix = self.layers[index].weights
@@ -160,24 +174,31 @@ class Model:
                 pass
         return struct
 
-    def forward(self, net_input):
+    def forward(self, net_input, training):
         """
         Performs a forward pass on the whole Network
         :param net_input: net's input vector/matrix
         :return: net's output vector/matrix
         """
         output = net_input
-        for layer in self.__layers:
-            net_input = output
-            output = layer.forward_pass(net_input)
-        return output
+        if training:
+            for layer in self.layers:
+                net_input = output
+                output = layer.forward_pass(net_input)
+            return output
+        elif not training:
+            for layer in self.dense_configuration:
+                net_input = output
+                output = self.layers[layer].forward_pass(net_input)
+            return output
 
-    def compile(self, optimizer='sgd', loss='squared', metrics='bin_class_acc'):
+    def compile(self, optimizer='sgd', loss=None, metrics=None, early_stopping=False, patience=3, tolerance=1e-2,
+                monitor='loss', mode='growth'):
         """
         Prepares the network for training by assigning an optimizer to it and setting its parameters
         :param opt: ('Optimizer' object)
         :param loss: (str) the type of loss function
-        :param metr: (str) the type of metric to track (accuracy etc)
+        :param metric: (str) the type of metric to track (accuracy etc)
         :param lr: (float) learning rate value
         :param lr_decay: type of decay for the learning rate
         :param decay_rate: (float) the higher, the stronger the exponential decay
@@ -188,6 +209,19 @@ class Model:
         :param lambd: (float) regularization parameter
         :param reg_type: (string) regularization type
         """
+        latest_units=0
+        for index,layer in enumerate(self.layers):
+
+            if layer.type=='dense':
+                if index==0:
+                    layer.set_input_shape(self.input_shape)
+                    layer.compile()
+                    latest_units=layer.n_units
+                else:
+                    layer.set_input_shape(latest_units)
+                    layer.compile()
+
+
         if isinstance(optimizer, str):
             self.optimizer = optimizers[optimizer]
         elif isinstance(optimizer, Optimizer):
@@ -195,17 +229,20 @@ class Model:
 
         self.loss = loss
         self.metrics = metrics
+        if early_stopping:
+            self.__early_stopping = True
+            self.__check_stop = EarlyStopping(monitor=monitor, mode=mode, patience=patience, tolerance=tolerance)
 
-        # self.__params = {**self.__params, **{'loss': loss, 'metr': metr, 'lr': lr, 'lr_decay': lr_decay,
+        # self.__params = {**self.__params, **{'loss': loss, 'metric': metric, 'lr': lr, 'lr_decay': lr_decay,
         #                                      'limit_step': limit_step, 'decay_rate': decay_rate,
         #                                      'decay_steps': decay_steps, 'staircase': staircase, 'momentum': momentum,
         #                                      'reg_type': reg_type, 'lambd': lambd}}
-        # self.__opt = optimizers[opt](net=self, loss=loss, metr=metr, lr=lr, lr_decay=lr_decay, limit_step=limit_step,
+        # self.__opt = optimizers[opt](net=self, loss=loss, metric=metric, lr=lr, lr_decay=lr_decay, limit_step=limit_step,
         #                              decay_rate=decay_rate, decay_steps=decay_steps, staircase=staircase,
         #                              momentum=momentum, reg_type=reg_type, lambd=lambd)
 
     def fit(self, training_data, training_targets, validation_data=None, epochs=1, batch_size=None, validation_split=0,
-            shuffle=False, **kwargs):
+            shuffle=False):
         """
         Execute the training of the network
         :param training_data: (numpy ndarray) input training set
@@ -247,18 +284,22 @@ class Model:
             batch_size = len(training_data)
             print("true")
         target_len = training_targets.shape[1] if len(training_targets.shape) > 1 else 1
+        print("target_len")
         print(target_len)
         print(training_targets.shape)
         n_patterns = training_data.shape[0] if len(training_data.shape) > 1 else 1
+        print("n_patters")
         print(n_patterns)
         n_targets = training_targets.shape[0] if len(training_targets.shape) > 1 else 1
+        print("n_targets")
         print(n_targets)
         if target_len != self.__layers[-1].n_units or n_patterns != n_targets or batch_size > n_patterns:
             raise AttributeError(f"Mismatching shapes")
 
         return self.optimizer.optimization_process(self, training_data, training_targets, epochs=self.epochs,
                                                    batch_size=self.batch_size, shuffle=shuffle,
-                                                   validation=validation_data)
+                                                   validation=validation_data, early_stopping=self.__early_stopping,
+                                                   check_stop=self.__check_stop)
 
     def predict(self, prediction_input, disable_tqdm=True):
         """
@@ -270,17 +311,17 @@ class Model:
         prediction_input = np.array(prediction_input)
         prediction_input = prediction_input[np.newaxis, :] if len(prediction_input.shape) < 2 else prediction_input
         predictions = []
-        for single_input in tqdm.tqdm(prediction_input, desc="Predicting patterns", disable=disable_tqdm):
-            predictions.append(self.forward(net_input=single_input))
+        for single_input in (prediction_input):
+            predictions.append(self.forward(net_input=single_input, training=False))
         return np.array(predictions)
 
-    def evaluate(self, targets, metr, loss, net_outputs=None, net_input=None, disable_tqdm=True):
+    def evaluate(self, targets, metric, loss, net_outputs=None, net_input=None, disable_tqdm=True):
         """
         Performs an evaluation of the network based on the targets and either the pre-computed outputs ('net_outputs')
         or the input data ('net_input'), on which the net will first compute the output.
         If both 'predicted' and 'net_input' are None, an AttributeError is raised
         :param targets: the targets for the input on which the net is evaluated
-        :param metr: the metric to track for the evaluation
+        :param metric: the metric to track for the evaluation
         :param loss: the loss to track for the evaluation
         :param net_outputs: the output of the net for a certain input
         :param net_input: the input on which the net has to be evaluated
@@ -291,17 +332,16 @@ class Model:
             if net_input is None:
                 raise AttributeError("Both net_outputs and net_input cannot be None")
             net_outputs = self.predict(net_input, disable_tqdm=disable_tqdm)
-        metr_scores = np.zeros(self.layers[-1].n_units)
+        metric_score = np.zeros(self.layers[-1].n_units)
         loss_scores = np.zeros(self.layers[-1].n_units)
-        for x, y in tqdm.tqdm(zip(net_outputs, targets), total=len(targets), desc="Evaluating model",
-                              disable=disable_tqdm):
-            metr_scores = np.add(metr_scores, metrics[metr].func(predicted=x, target=y))
-            loss_scores = np.add(loss_scores, losses[loss].func(predicted=x, target=y))
+        for x, y in zip(net_outputs, targets):
+            metric_score = np.add(metric_score, metrics[metric].function(predicted=x, target=y))
+            loss_scores = np.add(loss_scores, losses[loss].function(predicted=x, target=y))
         loss_scores = np.sum(loss_scores) / len(loss_scores)
-        metr_scores = np.sum(metr_scores) / len(metr_scores)
+        metric_score = np.sum(metric_score) / len(metric_score)
         loss_scores /= len(net_outputs)
-        metr_scores /= len(net_outputs)
-        return loss_scores, metr_scores
+        metric_score /= len(net_outputs)
+        return loss_scores, metric_score
 
     def propagate_back(self, dErr_dOut, gradient_network):
         """

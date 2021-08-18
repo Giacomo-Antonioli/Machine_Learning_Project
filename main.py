@@ -8,7 +8,9 @@ from sklearn.model_selection import train_test_split
 
 from NeuralNetworkCore.Layer import Dense,Dropout
 from NeuralNetworkCore.Model import Model
-from NeuralNetworkCore.Optimizers import StochasticGradientDescent
+from NeuralNetworkCore.Optimizers import StochasticGradientDescent,RMSProp,Adam
+from NeuralNetworkCore.Reguralizers import regularizers
+from NeuralNetworkCore.Loss import losses
 
 
 def read_cup(int_ts=False):
@@ -67,28 +69,47 @@ def read_cup(int_ts=False):
 
 
 devset_x, devset_y, int_ts_x, int_ts_y, ts_data = read_cup(int_ts=True)
-#
-# model = Model("SimpleNet")
-#
-# model.add(Dense(10, 5))
-# model.add(Dropout(0.3))
-# model.add(Dense(5, 1))
-# optimizer = StochasticGradientDescent(metric='euclidean')
-# model.compile(optimizer=optimizer)
-# print(type(devset_x))
-# print(devset_x.shape)
-# print(devset_y.shape)
-# print(devset_y[:, 0].shape)
-# model.showLayers()
-# print(model.dense_configuration)
-# res = model.fit(devset_x, np.reshape(devset_y[:, 0], (-1, 1)), batch_size=10, epochs=20)
-# plt.plot(res['training_error'])
-# plt.show()
-# print(res)
-
-from NeuralNetworkCore.Validation.Model_selection import Simple_Holdout,KFold
-
-c=Simple_Holdout()
 
 
-c.split(np.array([1,2,3,4,5,6,7,8,9,0]),5)
+for index,x in enumerate(devset_x):
+    if index==0:
+        print(x)
+for index,x in enumerate(devset_y):
+    if index==0:
+        print(x)
+from NeuralNetworkCore.Validation.Model_selection import SimpleHoldout
+for pip in range(1):
+    model = Model("SimpleNet")
+    model.set_input_shape(10)
+    model.add(Dense(5,activation_function='sigmoid'))
+    model.add(Dropout(0.3))
+    model.add(Dropout(0.3))
+    model.add(Dense(1))
+    optimizer = RMSProp()
+    model.compile(optimizer=optimizer,metrics='accuracy',loss='squared',early_stopping=False,mode='absolute_growth')
+    model.showLayers()
+    data_trainx=devset_x
+    data_trainy_1=np.reshape(devset_y[:, 0], (-1, 1))
+
+    simple_splitter=SimpleHoldout()
+
+    train,val,test=simple_splitter.split((data_trainx,data_trainy_1))
+    # res = model.fit(train[0],train[1], validation_data=val, batch_size=20, epochs=200)
+    # optimizer = Adam()
+    # model.compile(optimizer=optimizer, metrics='accuracy', loss='squared', early_stopping=False, mode='absolute_growth')
+    # plt.plot(res['training_error'])
+    # plt.plot(res['validation_error'])
+    # res = model.fit(train[0], train[1], validation_data=val, batch_size=20, epochs=200)
+    # plt.plot(res['training_error'])
+    # plt.plot(res['validation_error'])
+    # plt.legend(['RMSProp Loss','RMSProp Validation', 'Adam Loss', 'Adam Validation'])
+    # plt.show()
+
+
+
+import numpy as np
+
+from NeuralNetworkCore.Validation.Model_selection import GridSearch
+
+c=GridSearch(model,{'beta1':[1,2,3],'opt':['adam','sgd']})
+c.fit(data_trainx,data_trainy_1,1,1,False)

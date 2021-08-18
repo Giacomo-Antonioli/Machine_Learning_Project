@@ -130,6 +130,10 @@ Computer Science Department, UNIPI University.
 g.antonioli3@studenti.unipi.it
 \end_layout
 
+\begin_layout In Title
+ML Course - AA:2020/2021
+\end_layout
+
 \begin_layout Date
 \begin_inset ERT
 status collapsed
@@ -157,14 +161,39 @@ prints the current date; should only be replaced for special cases
 \end_layout
 
 \begin_layout Abstract
-Implementation of the course contents by develpoing a simple Neural Network
- that was implemente without using libraries available on the market.
- Each aspect of the net was implementend in the given code.
- From the creation of the net, the feed-forward process, the loss calculation
- and the weight update.
- Many different optimizations and strategies were applied in order to emprove
- the results without losing too much generality.
- 
+Implementation of the course contents by developing a simple Neural Network
+ without using ML libraries available on the market.
+ Each aspect of the net is implemented in the given code, from the creation
+ of the 
+\series bold
+net
+\series default
+, the 
+\series bold
+feed-forward process
+\series default
+, the 
+\series bold
+loss calculation
+\series default
+ and the 
+\series bold
+weight update
+\series default
+.
+ Different optimization strategies were applied in order to improve the
+ results and efforts were take in order to avoid over-fitting.
+ The code is written in Python and as a benchmark tool to asses its correctness
+ the 
+\series bold
+MONK data-set
+\series default
+ will be used and the results will be reported.
+ The implemented code will be then applied to another data-set, the 
+\series bold
+CUP data-set
+\series default
+, in order to enter the competition.
 \end_layout
 
 \begin_layout Section
@@ -178,52 +207,11 @@ Introduction
 \end_layout
 
 \begin_layout Standard
-Vestibulum non magna tincidunt, bibendum mi ac, euismod nibh.
- Nam sit amet nunc quis ante vulputate cursus at mattis arcu.
- Orci varius natoque penatibus et magnis dis parturient montes, nascetur
- ridiculus mus.
- In sit amet magna dui.
- Ut semper sit amet risus a accumsan.
- Vestibulum iaculis, neque efficitur volutpat maximus, tortor sem interdum
- risus, sed molestie libero risus a arcu.
- Donec varius viverra egestas.
- Nulla tellus augue, rutrum non molestie eu, pretium a est.
- Curabitur sed enim velit.
- Nullam pretium purus molestie purus fringilla, sit amet vehicula dui dapibus.
- Aliquam gravida erat a erat malesuada suscipit.
- Nulla laoreet sodales libero vel aliquam.
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-Figure Test
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename /home/gantonioli/Pictures/jack.jpeg
-	scale 40
-	clip
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
+This report's aim is to describe the development and realization of a learning
+ system simulator and validating it by reporting its bench-marking results.
+ The system was tuned by searching different hyper-parameters and evaluating
+ the relative models in order to obtain the best performing models for both
+ the data-sets.
 \end_layout
 
 \begin_layout Standard
@@ -247,6 +235,16 @@ name "sec:ModelDescription"
 Model Description
 \end_layout
 
+\begin_layout Standard
+The learning simulator under analysis is a simple implementation of a Multi
+ Layer Perceptron model.
+ A brief description of each part of what was implemented will now follow
+ to permit the reader to acquire a better comprehension of the development
+ aim of this report.
+ Each subsection will introduce all the different classes developed in order
+ to build each aspect of the simulator.
+\end_layout
+
 \begin_layout Subsection
 \begin_inset CommandInset label
 LatexCommand label
@@ -258,21 +256,79 @@ Layers
 \end_layout
 
 \begin_layout Standard
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
- Maecenas libero augue, egestas in ullamcorper eu, eleifend in augue.
- Nullam ullamcorper turpis enim, auctor semper quam gravida id.
- Aliquam risus purus, viverra eget condimentum a, hendrerit sed turpis.
- Curabitur laoreet a diam ac ullamcorper.
- Maecenas mattis quam eget sem commodo elementum.
- Donec gravida varius nunc, vel imperdiet sem.
- Nullam orci sem, rutrum at tempor sed, aliquet sit amet nunc.
- Morbi ac condimentum lacus.
- Maecenas non scelerisque nibh.
- Nam ac maximus velit.
- Class aptent taciti sociosqu ad litora torquent per conubia nostra, per
- inceptos himenaeos.
- Maecenas dapibus accumsan ex eget laoreet.
- Curabitur semper fermentum nibh in fringilla.
+The 
+\emph on
+Layers
+\emph default
+ class is the main building block of the given simulator.
+ It implements a single layer of a MLP and specializes into two different
+ types: a Dense layer and a Dropout layer.
+ This two specializations both implement a 
+\begin_inset listings
+lstparams "basicstyle={\ttfamily}"
+inline true
+status open
+
+\begin_layout Plain Layout
+
+forward_pass
+\end_layout
+
+\end_inset
+
+ method to propagate the computation from the input to the output and also
+ a 
+\begin_inset listings
+lstparams "basicstyle={\ttfamily}"
+inline true
+status open
+
+\begin_layout Plain Layout
+
+backwards_pass
+\end_layout
+
+\end_inset
+
+ method to propagate to the origin the error.
+\end_layout
+
+\begin_layout Subsubsection
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Dense-Layer"
+
+\end_inset
+
+Dense Layer
+\end_layout
+
+\begin_layout Standard
+This is the true implementation of a MLP layer and contains matrix for both
+ weights and biases, based on the input dimension and the number of units
+ contained in this layer.
+ This matrices are initialized with a default method, but there are different
+ options from which to choose.
+ Even the activation function is set by default but it can be changed.
+ There is also the possibility to assign to the layer a regularization parameter
+ that can differ from the ones of the other layers.
+\end_layout
+
+\begin_layout Subsubsection
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Dropout-Layer"
+
+\end_inset
+
+Dropout Layer
+\end_layout
+
+\begin_layout Standard
+On the other hand the dropout layer is a fake layer that only changes the
+ input of the successive dense layer zeroing some random inputs.
+ It can be initialized with an user selected dropout-ratio and with a specific
+ seed for the random generator.
 \end_layout
 
 \begin_layout Standard
@@ -426,7 +482,27 @@ Test Tables
 \end_layout
 
 \begin_layout Subsection
-Feed-Forward
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Weight-Initializer"
+
+\end_inset
+
+Weight Initializer
+\end_layout
+
+\begin_layout Standard
+
+\end_layout
+
+\begin_layout Subsection
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Model"
+
+\end_inset
+
+Model
 \end_layout
 
 \begin_layout Standard
@@ -446,6 +522,12 @@ Quisque non urna nec quam consequat viverra.
 \end_layout
 
 \begin_layout Subsection
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Activation-Functions"
+
+\end_inset
+
 Activation Functions
 \end_layout
 
@@ -494,27 +576,11 @@ Phasellus id metus eu ligula rhoncus malesuada eu ac purus.
 \begin_layout Subsection
 \begin_inset CommandInset label
 LatexCommand label
-name "subsec:Gradient"
+name "subsec:Learning-Rates"
 
 \end_inset
 
-Gradient
-\end_layout
-
-\begin_layout Standard
-In sodales nisi justo, eu molestie ipsum pellentesque nec.
- Mauris mollis, felis sed facilisis consequat, ante ex tempus ipsum, in
- gravida eros risus vitae sapien.
- Vestibulum magna lacus, tempor et luctus sit amet, ornare a urna.
- Suspendisse consectetur dolor quis eros interdum, vitae dignissim ipsum
- volutpat.
- Nam dapibus turpis dignissim arcu rhoncus, at euismod magna aliquam.
- Vestibulum ipsum purus, dapibus et turpis ac, rhoncus iaculis enim.
- Pellentesque odio arcu, blandit ut nulla vel, tempus aliquet ipsum.
- Proin vitae risus vestibulum, tristique enim scelerisque, pretium erat.
- Maecenas id ex elit.
- Nulla eu purus aliquam, pretium arcu eu, tristique orci.
- 
+Learning Rates
 \end_layout
 
 \begin_layout Subsection
@@ -536,6 +602,16 @@ Aliquam interdum magna sit amet tempor sagittis.
  Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere
  cubilia curae; Nunc laoreet enim sit amet elit pretium, vitae vulputate
  urna ultrices.
+\end_layout
+
+\begin_layout Subsection
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Regularizers"
+
+\end_inset
+
+Regularizers
 \end_layout
 
 \begin_layout Subsection

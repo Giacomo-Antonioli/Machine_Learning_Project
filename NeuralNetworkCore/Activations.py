@@ -76,4 +76,5 @@ activation_functions = {
     'leaky_relu': LeakyReLU,
     'sigmoid': Sigmoid,
     'tanh': Tanh,
+    'linear': Identity
 }

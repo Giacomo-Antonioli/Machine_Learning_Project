@@ -21,7 +21,7 @@ def squared_loss_derivative(predicted, target):
     :param target: ndarray of shape (n, m) – Ground truth for each of n examples
     :return: derivative of the squared error
     """
-    # exponent 2 in the deriv becomes a multiplying constant and simplifies itself with the denominator of the func
+    # exponent 2 in the derive becomes a multiplying constant and simplifies itself with the denominator of the func
     return np.subtract(predicted, target)
 
 
