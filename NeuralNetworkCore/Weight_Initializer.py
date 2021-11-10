@@ -8,16 +8,12 @@ def weights_initializers(init_type, **kwargs):
         'glorot_normal': _glorot_normal,
         'he_uniform': _he_uniform,
         'he_normal': _he_normal,
-        'fixed': _fixed_init,
         'uniform': _rand_init
     }
     return inits[init_type](**kwargs)
 
 
-def _fixed_init(fan_in, fan_out, init_value):
-    if fan_in == 1:
-        return np.full(shape=fan_out, fill_value=init_value)
-    return np.full(shape=(fan_in, fan_out), fill_value=init_value)
+
 
 
 def _rand_init(fan_in, fan_out, limits=(-0.1, 0.1)):

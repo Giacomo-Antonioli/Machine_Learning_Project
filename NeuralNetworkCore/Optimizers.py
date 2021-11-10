@@ -1,30 +1,15 @@
 from abc import ABC, abstractmethod
 
-from NeuralNetworkCore.LearningRates import *
+from tqdm import tqdm
+import numpy as np
+import math
 from NeuralNetworkCore.Loss import losses
 from NeuralNetworkCore.Metrics import metrics
 
-from tqdm import tqdm
+
 class Optimizer(ABC):
     """
     Abstract class representing a generic optimizer
-    (check 'ABC' documentation for more info about abstract classes in Python)
-
-    Attributes:
-        model: ('Network' object) Neural Network to which apply the algorithm
-        loss: ('DerivableFunction' object) loss function
-        metric: ('Function' object) accuracy function
-        lr: (float) learning rate
-        base_lr: (float) the initial learning rate
-        final_lr: (float) the final learning rate in case of linear decay (it's 1% of base_le)
-        lr_decay: (str) the type of learning rate decay
-        limit_step: (int) the number of the weight update where the linear decaying learning rate has to reach final_lr
-        decay_rate: (float) for exponential learning rate decay: the higher, the stronger the decay
-        decay_steps: (int) similar to limit_step but for the exponential decay case
-        staircase: (bool) if True, the exponentially decaying learning rate decays in a stair-like fashion
-        momentum: (float) momentum coefficient
-        lambd: (float) regularization coefficient
-        reg_type: (str) the type of regularization (either None, 'l1', 'l2')
     """
 
     @abstractmethod
@@ -35,10 +20,15 @@ class Optimizer(ABC):
 class StochasticGradientDescent(Optimizer):
     """
     Stochastic Gradient Descent
-    Concrete implementation of the abstract class Optimizer
     """
 
-    def __init__(self, learning_rate=0.01, momentum=0.1, nesterov=False):
+    def __init__(self, learning_rate=0.1, momentum=0.1, nesterov=False):
+        """
+        Constructor
+        :param learning_rate: Learning Rate parameter
+        :param momentum:  Momentum parameter
+        :param nesterov: Bool that indicates the usage of the nesterov momentum technique
+        """
         super().__init__()
         if learning_rate <= 0 or learning_rate > 1:
             raise ValueError('learning_rate should be a value between 0 and 1, Got:{}'.format(learning_rate))
@@ -100,7 +90,7 @@ class StochasticGradientDescent(Optimizer):
         if early_stopping == True and check_stop is None:
             raise AttributeError("CheckStop value is invalid")
         stop_variable = False
-        print(model.loss)
+
         if isinstance(model.loss, str):
             self.loss_function = losses[model.loss]
         else:
@@ -112,6 +102,8 @@ class StochasticGradientDescent(Optimizer):
             self.metric = model.metrics
         if batch_size == None:
             batch_size = 1
+        if batch_size== 'all':
+            batch_size=len(train_dataset)
         train_dataset = train_dataset[np.newaxis, :] if len(train_dataset.shape) < 2 else train_dataset
         train_labels = train_labels[np.newaxis, :] if len(train_labels.shape) < 2 else train_labels
 
@@ -122,13 +114,10 @@ class StochasticGradientDescent(Optimizer):
 
         momentum_network = model.get_empty_struct()
         partial_momentum_network = momentum_network
-        step = 0
         current_val_error = 0
-        current_loss_error = 0
-        # cycle through epochs
         epoch = 0
-        pbar = tqdm(total=epochs + 1)
-        while epoch < epochs  and not stop_variable:
+        pbar = tqdm(total=epochs)
+        while epoch < epochs and not stop_variable:
 
             epoch_training_error = np.zeros(model.layers[-1].n_units)
             epoch_training_error_metric = np.zeros(model.layers[-1].n_units)
@@ -139,7 +128,6 @@ class StochasticGradientDescent(Optimizer):
                 train_dataset = train_dataset[indexes]
                 train_labels = train_labels[indexes]
 
-            # cycle through batches
             for batch_index in range(math.ceil(len(train_dataset) / batch_size)):
                 start = batch_index * batch_size
                 end = start + batch_size
@@ -149,7 +137,6 @@ class StochasticGradientDescent(Optimizer):
                 for current_input, current_target in zip(train_batch, targets_batch):
                     net_outputs = model.forward(net_input=current_input, training=True)
 
-                    # epoch training error = itself + loss + regularization
 
                     epoch_training_error = np.add(epoch_training_error,
                                                   self.__loss_function.function(predicted=net_outputs,
@@ -160,39 +147,27 @@ class StochasticGradientDescent(Optimizer):
                                                                                 target=current_target))
 
                     dErr_dOut = self.loss_function.derive(predicted=net_outputs, target=current_target)
-                    if self.nesterov:
-                        # https://towardsdatascience.com/learning-parameters-part-2-a190bef2d12
-                        for grad_net_index in range(len(model.dense_configuration)):
-                            partial_momentum_network[grad_net_index]['weights'] *= self.momentum
-                            partial_momentum_network[grad_net_index]['biases'] *= self.momentum
-                            gradient_network[grad_net_index]['weights'] = np.subtract(
-                                gradient_network[grad_net_index]['weights'],
-                                partial_momentum_network[grad_net_index]['weights'])
-                            gradient_network[grad_net_index]['biases'] = np.subtract(
-                                gradient_network[grad_net_index]['biases'],
-                                partial_momentum_network[grad_net_index]['biases'])
+
                     gradient_network = model.propagate_back(dErr_dOut, gradient_network)
-
-                # # learning rate decays
-                # if self.lr_decay is not None:
-                #     step += 1
-                #     self.lr = lr_decays[self.lr_decay].func(curr_step=step, **self.lr_params)
-
-                # weights update
-
+                if self.nesterov:
+                    # https://towardsdatascience.com/learning-parameters-part-2-a190bef2d12
+                    for grad_net_index in range(len(model.dense_configuration)):
+                        partial_momentum_network[grad_net_index]['weights'] *= self.momentum
+                        partial_momentum_network[grad_net_index]['biases'] *= self.momentum
+                        gradient_network[grad_net_index]['weights'] = np.subtract(
+                            gradient_network[grad_net_index]['weights'],
+                            partial_momentum_network[grad_net_index]['weights'])
+                        gradient_network[grad_net_index]['biases'] = np.subtract(
+                            gradient_network[grad_net_index]['biases'],
+                            partial_momentum_network[grad_net_index]['biases'])
                 for grad_net_index in range(len(model.dense_configuration)):
 
                     layer_index = model.dense_configuration[grad_net_index]
 
-                    # gradient_network contains the gradients of all the layers (and units) in the network
                     gradient_network[grad_net_index]['weights'] /= batch_size
                     gradient_network[grad_net_index]['biases'] /= batch_size
-                    # delta_w is equivalent to lrn_rate * local_grad * input_on_that_connection (local_grad = delta)
                     delta_w = self.lr * gradient_network[grad_net_index]['weights']
                     delta_b = self.lr * gradient_network[grad_net_index]['biases']
-                    # momentum_network[layer_index]['weights'] is the new delta_w --> it adds the momentum
-                    # Since it acts as delta_w, it multiplies itself by the momentum constant and then adds
-                    # lrn_rate * local_grad * input_on_that_connection (i.e. "delta_w")
                     momentum_network[grad_net_index]['weights'] *= self.momentum
                     momentum_network[grad_net_index]['biases'] *= self.momentum
                     momentum_network[grad_net_index]['weights'] = np.add(momentum_network[grad_net_index]['weights'],
@@ -217,15 +192,10 @@ class StochasticGradientDescent(Optimizer):
                         momentum_network[grad_net_index]['biases']
                     )
                     partial_momentum_network = momentum_network
-                    print(model.layers[0].weights[0])
-                    print("_____")
-            # validation
             if validation is not None:
                 val_x = validation[0][np.newaxis, :] if len(validation[0].shape) < 2 else validation[0]
                 val_y = validation[1][np.newaxis, :] if len(validation[1].shape) < 2 else validation[1]
-                epoch_val_error, epoch_val_metric = model.evaluate(net_input=val_x, targets=val_y,
-                                                                   metric=self.metric.name,
-                                                                   loss=self.loss_function.name)
+                epoch_val_error, epoch_val_metric = model.evaluate(validation_data=val_x, targets=val_y)
                 current_val_error = epoch_val_error
                 values_dict['validation_error'].append(current_val_error)
                 values_dict['validation_metrics'].append(epoch_val_metric)
@@ -244,13 +214,11 @@ class StochasticGradientDescent(Optimizer):
             pbar.update(1)
         pbar.close()
         return values_dict
-        #################################
 
 
 class RMSProp(Optimizer):
     """
-    Stochastic Gradient Descent
-    Concrete implementation of the abstract class Optimizer
+    Root Mean Square Propagation
     """
 
     def __init__(self, learning_rate=0.01, momentum=0.1, rho=0.9):
@@ -265,6 +233,7 @@ class RMSProp(Optimizer):
         self.__name = 'rmsprop'
         self.__loss_function = ''
         self.__metric = ''
+        self.__epsilon=1e-8
 
     @property
     def type(self):
@@ -327,6 +296,8 @@ class RMSProp(Optimizer):
             self.metric = model.metrics
         if batch_size == None:
             batch_size = 1
+        if batch_size== 'all':
+            batch_size = 1
         train_dataset = train_dataset[np.newaxis, :] if len(train_dataset.shape) < 2 else train_dataset
         train_labels = train_labels[np.newaxis, :] if len(train_labels.shape) < 2 else train_labels
 
@@ -336,13 +307,11 @@ class RMSProp(Optimizer):
                        'validation_metrics': []}
 
         rmsprop_network = model.get_empty_struct()
-        step = 0
+
         current_val_error = 0
-        current_loss_error = 0
-        # cycle through epochs
         epoch = 0
-        pbar = tqdm(total=epochs + 1)
-        while epoch < epochs  and not stop_variable:
+        pbar = tqdm(total=epochs)
+        while epoch < epochs and not stop_variable:
 
             epoch_training_error = np.zeros(model.layers[-1].n_units)
             epoch_training_error_metric = np.zeros(model.layers[-1].n_units)
@@ -353,7 +322,6 @@ class RMSProp(Optimizer):
                 train_dataset = train_dataset[indexes]
                 train_labels = train_labels[indexes]
 
-            # cycle through batches
             for batch_index in range(math.ceil(len(train_dataset) / batch_size)):
                 start = batch_index * batch_size
                 end = start + batch_size
@@ -363,7 +331,6 @@ class RMSProp(Optimizer):
                 for current_input, current_target in zip(train_batch, targets_batch):
                     net_outputs = model.forward(net_input=current_input, training=True)
 
-                    # epoch training error = itself + loss + regularization
 
                     epoch_training_error = np.add(epoch_training_error,
                                                   self.__loss_function.function(predicted=net_outputs,
@@ -376,31 +343,14 @@ class RMSProp(Optimizer):
                     dErr_dOut = self.__loss_function.derive(predicted=net_outputs, target=current_target)
                     gradient_network = model.propagate_back(dErr_dOut, gradient_network)
 
-                # # learning rate decays
-                # if self.lr_decay is not None:
-                #     step += 1
-                #     self.lr = lr_decays[self.lr_decay].func(curr_step=step, **self.lr_params)
-
-                # weights update
-
                 for grad_net_index in range(len(model.dense_configuration)):
                     layer_index = model.dense_configuration[grad_net_index]
 
-                    # gradient_network contains the gradients of all the layers (and units) in the network
                     gradient_network[grad_net_index]['weights'] /= batch_size
                     gradient_network[grad_net_index]['biases'] /= batch_size
-                    # delta_w is equivalent to lrn_rate * local_grad * input_on_that_connection (local_grad = delta)
                     delta_w = gradient_network[grad_net_index]['weights']
                     delta_b = gradient_network[grad_net_index]['biases']
-                    # momentum_network[layer_index]['weights'] is the new delta_w --> it adds the momentum
-                    # Since it acts as delta_w, it multiplies itself by the momentum constant and then adds
-                    # lrn_rate * local_grad * input_on_that_connection (i.e. "delta_w")
-                    # momentum_network[grad_net_index]['weights'] *= self.momentum
-                    # momentum_network[grad_net_index]['biases'] *= self.momentum
-                    # momentum_network[grad_net_index]['weights'] = np.add(momentum_network[grad_net_index]['weights'],
-                    #                                                      delta_w)
-                    # momentum_network[grad_net_index]['biases'] = np.add(momentum_network[grad_net_index]['biases'],
-                    #                                                     delta_b)
+
                     rmsprop_network[grad_net_index]['weights'] = np.add(
                         rmsprop_network[grad_net_index]['weights'] * self.rho, np.power(delta_w, 2) * (1 - self.rho))
                     rmsprop_network[grad_net_index]['biases'] = np.add(
@@ -408,30 +358,16 @@ class RMSProp(Optimizer):
 
                     model.layers[layer_index].weights = np.add(model.layers[layer_index].weights,
                                                                self.lr * np.divide(delta_w, np.sqrt(
-                                                                   rmsprop_network[grad_net_index]['weights'])))
+                                                                   rmsprop_network[grad_net_index]['weights'])+self.__epsilon))
                     model.layers[layer_index].biases = np.add(model.layers[layer_index].biases,
                                                               self.lr * np.divide(delta_b, np.sqrt(
-                                                                  rmsprop_network[grad_net_index]['biases'])))
+                                                                  rmsprop_network[grad_net_index]['biases'])+self.__epsilon))
 
-                    # if model.layers[layer_index].regularizer != None:
-                    #     model.layers[layer_index].weights = np.subtract(
-                    #         np.add(model.layers[layer_index].weights, rmsprop_network[grad_net_index]['weights']),
-                    #         model.layers[layer_index].regularizer.derive(
-                    #             w=model.layers[layer_index].weights,
-                    #             lambd=model.layers[layer_index].regularizer_param),
-                    #     )
-                    # model.layers[layer_index].biases = np.add(
-                    #     model.layers[layer_index].biases,
-                    #     rmsprop_network[grad_net_index]['biases']
-                    # )
 
-            # validation
             if validation is not None:
                 val_x = validation[0][np.newaxis, :] if len(validation[0].shape) < 2 else validation[0]
                 val_y = validation[1][np.newaxis, :] if len(validation[1].shape) < 2 else validation[1]
-                epoch_val_error, epoch_val_metric = model.evaluate(net_input=val_x, targets=val_y,
-                                                                   metric=self.metric.name,
-                                                                   loss=self.loss_function.name)
+                epoch_val_error, epoch_val_metric = model.evaluate(validation_data=val_x, targets=val_y)
                 current_val_error = epoch_val_error
                 values_dict['validation_error'].append(current_val_error)
                 values_dict['validation_metrics'].append(epoch_val_metric)
@@ -450,13 +386,12 @@ class RMSProp(Optimizer):
             pbar.update(1)
         pbar.close()
         return values_dict
-        #################################
+
 
 
 class Adam(Optimizer):
     """
-    Stochastic Gradient Descent
-    Concrete implementation of the abstract class Optimizer
+    Adaptive Moment Estimation
     """
 
     def __init__(self, learning_rate=0.1, momentum=0.00001, beta1=0.9, beta2=0.999, epsilon=1e-8):
@@ -535,6 +470,9 @@ class Adam(Optimizer):
             self.metric = model.metrics
         if batch_size == None:
             batch_size = 1
+        if batch_size== 'all':
+            batch_size=len(train_dataset)
+
         train_dataset = train_dataset[np.newaxis, :] if len(train_dataset.shape) < 2 else train_dataset
         train_labels = train_labels[np.newaxis, :] if len(train_labels.shape) < 2 else train_labels
 
@@ -545,13 +483,10 @@ class Adam(Optimizer):
 
         momentum_network_1 = model.get_empty_struct()
         momentum_network_2 = model.get_empty_struct()
-        step = 0
         current_val_error = 0
-        current_loss_error = 0
-        # cycle through epochs
         epoch = 0
-        pbar = tqdm(total=epochs + 1)
-        while epoch < epochs +1 and not stop_variable:
+        pbar = tqdm(total=epochs)
+        while epoch < epochs + 1 and not stop_variable:
 
             epoch_training_error = np.zeros(model.layers[-1].n_units)
             epoch_training_error_metric = np.zeros(model.layers[-1].n_units)
@@ -562,7 +497,6 @@ class Adam(Optimizer):
                 train_dataset = train_dataset[indexes]
                 train_labels = train_labels[indexes]
 
-            # cycle through batches
             for batch_index in range(math.ceil(len(train_dataset) / batch_size)):
                 start = batch_index * batch_size
                 end = start + batch_size
@@ -571,9 +505,6 @@ class Adam(Optimizer):
                 gradient_network = model.get_empty_struct()
                 for current_input, current_target in zip(train_batch, targets_batch):
                     net_outputs = model.forward(net_input=current_input, training=True)
-
-                    # epoch training error = itself + loss + regularization
-
                     epoch_training_error = np.add(epoch_training_error,
                                                   self.__loss_function.function(predicted=net_outputs,
                                                                                 target=current_target))
@@ -585,31 +516,13 @@ class Adam(Optimizer):
                     dErr_dOut = self.__loss_function.derive(predicted=net_outputs, target=current_target)
                     gradient_network = model.propagate_back(dErr_dOut, gradient_network)
 
-                # # learning rate decays
-                # if self.lr_decay is not None:
-                #     step += 1
-                #     self.lr = lr_decays[self.lr_decay].func(curr_step=step, **self.lr_params)
-
-                # weights update
 
                 for grad_net_index in range(len(model.dense_configuration)):
                     layer_index = model.dense_configuration[grad_net_index]
 
-                    # gradient_network contains the gradients of all the layers (and units) in the network
                     gradient_network[grad_net_index]['weights'] /= batch_size
                     gradient_network[grad_net_index]['biases'] /= batch_size
-                    # delta_w is equivalent to lrn_rate * local_grad * input_on_that_connection (local_grad = delta)
-                    delta_w = gradient_network[grad_net_index]['weights']
-                    delta_b = gradient_network[grad_net_index]['biases']
-                    # momentum_network[layer_index]['weights'] is the new delta_w --> it adds the momentum
-                    # Since it acts as delta_w, it multiplies itself by the momentum constant and then adds
-                    # lrn_rate * local_grad * input_on_that_connection (i.e. "delta_w")
-                    # momentum_network[grad_net_index]['weights'] *= self.momentum
-                    # momentum_network[grad_net_index]['biases'] *= self.momentum
-                    # momentum_network[grad_net_index]['weights'] = np.add(momentum_network[grad_net_index]['weights'],
-                    #                                                      delta_w)
-                    # momentum_network[grad_net_index]['biases'] = np.add(momentum_network[grad_net_index]['biases'],
-                    #                                                     delta_b)
+
                     momentum_network_1[grad_net_index]['weights'] = np.add(
                         self.__beta1 * self.momentum, gradient_network[grad_net_index]['weights'] * (1 - self.__beta1))
                     momentum_network_2[grad_net_index]['biases'] = np.add(
@@ -639,25 +552,10 @@ class Adam(Optimizer):
                                                               self.lr * np.divide(m_hat_b, np.sqrt(
                                                                   v_hat_b + self.__epsilon)))
 
-                    # if model.layers[layer_index].regularizer != None:
-                    #     model.layers[layer_index].weights = np.subtract(
-                    #         np.add(model.layers[layer_index].weights, rmsprop_network[grad_net_index]['weights']),
-                    #         model.layers[layer_index].regularizer.derive(
-                    #             w=model.layers[layer_index].weights,
-                    #             lambd=model.layers[layer_index].regularizer_param),
-                    #     )
-                    # model.layers[layer_index].biases = np.add(
-                    #     model.layers[layer_index].biases,
-                    #     rmsprop_network[grad_net_index]['biases']
-                    # )
-
-            # validation
             if validation is not None:
                 val_x = validation[0][np.newaxis, :] if len(validation[0].shape) < 2 else validation[0]
                 val_y = validation[1][np.newaxis, :] if len(validation[1].shape) < 2 else validation[1]
-                epoch_val_error, epoch_val_metric = model.evaluate(net_input=val_x, targets=val_y,
-                                                                   metric=self.metric.name,
-                                                                   loss=self.loss_function.name)
+                epoch_val_error, epoch_val_metric = model.evaluate(validation_data=val_x, targets=val_y)
                 current_val_error = epoch_val_error
                 values_dict['validation_error'].append(current_val_error)
                 values_dict['validation_metrics'].append(epoch_val_metric)
@@ -676,11 +574,10 @@ class Adam(Optimizer):
             pbar.update(1)
         pbar.close()
         return values_dict
-        #################################
 
 
 optimizers = {
     'sgd': StochasticGradientDescent,
-    'rmsprop' : RMSProp,
+    'rmsprop': RMSProp,
     'adam': Adam
 }

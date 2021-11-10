@@ -1,0 +1,78 @@
+CUP GRIDSEARCH RESULTS
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+optmomlrmetricslossepochsbatchsize
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+________param_combination________
+opt:sgd	mom:0.7	lr:0.1	metrics:binary	loss:squared	epochs:100	batchsize:1	
+________index__________________
+0
+________Training_error________
+0.0001453431932859416
+________Training_metrics________
+1.0
+___________________________________
+________param_combination________
+opt:sgd	mom:0.7	lr:0.2	metrics:binary	loss:squared	epochs:100	batchsize:1	
+________index__________________
+1
+________Training_error________
+8.264108632224147e-05
+________Training_metrics________
+1.0
+___________________________________
+________param_combination________
+opt:sgd	mom:0.8	lr:0.1	metrics:binary	loss:squared	epochs:100	batchsize:1	
+________index__________________
+2
+________Training_error________
+0.000312155839939927
+________Training_metrics________
+1.0
+___________________________________
+________param_combination________
+opt:sgd	mom:0.8	lr:0.2	metrics:binary	loss:squared	epochs:100	batchsize:1	
+________index__________________
+3
+________Training_error________
+8.932494573232549e-05
+________Training_metrics________
+1.0
+___________________________________
+________param_combination________
+opt:rmsprop	mom:0.7	lr:0.1	metrics:binary	loss:squared	epochs:100	batchsize:1	
+________index__________________
+4
+________Training_error________
+4.5081909412312604e-05
+________Training_metrics________
+1.0
+___________________________________
+________param_combination________
+opt:rmsprop	mom:0.7	lr:0.2	metrics:binary	loss:squared	epochs:100	batchsize:1	
+________index__________________
+5
+________Training_error________
+4.5054668847780295e-05
+________Training_metrics________
+1.0
+___________________________________
+________param_combination________
+opt:rmsprop	mom:0.8	lr:0.1	metrics:binary	loss:squared	epochs:100	batchsize:1	
+________index__________________
+6
+________Training_error________
+4.244891481960552e-05
+________Training_metrics________
+1.0
+___________________________________
+________param_combination________
+opt:rmsprop	mom:0.8	lr:0.2	metrics:binary	loss:squared	epochs:100	batchsize:1	
+________index__________________
+7
+________Training_error________
+4.412821266862369e-05
+________Training_metrics________
+1.0
+___________________________________
+BEST RESULTS 
+opt:sgd	mom:0.7	lr:0.1	metrics:binary	loss:squared	epochs:100	batchsize:1	

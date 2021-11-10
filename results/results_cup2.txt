@@ -1,0 +1,21 @@
+CUP GRIDSEARCH RESULTS
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+dense_1regparam_1lrdrop_1momreg_1optepochsbatchsize
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+________param_combination________
+dense_1:10	regparam_1:0.001	lr:0.01	drop_1:0.1	mom:0.1	reg_1:l2	opt:rmsprop	epochs:50	batchsize:10	
+________index__________________
+0
+________Training_error________
+9.847241548682895
+________Validation_error________
+7.385057994594885
+________Training_metrics________
+3.4796261914627795
+________Validation_metrics________
+2.9323749842196416
+___________________________________
+BEST RESULTS 
+Validation metrics
+2.9323749842196416
+dense_1:10	regparam_1:0.001	lr:0.01	drop_1:0.1	mom:0.1	reg_1:l2	opt:rmsprop	epochs:50	batchsize:10	

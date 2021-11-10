@@ -48,8 +48,10 @@ def categorical_cross_entropy(actual, predicted):
 
 
 
-# losses
+
 SquaredLoss = DerivableFunction(squared_loss, squared_loss_derivative, 'squared')
+Binary_cross_entropy= DerivableFunction(binary_cross_entropy,binary_cross_entropy_derivative,'binary_cross_entropy')
 losses = {
     'squared': SquaredLoss,
+    'binary_cross_entropy':Binary_cross_entropy
 }

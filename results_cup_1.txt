@@ -1059,4 +1059,4 @@ ________Validation_metrics________
 7.617936131582827
 ___________________________________
 BEST RESULTS
-dense_1regparam_1lrdrop_1momreg_1optepochsbatchsize
+dense_1:10	regparam_1:0.001	lr:0.1	drop_1:0.1	mom:0.5	reg_1:l2	opt:sgd	epochs:25	batchsize:10

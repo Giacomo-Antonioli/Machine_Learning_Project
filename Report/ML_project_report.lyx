@@ -45,7 +45,7 @@ InStar
 \bibtex_command bibtex
 \index_command default
 \float_placement H
-\paperfontsize default
+\paperfontsize 12
 \spacing single
 \use_hyperref false
 \papersize a4paper
@@ -214,17 +214,6 @@ This report's aim is to describe the development and realization of a learning
  the data-sets.
 \end_layout
 
-\begin_layout Standard
-\begin_inset Formula 
-\begin{eqnarray}
-F=m\times a\label{eq:second}
-\end{eqnarray}
-
-\end_inset
-
-
-\end_layout
-
 \begin_layout Section
 \begin_inset CommandInset label
 LatexCommand label
@@ -307,11 +296,14 @@ Dense Layer
 This is the true implementation of a MLP layer and contains matrix for both
  weights and biases, based on the input dimension and the number of units
  contained in this layer.
- This matrices are initialized with a default method, but there are different
- options from which to choose.
- Even the activation function is set by default but it can be changed.
- There is also the possibility to assign to the layer a regularization parameter
- that can differ from the ones of the other layers.
+ The input dimensions of each layer, except from the first one, are retrieved
+ from the previous dense layer.
+ The weight and biases matrices are initialized using different initialization
+ methods and there are different options from which to choose.
+ To the internal propagation of the input through the layer an activation
+ function is applied to the final computational result.
+ Each layer has the possibility to implement some kinds of regularization
+ independently from each other.
 \end_layout
 
 \begin_layout Subsubsection
@@ -329,156 +321,7 @@ On the other hand the dropout layer is a fake layer that only changes the
  input of the successive dense layer zeroing some random inputs.
  It can be initialized with an user selected dropout-ratio and with a specific
  seed for the random generator.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float table
-wide false
-sideways false
-status open
-
-\begin_layout Ruled Table
-\align center
-\begin_inset Tabular
-<lyxtabular version="3" rows="3" columns="4">
-<features tabularvalignment="middle">
-<column alignment="left" valignment="top" width="10col%">
-<column alignment="center" valignment="top" width="10col%">
-<column alignment="center" valignment="top" width="10col%">
-<column alignment="center" valignment="top" width="10col%">
-<row>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Test1
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-a
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-b
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-c
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="left" valignment="top" topline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-gpu
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.6
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.7
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.8
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-cpu
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-3
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-4
-\end_layout
-
-\end_inset
-</cell>
-</row>
-</lyxtabular>
-
-\end_inset
-
-
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-Test Tables
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
+ This zeroing process is only applied to the feed-forward propagation.
 \end_layout
 
 \begin_layout Subsection
@@ -488,11 +331,33 @@ name "subsec:Weight-Initializer"
 
 \end_inset
 
-Weight Initializer
+Biases and Weights Initializers
 \end_layout
 
 \begin_layout Standard
-
+In order to prevent layer activation output to explode or vanish some strategies
+ to initialize both weights and biases were implemented.
+ Each dense layer can chose between different strategies and apply different
+ matrices initialization heuristics.
+ Some of the implemented heuristics are the 
+\series bold
+\emph on
+constant
+\series default
+\emph default
+ initialization, the 
+\series bold
+\emph on
+glorot_uniform, glorot_normal
+\series default
+\emph default
+ and the 
+\series bold
+\emph on
+he_normal, he_uniform
+\series default
+\emph default
+.
 \end_layout
 
 \begin_layout Subsection
@@ -506,19 +371,12 @@ Model
 \end_layout
 
 \begin_layout Standard
-Quisque non urna nec quam consequat viverra.
- Integer lacinia lacus sed efficitur accumsan.
- Vivamus id congue purus.
- Etiam consequat, orci ac semper vestibulum, diam dolor rhoncus erat, sit
- amet venenatis orci ex a augue.
- Sed vitae leo diam.
- Aliquam commodo nibh molestie neque viverra egestas.
- Curabitur varius dui nec nulla tincidunt facilisis a a mauris.
- Praesent lobortis efficitur sapien.
- Integer at nulla vel leo lobortis dapibus at eu eros.
- Morbi quis purus ex.
- Sed vitae lobortis ligula, vitae scelerisque mauris.
- Donec ut pharetra tellus, in volutpat libero.
+This class collects all the parts used to run the simulator and compiles
+ the simulator with all the required parameters.
+ If some of these are not given, it sets them to some default.
+ This class also implements a fitting method, to compute the training of
+ the network, an evaluating method, to determine the quality of the model
+ and a predicting method, to use what the simulator learned to perform inference.
 \end_layout
 
 \begin_layout Subsection
@@ -532,25 +390,30 @@ Activation Functions
 \end_layout
 
 \begin_layout Standard
-Cras vel mi vitae ligula dignissim convallis id eget dolor.
- Donec in sapien euismod, lacinia ante ut, aliquet nibh.
- Ut consectetur turpis at malesuada aliquet.
- Pellentesque ante quam, scelerisque ultrices nulla vitae, condimentum mollis
- turpis.
- Aliquam tempus eget velit vel aliquam.
- Ut dapibus interdum turpis eget aliquet.
- Nunc maximus blandit egestas.
- Nam nibh diam, lacinia id mollis id, pharetra lobortis justo.
- Pellentesque vehicula commodo lobortis.
- Suspendisse finibus facilisis urna ultricies maximus.
- Aliquam semper, dui ac aliquet lobortis, felis sem auctor enim, vel mollis
- diam quam faucibus ante.
- Nullam rhoncus purus ut neque blandit, at mattis metus viverra.
- Cras tristique nibh id vestibulum porta.
- Etiam nec gravida ipsum.
- Curabitur finibus est et convallis sodales.
- Cras condimentum id sapien eu fermentum.
+Many different activation functions were implemented in order to have a
+ different linear and non-linear transformations applicable to the feed-forward
+ process.
+ Some of the most relevant ones are the 
+\series bold
+\emph on
+linear
+\series default
+\emph default
+, the 
+\series bold
+\emph on
+sigmoid
+\series default
+\emph default
+ and the 
+\series bold
+\emph on
+ReLU.
  
+\series default
+\emph default
+Different functions work better with different aspects of different issues
+ so different combinations were tried in the experimental part.
 \end_layout
 
 \begin_layout Subsection
@@ -564,44 +427,22 @@ Loss Functions
 \end_layout
 
 \begin_layout Standard
-Phasellus id metus eu ligula rhoncus malesuada eu ac purus.
- Sed massa purus, convallis eget gravida id, suscipit at diam.
- In hac habitasse platea dictumst.
- Etiam rhoncus tellus id magna ultrices, vitae facilisis ipsum varius.
- Suspendisse aliquet vehicula auctor.
- Pellentesque malesuada non quam eget congue.
- Aenean ac semper augue.
-\end_layout
-
-\begin_layout Subsection
-\begin_inset CommandInset label
-LatexCommand label
-name "subsec:Learning-Rates"
-
-\end_inset
-
-Learning Rates
-\end_layout
-
-\begin_layout Subsection
-\begin_inset CommandInset label
-LatexCommand label
-name "subsec:Back-Propagation"
-
-\end_inset
-
-Back Propagation
-\end_layout
-
-\begin_layout Standard
-Aliquam interdum magna sit amet tempor sagittis.
- Aliquam dui arcu, cursus sit amet efficitur nec, feugiat et eros.
- Sed suscipit ex rhoncus tortor vestibulum, at sollicitudin felis efficitur.
- Pellentesque ullamcorper nisl diam, vehicula gravida nibh semper ac.
- Aliquam ut egestas ipsum, nec vulputate turpis.
- Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere
- cubilia curae; Nunc laoreet enim sit amet elit pretium, vitae vulputate
- urna ultrices.
+Loss function are used by the simulator to measure the distance between
+ the predicted value of the net and the target values of the labeled training
+ set.
+ These distance functions have been implemented in their normal form and
+ in their derivative form in order to be used even during the back-propagation
+ phase.
+ To do this a 
+\emph on
+Function
+\emph default
+ class was crated and specialized in an 
+\emph on
+DerivableFunction
+\emph default
+ class in order to access to the needed version of the function at the needed
+ time.
 \end_layout
 
 \begin_layout Subsection
@@ -614,6 +455,73 @@ name "subsec:Regularizers"
 Regularizers
 \end_layout
 
+\begin_layout Standard
+Different regularization techniques were implemented in order to keep the
+ overfitting phenomenon under control.
+ Bot the 
+\series bold
+\emph on
+Lasso regression
+\series default
+\emph default
+ and the 
+\series bold
+\emph on
+Ridge regression 
+\series default
+\emph default
+were implemented as regularization functions to be given to each layer with
+ a specific parameter as the penalty term.
+ 
+\end_layout
+
+\begin_layout Standard
+Another regularization technique implemented is the 
+\series bold
+\emph on
+Early Stopping
+\series default
+\emph default
+ that automatically stops the training based on both the monitored value
+ (e.g.
+ loss or validation loss) and the monitoring mode: 
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+growth mode
+\series default
+: if the monitored value grows in a patience range (for n times consecutively
+ w.r.t.
+ the t-n+1th value) then the training is stopped;
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+absolute growth mode
+\series default
+: if the last monitored value is bigger than the previous one then the training
+ is stopped;
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+stationary mode
+\series default
+: if the monitored value doesn't change over a tolerance value in a patience
+ range (for n times consecutively w.r.t.
+ the t-n+1th value) then the training is stopped.
+\end_layout
+
+\begin_layout Standard
+The patience value and the tolerance value can be defined by the user but
+ already have a default value.
+ 
+\end_layout
+
 \begin_layout Subsection
 \begin_inset CommandInset label
 LatexCommand label
@@ -621,25 +529,153 @@ name "subsec:Optimizers"
 
 \end_inset
 
-Optimizers
+Optimizer
 \end_layout
 
 \begin_layout Standard
-Donec dapibus consectetur porta.
- Curabitur iaculis, purus eu condimentum fermentum, sem ante semper mi,
- ut tincidunt ex felis at elit.
- Fusce pharetra suscipit volutpat.
- Proin pellentesque blandit nisi eu vulputate.
- Donec pulvinar interdum eros, at blandit neque egestas fringilla.
- Quisque a metus ipsum.
- Phasellus vitae ultricies leo.
- Praesent eu leo commodo, molestie sem sed, ultrices ex.
- Nunc vitae vehicula mauris.
- Nam vitae dictum tellus.
- Nunc lacinia urna eu tortor euismod consectetur.
- Ut vitae vestibulum lacus.
- Vivamus euismod posuere condimentum.
+Three different optimizers have been implemented during the project's developmen
+t.
+ These are:
+\end_layout
+
+\begin_layout Itemize
+Stochastic Gradient Descent (
+\series bold
+\emph on
+SGD
+\series default
+\emph default
+) with a 
+\series bold
+\emph on
+learning rate
+\series default
+\emph default
+ and 
+\series bold
+\emph on
+momentum
+\series default
+\emph default
+ parameter.
+ Also the 
+\series bold
+\emph on
+Nesterov Accelerated Momentum
+\series default
+\emph default
+ method has been implemented and it can be toggled by a Boolean parameter.
  
+\end_layout
+
+\begin_layout Itemize
+Root Mean Square Propagation (
+\series bold
+\emph on
+RMSProp
+\series default
+\emph default
+) with a 
+\series bold
+\emph on
+learning rate
+\series default
+\emph default
+, 
+\series bold
+\emph on
+momentum
+\series default
+\emph default
+ and 
+\series bold
+\emph on
+rho 
+\series default
+\emph default
+parameter.
+ This algorithm advantage is that it divides the learning rate for a weight
+ by a running average of the magnitudes of recent gradients for that weight.
+\end_layout
+
+\begin_layout Itemize
+Adaptive Moment Estimation (
+\series bold
+\emph on
+Adam
+\series default
+\emph default
+) with a 
+\series bold
+\emph on
+learning rate
+\series default
+\emph default
+, 
+\series bold
+\emph on
+momentum
+\series default
+\emph default
+, 
+\series bold
+\emph on
+beta1
+\series default
+\emph default
+, 
+\series bold
+\emph on
+beta2
+\series default
+\emph default
+ and 
+\series bold
+\emph on
+epsilon
+\emph default
+ 
+\series default
+parameter
+\emph on
+.
+ T
+\emph default
+his algorithm is for first-order gradient-based optimization of stochastic
+ objective functions, based on adaptive estimates of lower-order moments.
+\end_layout
+
+\begin_layout Standard
+All the optimizers have a method called 
+\begin_inset listings
+lstparams "basicstyle={\ttfamily}"
+inline true
+status open
+
+\begin_layout Plain Layout
+
+optimize
+\end_layout
+
+\end_inset
+
+ that cycles on the given epochs and check if the early stopping regularization
+ is used.
+ Then based on the batch_size it splits the training data-set into 
+\begin_inset Formula $\frac{data\_set}{batch\_size}$
+\end_inset
+
+ subsets and cycles on every subset.
+ For each subset it propagates forward every input of the batch it accumulates
+ the gradient and the depending on the optimizer, it applies different regulariz
+ation techniques.
+ Successively the optimizer updates the biases and weights matrices of each
+ dense layer.
+ Once this is done, then it proceeds, if specified in the parameters, to
+ the evaluation of the model using a validation data-set.
+ Finally it reports the results of all the epochs based on the specified
+ loss and metric, of the training phase and of the validation phase (if
+ a validation data-set was fed to the model).
 \end_layout
 
 \begin_layout Subsection
@@ -649,20 +685,46 @@ name "subsec:Evaluation-Metrics"
 
 \end_inset
 
-Evaluation Metrics
+Model Selection
 \end_layout
 
 \begin_layout Standard
-Curabitur interdum turpis quis leo posuere elementum.
- Cras pretium porta placerat.
- In pulvinar ex diam.
- Phasellus eget tincidunt ligula.
- Donec sit amet tortor velit.
- Aliquam tincidunt ante ligula, at cursus nisi maximus id.
- Proin felis elit, faucibus vitae libero at, fermentum consequat turpis.
- Vestibulum quis dui id nisi sollicitudin consectetur nec nec eros.
- Fusce auctor at ligula et porttitor.
+In order to perform model selection different types of validation techniques
+ were developed.
+ A 
+\series bold
+\emph on
+Simple Holdout
+\series default
+\emph default
+ method was implemented in order to divide the given data-set into training_set,
+ validation_set and test_set.
+ A 
+\series bold
+\emph on
+KFold
+\series default
+\emph default
+ method was also implemented, which divides the data-set into K different
+ subset and iterates over them in order to use different partitions as different
+ training sets and a single partitions, different for all iterations, to
+ validate the constructed training set.
  
+\end_layout
+
+\begin_layout Standard
+A Hyper-parameter selection method such as 
+\series bold
+\emph on
+Grid Search
+\series default
+\emph default
+ was implemented to give the user a way to fine tune the models.
+ This algorithm uses one of the two above illustrated data-sets splitters
+ and if the KFold method is used the final scores of the loss and validation
+ are averaged over all the K iterations.
+ This method stores the best parameter configuration and the best evaluator
+ based on the validation metrics result
 \end_layout
 
 \begin_layout Section
@@ -676,18 +738,9 @@ Experiments
 \end_layout
 
 \begin_layout Standard
-In mollis, nisl vitae imperdiet dapibus, ligula urna condimentum arcu, non
- condimentum lectus tellus non quam.
- Suspendisse gravida ex sed massa dictum, ut maximus eros egestas.
- Nam odio est, tincidunt at consequat at, consequat vitae metus.
- Pellentesque habitant morbi tristique senectus et netus et malesuada fames
- ac turpis egestas.
- Integer ornare, ante at rutrum imperdiet, eros diam euismod elit, id facilisis
- ipsum nunc in enim.
- Pellentesque id feugiat risus.
- Ut semper, nibh eget blandit rutrum, nisl enim rutrum urna, sit amet tempor
- lorem orci sit amet libero.
- Nullam id justo neque.
+In this section the experimental part of the project will be introduced
+ and illustrated to give an insight of how the simulator performs on two
+ different data-sets.
  
 \end_layout
 
@@ -702,19 +755,8 @@ MONK
 \end_layout
 
 \begin_layout Standard
-Mauris id tellus ultricies, blandit erat quis, aliquet augue.
- Integer suscipit suscipit arcu, et varius ipsum sagittis vitae.
- Nulla facilisi.
- Sed vel aliquam tortor.
- Morbi ultricies nulla ut ipsum accumsan fringilla.
- Pellentesque malesuada orci nec auctor finibus.
- Nam et odio bibendum ex dictum interdum a non erat.
- Quisque nisl sem, placerat non viverra nec, rhoncus in risus.
- Suspendisse ornare eleifend placerat.
- In hac habitasse platea dictumst.
- Suspendisse potenti.
- Mauris accumsan nisl justo, ultrices pretium nibh mollis ut.
- Sed condimentum non lorem sed tincidunt.
+The Monk data-set is used as a baseline to evaluate the correct functioning
+ of the simulator.
  
 \end_layout
 
@@ -729,19 +771,14 @@ Dataset Introduction
 \end_layout
 
 \begin_layout Standard
-Quisque sit amet aliquet nisi.
- Integer enim metus, elementum a dignissim a, maximus sollicitudin neque.
- Sed quis mauris imperdiet, lobortis neque sed, scelerisque nisi.
- Pellentesque porttitor elit non ullamcorper condimentum.
- Nullam consequat sit amet lectus in suscipit.
- Proin velit turpis, sollicitudin ac elit at, efficitur rhoncus nibh.
- Maecenas fringilla metus finibus dapibus iaculis.
- Integer rhoncus vehicula porta.
- Ut bibendum nibh gravida aliquam elementum.
- Phasellus at nisl cursus, sagittis neque vitae, viverra justo.
- Duis a enim id metus dictum malesuada.
- Lorem ipsum dolor sit amet, consectetur adipiscing elit.
- 
+The MONK's problem were the basis of a first international comparison of
+ learning algorithms.
+ It is made of 6 different attributes that were one-hot encoded and two
+ different possible classifications.
+ This data-set so was used to determine the classification power of the
+ simulator and due to the fact that these data-sets are guaranteed to obtain
+ approximately a 100% accuracy, this information was exploited to see if
+ the simulator performed correctly the classification.
 \end_layout
 
 \begin_layout Subsubsection
@@ -755,15 +792,12 @@ Validation
 \end_layout
 
 \begin_layout Standard
-Duis malesuada viverra ultricies.
- Donec mollis finibus sapien eu vulputate.
- Suspendisse at varius tellus.
- Sed viverra rhoncus interdum.
- Donec venenatis interdum lectus at egestas.
- Donec quis posuere est, vel semper mi.
- Pellentesque dignissim posuere quam vitae laoreet.
- Praesent tincidunt urna in eros aliquam, in porttitor dui ullamcorper.
- Pellentesque ac dictum justo, at auctor felis.
+The MONK's data-sets were tested using a grid search with using KFold with
+ a value of K=3.
+ In this way 66% of the data-set was used for training and 33% was used
+ for validation.
+ Previously a 10% of the original data-set was excluded to be the internal
+ test-set.
 \end_layout
 
 \begin_layout Subsection
@@ -777,22 +811,10 @@ CUP
 \end_layout
 
 \begin_layout Standard
-Integer pellentesque pellentesque erat, non varius orci efficitur sit amet.
- Nam at erat ut tortor facilisis ullamcorper.
- Fusce at feugiat elit.
- Cras ac dolor eu eros pellentesque mattis et ac libero.
- Quisque ac mi at odio mattis bibendum.
- Donec ac pellentesque ipsum.
- Quisque finibus leo eget metus cursus imperdiet.
- Sed mauris lorem, molestie et tempus quis, ornare tincidunt justo.
- Nullam a lectus eu leo dapibus congue.
- Pellentesque sed sagittis eros.
- Ut diam erat, tempus ut maximus ut, tincidunt non augue.
- Vestibulum sed metus mauris.
- Nulla dapibus rhoncus odio eget congue.
- Etiam nec ullamcorper est.
- Praesent fringilla vitae massa ac hendrerit.
- Vivamus ultricies et ligula at accumsan.
+The CUP data-set represents a regression problem and it is made of 10 different
+ attributes and two different scores.
+ Two different models were implemented to simulate the model the two different
+ regressions.
  
 \end_layout
 
@@ -807,22 +829,9 @@ Data-set Introduction
 \end_layout
 
 \begin_layout Standard
-Nunc lacinia, diam id commodo ultrices, nulla nisi dapibus mauris, eget
- vestibulum tellus turpis sit amet augue.
- Praesent sit amet felis ac ex hendrerit pharetra.
- Proin vel justo at metus aliquam porttitor.
- Sed eget mollis elit, eget sagittis urna.
- Proin sed leo sed odio lobortis auctor.
- Suspendisse vulputate libero in luctus consectetur.
- Aenean ut aliquam nisi, accumsan ornare enim.
- Integer et ipsum id orci porttitor vulputate et eget est.
- Curabitur sagittis, ipsum eget sollicitudin tristique, nisi lorem vestibulum
- libero, quis sodales tellus purus ut mauris.
- Vivamus ut ullamcorper purus.
- Nullam tincidunt nulla ac elementum fringilla.
- Aliquam quis accumsan mauris, in mollis justo.
- Proin nec neque ipsum.
- Suspendisse ullamcorper enim ligula, quis pellentesque felis interdum eu.
+This data-set for us students is unknown.
+ No information about what the data is used for and how it was collected
+ was given so the approach to it is totally blind.
  
 \end_layout
 
@@ -837,22 +846,11 @@ Validation
 \end_layout
 
 \begin_layout Standard
-Proin mauris elit, consequat quis risus in, fermentum bibendum arcu.
- Phasellus tempor finibus est, non lobortis justo dapibus eget.
- Aenean rhoncus ipsum sed mi molestie, sed molestie ligula viverra.
- Fusce dictum a est a dictum.
- Phasellus suscipit sagittis magna, sit amet porta ex rhoncus a.
- Morbi maximus vehicula interdum.
- Proin volutpat consectetur euismod.
- Mauris ut mauris id erat porta maximus eget et elit.
- Suspendisse luctus nec dolor eget suscipit.
- Quisque ultricies molestie urna a scelerisque.
- Phasellus eleifend dictum dapibus.
- Duis dictum orci feugiat orci interdum efficitur.
- Nam faucibus suscipit nibh, vitae venenatis tellus eleifend vel.
- Class aptent taciti sociosqu ad litora torquent per conubia nostra, per
- inceptos himenaeos.
- 
+The CUP data-set was tested using a grid search with using KFold with a
+ value of K=3.
+ In this way 66% of the data-set was used for training and 33% was used
+ for validation.
+ A previous 10% of the 
 \end_layout
 
 \begin_layout Section
@@ -866,23 +864,13 @@ Results
 \end_layout
 
 \begin_layout Standard
-Integer lobortis ante eget condimentum vulputate.
- Duis non euismod nulla, vitae commodo diam.
- Mauris in urna quis ex pulvinar laoreet sed in tortor.
- Morbi egestas orci in consectetur tempus.
- Donec vitae quam est.
- Duis quis placerat tellus.
- Pellentesque aliquet, quam vel molestie consectetur, odio lorem hendrerit
- libero, non maximus ipsum quam ut massa.
- Nunc et dolor eu felis dignissim auctor.
- Cras accumsan sed felis semper consequat.
- Nunc accumsan mi quis lorem auctor maximus.
- Vestibulum eu augue dapibus, tincidunt metus aliquet, volutpat turpis.
- Pellentesque dignissim nunc nulla, eget gravida ex interdum sed.
- Morbi consequat dolor congue sapien dignissim facilisis.
- Morbi mollis vestibulum risus, sit amet dapibus nibh viverra vel.
- Duis lacinia auctor lobortis.
- Aliquam in accumsan est.
+The principal aim of this project was to implement a simulator system that
+ could autonomously learn from given inputs and due to a less efficient
+ implementation w.r.t off the shelf products, the training and fine-tuning
+ required an important amount of time.
+ So due too the many developed parts the fine-tuning and testing parts results
+ in being less deep and doesn't cover all the developed parts for simplicity.
+ 
 \end_layout
 
 \begin_layout Subsection
@@ -896,25 +884,1251 @@ MONK Results
 \end_layout
 
 \begin_layout Standard
-Sed in porttitor erat, eget imperdiet mi.
- Aliquam erat volutpat.
- Donec nec ligula purus.
- Donec quis velit facilisis, consequat mauris feugiat, laoreet sapien.
- Morbi ultricies lectus urna, a molestie augue convallis quis.
- Etiam sollicitudin lorem vel erat semper pretium.
- Nullam quam est, viverra sit amet tempus at, vestibulum at est.
- Ut nisi nulla, tincidunt nec massa a, ultricies vehicula nulla.
- Integer malesuada, nibh ullamcorper molestie placerat, risus risus dapibus
- enim, id mattis justo turpis sed eros.
- Nunc auctor viverra augue, tempor iaculis sem posuere a.
- Nullam vulputate ultricies nulla, vel elementum urna dictum quis.
- Sed ullamcorper odio quis justo sollicitudin pulvinar.
- Interdum et malesuada fames ac ante ipsum primis in faucibus.
- Proin blandit, metus sit amet cursus semper, ligula diam commodo quam,
- eu ullamcorper eros nisl a nunc.
- Sed lobortis, turpis vitae vehicula faucibus, eros neque congue neque,
- ut placerat mauris libero vel nunc.
- Aliquam feugiat sollicitudin sollicitudin.
+This data-set, as it has been already said, is used for a baseline comparison
+ of the simulator and to guarantee the effectiveness of it.
+\end_layout
+
+\begin_layout Standard
+Different configurations of learning_rate,moments ,activation functions,
+ neuron configurations and optimizers were tested.
+\end_layout
+
+\begin_layout Standard
+Best results for each data-set will be reported below.
+\end_layout
+
+\begin_layout Standard
+{'opt': 'sgd', 'mom': 0.7, 'lr': 0.1, 'metrics': 'binary', 'loss': 'squared',
+ 'epochs': 100, 'batchsize': 1}
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status open
+
+\begin_layout Ruled Table
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="6" columns="4">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="10col%">
+<column alignment="center" valignment="top" width="10col%">
+<column alignment="center" valignment="top" width="10col%">
+<column alignment="center" valignment="top" width="10col%">
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Parameter
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Value
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Parameter
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Value
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+n_units_1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+n_units2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+4
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+act_1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+tanh
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+act_2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+sigmoid
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+learning rate
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+momentum
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.7
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+optimizer
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+SGD
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+batch size
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+epochs
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+100
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Best Model configuration for Monk1
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename /home/gantonioli/Downloads/ML-20-PRJ lecture package (new)-20210804/0error.png
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Best model Monk 1 Loss (MSE)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename /home/gantonioli/Downloads/ML-20-PRJ lecture package (new)-20210804/0metrics.png
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Best model Monk 1 Accuracy
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status open
+
+\begin_layout Ruled Table
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="6" columns="4">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="10col%">
+<column alignment="center" valignment="top" width="10col%">
+<column alignment="center" valignment="top" width="10col%">
+<column alignment="center" valignment="top" width="10col%">
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Parameter
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Value
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Parameter
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Value
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+n_units_1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+n_units2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+act_1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+tanh
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+act_2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+sigmoid
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+learning rate
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+momentum
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.7
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+optimizer
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+SGD
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+batch size
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+epochs
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+100
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Best Model configuration for Monk2
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename /home/gantonioli/PycharmProjects/Machine_Learning_Project/plots/monks-2/0error.png
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Best model Monk 2 Loss (MSE)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename /home/gantonioli/PycharmProjects/Machine_Learning_Project/plots/monks-2/0metrics.png
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Best model Monk 2 Accuracy
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status open
+
+\begin_layout Ruled Table
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="6" columns="4">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="10col%">
+<column alignment="center" valignment="top" width="10col%">
+<column alignment="center" valignment="top" width="10col%">
+<column alignment="center" valignment="top" width="10col%">
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Parameter
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Value
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Parameter
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Value
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+n_units_1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+n_units2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+act_1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+tanh
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+act_2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+sigmoid
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+learning rate
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+momentum
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.7
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+optimizer
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+SGD
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+batch size
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+epochs
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+100
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Best Model configuration for Monk3
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename /home/gantonioli/PycharmProjects/Machine_Learning_Project/plots/monks-3/0error.png
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Best model Monk 3 Loss (MSE)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename /home/gantonioli/PycharmProjects/Machine_Learning_Project/plots/monks-3/0metrics.png
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Best model Monk 3 Accuracy
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status open
+
+\begin_layout Ruled Table
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="4" columns="5">
+<features tabularvalignment="middle">
+<column alignment="left" valignment="top" width="10col%">
+<column alignment="center" valignment="top" width="10col%">
+<column alignment="center" valignment="top" width="10col%">
+<column alignment="center" valignment="top" width="10col%">
+<column alignment="center" valignment="top" width="10col%">
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Data-set
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Loss TR
+\end_layout
+
+\begin_layout Plain Layout
+(MSE)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Loss Ts
+\end_layout
+
+\begin_layout Plain Layout
+(MSE)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Accuracy TR (%)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Accuracy TS(%)
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+monk 1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.000283
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.000418
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+100%
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+100%
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+monk 2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0001453
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+5.887e-05
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+100%
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+100%
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+monk 3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.00439
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0198058
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+99.18%
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+94.21%
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Loss and Accuracy for Monk Datasets
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -928,23 +2142,800 @@ CUP Results
 \end_layout
 
 \begin_layout Standard
-Mauris in nisi malesuada quam egestas molestie.
- Proin et felis convallis, luctus ipsum tristique, ultricies purus.
- Cras pharetra, tellus nec convallis placerat, velit tellus fringilla erat,
- eu pulvinar purus velit eget lorem.
- Aenean elementum justo nec risus congue facilisis.
- Nam rutrum in quam accumsan pellentesque.
- Quisque id viverra orci.
- Suspendisse pulvinar lacus in elementum posuere.
- Pellentesque euismod eros vel diam egestas, in venenatis lectus finibus.
- Cras vitae ornare dui, a rhoncus leo.
- Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere
- cubilia curae; Fusce commodo facilisis felis a pharetra.
- Integer ac tortor urna.
- Mauris augue lectus, dapibus ut velit eget, venenatis aliquet dolor.
- Aenean eu arcu vehicula, pretium ligula ac, pellentesque nibh.
- Maecenas et rutrum dui.
+Two different models were implemented for the CUP data-set, due to the nature
+ of it.
+ One model was trained to predict the first target and the second was trained
+ to predict the second target.
  
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status open
+
+\begin_layout Ruled Table
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="4" columns="4">
+<features tabularvalignment="middle">
+<column alignment="left" valignment="top" width="10col%">
+<column alignment="center" valignment="top" width="10col%">
+<column alignment="center" valignment="top" width="10col%">
+<column alignment="center" valignment="top" width="10col%">
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Model
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Training set MEE
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Validation set MEE
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Internal Test set MEE
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+model 1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.79305
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.20227
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+5.2965
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+model 2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Todo
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+todo
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+todo
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+model 3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+todo
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+todo
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+todo-
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+MEE results for CUP
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The parameters used for the best model are: 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status open
+
+\begin_layout Ruled Table
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="8" columns="4">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="10col%">
+<column alignment="center" valignment="top" width="10col%">
+<column alignment="center" valignment="top" width="10col%">
+<column alignment="center" valignment="top" width="10col%">
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Parameter
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Value
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Parameter
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Value
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+n_units_1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+10
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+n_units2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+4
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+n_units_3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+act_1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+sigmoid
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+act_2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+relu
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+act_3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+linear
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+regularizer
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+L2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+learning rate
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.01
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+regularizer param
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.001
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+dropout rate
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+10%
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+optimizer
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+RMSProp
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+momentum
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.1
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+epochs
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+50
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+batch size
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+10
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Best Model configuration for CUP
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename /home/gantonioli/PycharmProjects/Machine_Learning_Project/plots/cup2/51error.png
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Best CUP 2 Model Loss
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename /home/gantonioli/PycharmProjects/Machine_Learning_Project/plots/cup2/51metrics.png
+	scale 50
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Best CUP 2 Model Accuracy
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status open
+
+\begin_layout Ruled Table
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="4" columns="4">
+<features tabularvalignment="middle">
+<column alignment="left" valignment="top" width="10col%">
+<column alignment="center" valignment="top" width="10col%">
+<column alignment="center" valignment="top" width="10col%">
+<column alignment="center" valignment="top" width="10col%">
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Model
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Training set MEE
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Validation set MEE
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Internal Test set MEE
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+model 1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.4621534
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.840094
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.78521
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+model 2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.6036494
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.911343
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+model 3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.5027666
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.921879
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+MEE results for CUP for the second label
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -973,2517 +2964,16 @@ Lowercase
 \end_layout
 
 \begin_layout Standard
-Mauris in nisi malesuada quam egestas molestie.
- Proin et felis convallis, luctus ipsum tristique, ultricies purus.
- Cras pharetra, tellus nec convallis placerat, velit tellus fringilla erat,
- eu pulvinar purus velit eget lorem.
- Aenean elementum justo nec risus congue facilisis.
- Nam rutrum in quam accumsan pellentesque.
- Quisque id viverra orci.
- Suspendisse pulvinar lacus in elementum posuere.
- Pellentesque euismod eros vel diam egestas, in venenatis lectus finibus.
- Cras vitae ornare dui, a rhoncus leo.
- Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere
- cubilia curae; Fusce commodo facilisis felis a pharetra.
- Integer ac tortor urna.
- Mauris augue lectus, dapibus ut velit eget, venenatis aliquet dolor.
- Aenean eu arcu vehicula, pretium ligula ac, pellentesque nibh.
- Maecenas et rutrum dui.
+This project was really fun to do and it game me the opportunity to explore
+ more in depth the course's contents as well as having a practical point
+ of view of what I saw during the lessons.
  
 \end_layout
 
-\begin_layout Subsection
-\begin_inset CommandInset label
-LatexCommand label
-name "sec:level2"
-
-\end_inset
-
-Second-level heading: Formatting
-\end_layout
-
 \begin_layout Standard
-This file may be formatted in either the 
-\family typewriter
-preprint
-\family default
- or 
-\family typewriter
-reprint
-\family default
- style.
+I agree to the disclosure and publication of my name, and the results with
+ preliminary and final ranking.
  
-\family typewriter
-reprint
-\family default
- format mimics final journal output.
- Either format may be used for submission purposes.
-\end_layout
-
-\begin_layout Subsubsection
-Wide text (A level-3 head)
-\end_layout
-
-\begin_layout Standard
-The 
-\family typewriter
-widetext
-\family default
- environment will make the text the width of the full page, as on page
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand pageref
-reference "eq:wideeq"
-
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Paragraph
-Note (Fourth-level head is run in)
-\end_layout
-
-\begin_layout Standard
-The width-changing commands only take effect in two-column formatting.
- There is no effect if text is in a single column.
-\end_layout
-
-\begin_layout Subsection
-\begin_inset CommandInset label
-LatexCommand label
-name "sec:citeref"
-
-\end_inset
-
-Citations and References
-\end_layout
-
-\begin_layout Subsubsection
-Citations
-\end_layout
-
-\begin_layout Standard
-Because REV\SpecialChar TeX
-
-\begin_inset space \space{}
-\end_inset
-
-uses the 
-\series bold
-natbib
-\series default
- package of Patrick Daly, the entire repertoire of commands in that package
- are available for your document; see the 
-\series bold
-natbib
-\series default
- documentation for further details.
-\end_layout
-
-\begin_layout Subsubsection
-Example citations
-\end_layout
-
-\begin_layout Standard
-By default, citations are numerical
-\begin_inset CommandInset citation
-LatexCommand citep
-key "article-full"
-literal "true"
-
-\end_inset
-
-.
- Author-year citations are used when the journal is RMP.
- To give a textual citation, use the custom inset 
-\family sans
-Online
-\begin_inset space ~
-\end_inset
-
-cite
-\family default
-: Refs.
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset Flex Online cite
-status open
-
-\begin_layout Plain Layout
-\begin_inset Argument 1
-status open
-
-\begin_layout Plain Layout
-and references therein
-\end_layout
-
-\end_inset
-
-article-full,booklet-full
-\end_layout
-
-\end_inset
-
-.
- By default, the 
-\family typewriter
-natbib
-\family default
- package automatically sorts your citations into numerical order and 
-\begin_inset Quotes eld
-\end_inset
-
-compresses
-\begin_inset Quotes erd
-\end_inset
-
- runs of three or more consecutive numerical citations.
- REV\SpecialChar TeX
-
-\begin_inset space \space{}
-\end_inset
-
-provides the ability to automatically change the punctuation when switching
- between journal styles that provide citations in square brackets and those
- that use a superscript style instead.
- This is done through the 
-\family typewriter
-citeautoscript
-\family default
- document class option.
- For instance, the journal style 
-\family typewriter
-prb
-\family default
- automatically invokes this option because 
-\shape italic
-Physical Review B
-\shape default
- uses superscript-style citations.
- The effect is to move the punctuation, which normally comes after a citation
- in square brackets, to its proper position before the superscript.
- To illustrate, we cite several together 
-\begin_inset CommandInset citation
-LatexCommand citep
-key "article-crossref,booklet-full,misc-full"
-literal "true"
-
-\end_inset
-
-.
- Futhermore, running this sample file under the 
-\family typewriter
-prb
-\family default
- option will move the punctuation to the correct place.
-\end_layout
-
-\begin_layout Standard
-When the 
-\family typewriter
-prb
-\family default
- class option is used, the citation is displayed as a superscript rather
- than in square brackets.
- Note that the location of the citation should be adjusted for the reference
- style: the superscript references in non-
-\family typewriter
-prb
-\family default
- style must appear after punctuation; otherwise the reference must appear
- before any punctuation.
- This sample was written for the regular (non-
-\family typewriter
-prb
-\family default
-) citation style.
- The citation in the 
-\family typewriter
-prb
-\family default
- style also displays the reference on the baseline.
-\end_layout
-
-\begin_layout Subsubsection
-References
-\end_layout
-
-\begin_layout Standard
-REV\SpecialChar TeX
-
-\begin_inset space ~
-\end_inset
-
-4.1 includes the Bib\SpecialChar TeX
-
-\begin_inset space \space{}
-\end_inset
-
-style files 
-\emph on
-apsrev4-1.bst
-\emph default
- and 
-\emph on
-apsrmp4-1.bst
-\emph default
- appropriate for 
-\shape italic
-Physical Review
-\shape default
- and 
-\shape italic
-Reviews of Modern Physics
-\shape default
-, respectively.
- To display titles for cited journal articles, use the 
-\family typewriter
-longbibliography
-\family default
- document class option.
-\end_layout
-
-\begin_layout Subsection
-Footnotes
-\end_layout
-
-\begin_layout Standard
-A footnote:
-\begin_inset Foot
-status open
-
-\begin_layout Plain Layout
-Automatically placing footnotes into the bibliography requires using 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-BibTeX
-\end_layout
-
-\end_inset
-
- to compile the bibliography.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Section
-Math and Equations
-\end_layout
-
-\begin_layout Standard
-In \SpecialChar LaTeX
-
-\begin_inset space \space{}
-\end_inset
-
-there are many different ways to display equations, and a few preferred
- ways are noted below.
- Displayed math will center by default.
- Use the document class option 
-\family sans
-fleqn
-\family default
- to flush equations left.
-\end_layout
-
-\begin_layout Standard
-Below we have a numbered single-line equation; this is the most common type
- of equation in 
-\shape italic
-Physical Review
-\shape default
-: 
-\begin_inset Formula 
-\begin{eqnarray}
-\left\{ \openone234567890abc123\alpha\beta\gamma\delta1234556\alpha\beta\frac{1\sum_{b}^{a}}{A^{2}}\right\} .\label{eq:one}
-\end{eqnarray}
-
-\end_inset
-
-Note the open one in Eq.
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand eqref
-reference "eq:one"
-
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-Not all numbered equations will fit within a narrow column this way.
- The equation number will move down automatically if it cannot fit on the
- same line with a one-line equation: 
-\begin_inset Formula 
-\begin{equation}
-\left\{ ab12345678abc123456abcdef\alpha\beta\gamma\delta1234556\alpha\beta\frac{1\sum_{b}^{a}}{A^{2}}\right\} .
-\end{equation}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsection
-Multiline equations
-\end_layout
-
-\begin_layout Standard
-Only number the last line of a continued equation: 
-\begin_inset Formula 
-\begin{eqnarray}
-{\cal M}= &  & ig_{Z}^{2}(4E_{1}E_{2})^{1/2}(l_{i}^{2})^{-1}\delta_{\sigma_{1},-\sigma_{2}}(g_{\sigma_{2}}^{e})^{2}\chi_{-\sigma_{2}}(p_{2})\nonumber \\
- &  & \times[\epsilon_{j}l_{i}\epsilon_{i}]_{\sigma_{1}}\chi_{\sigma_{1}}(p_{1})
-\end{eqnarray}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-To obtain numbers not normally produced by the automatic numbering, use
- the \SpecialChar LaTeX
--command 
-\series bold
-
-\backslash
-tag
-\series default
-.
- See sec.
-\begin_inset space \space{}
-\end_inset
-
-
-\emph on
-User-defined Numbering
-\emph default
- of \SpecialChar LyX
-'s 
-\emph on
-Math
-\emph default
- manual for more info about 
-\series bold
-
-\backslash
-tag
-\series default
-.
- 
-\series bold
-
-\backslash
-tag
-\series default
- should only be used in exceptional cases—do not use it to number many equations
- in your paper.
-\end_layout
-
-\begin_layout Standard
-Setting display math within custom inset 
-\family sans
-Subequations
-\family default
- will produce a set of equations that are labeled with letters, as shown
- in Eqs.
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand eqref
-reference "subeq:1"
-
-\end_inset
-
- and 
-\begin_inset CommandInset ref
-LatexCommand eqref
-reference "subeq:2"
-
-\end_inset
-
- below.
- You may include any number of single-line and multiline equations, although
- it is probably not a good idea to follow one display math directly after
- another.
- 
-\begin_inset Flex Subequations
-status open
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "eq:whole"
-
-\end_inset
-
-
-\begin_inset Formula 
-\begin{eqnarray}
-{\cal M}= &  & ig_{Z}^{2}(4E_{1}E_{2})^{1/2}(l_{i}^{2})^{-1}(g_{\sigma_{2}}^{e})^{2}\chi_{-\sigma_{2}}(p_{2})\nonumber \\
- &  & \times[\epsilon_{i}]_{\sigma_{1}}\chi_{\sigma_{1}}(p_{1}).\label{subeq:2}
-\end{eqnarray}
-
-\end_inset
-
-
-\begin_inset Formula 
-\begin{equation}
-\left\{ abc123456abcdef\alpha\beta\gamma\delta1234556\alpha\beta\frac{1\sum_{b}^{a}}{A^{2}}\right\} ,\label{subeq:1}
-\end{equation}
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
- 
-\end_layout
-
-\begin_layout Subsubsection
-Wide equations
-\end_layout
-
-\begin_layout Standard
-The equation that follows is set in a wide format, i.e., it spans the full
- page.
- The wide format is reserved for long equations that cannot easily be set
- in a single column: 
-\end_layout
-
-\begin_layout Wide Text
-\begin_inset Formula 
-\begin{equation}
-{\cal R}^{(\text{d})}=g_{\sigma_{2}}^{e}\left(\frac{[\Gamma^{Z}(3,21)]_{\sigma_{1}}}{Q_{12}^{2}-M_{W}^{2}}+\frac{[\Gamma^{Z}(13,2)]_{\sigma_{1}}}{Q_{13}^{2}-M_{W}^{2}}\right)+x_{W}Q_{e}\left(\frac{[\Gamma^{\gamma}(3,21)]_{\sigma_{1}}}{Q_{12}^{2}-M_{W}^{2}}+\frac{[\Gamma^{\gamma}(13,2)]_{\sigma_{1}}}{Q_{13}^{2}-M_{W}^{2}}\right)\;.\label{eq:wideeq}
-\end{equation}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-This is typed to show how the output appears in wide format.
- (Incidentally, since there is no blank line between the 
-\family typewriter
-equation
-\family default
- environment above and the start of this paragraph, this paragraph is not
- indented.)
-\end_layout
-
-\begin_layout Section
-Cross-referencing
-\end_layout
-
-\begin_layout Standard
-The referencing label should appear within the section heading, within the
- footnote text, within the equation, or within the table or figure caption.
- Some examples: Section
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "sec:Intro"
-
-\end_inset
-
- on page
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand pageref
-reference "sec:Intro"
-
-\end_inset
-
-, Table
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:table1"
-
-\end_inset
-
-,
-\begin_inset Note Note
-status collapsed
-
-\begin_layout Plain Layout
-The proposed place to locate the table is directly after its first reference
- in text.
-\end_layout
-
-\end_inset
-
-
-\begin_inset Float table
-placement b
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "tab:table1"
-
-\end_inset
-
-A table that fits into a single column of a two-column layout.
- Note that REV\SpecialChar TeX
-
-\begin_inset space ~
-\end_inset
-
-4 adjusts the intercolumn spacing so that the table fills the entire width
- of the column.
- Table captions are numbered automatically.
- This table illustrates left-, center-, decimal- and right-aligned columns,
- along with the use of the 
-\family typewriter
-ruledtabular
-\family default
- environment which sets the Scotch (double) rules above and below the alignment,
- per APS style.
- 
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Ruled Table
-\begin_inset Tabular
-<lyxtabular version="3" rows="4" columns="3">
-<features tabularvalignment="middle">
-<column alignment="left" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="right" valignment="top">
-<row>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-Left
-\begin_inset Foot
-status collapsed
-
-\begin_layout Plain Layout
-
-\family roman
-Note a.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-Centered
-\begin_inset Foot
-status open
-
-\begin_layout Plain Layout
-
-\family roman
-Note b.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell multicolumn="1" alignment="none" valignment="top" usebox="none" special="c">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-Decimal
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-colrule
-\end_layout
-
-\end_inset
-
- 1 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="right" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-3.001 
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-10 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-20 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="right" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-30 
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-100 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-200 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="right" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-300.0 
-\end_layout
-
-\end_inset
-</cell>
-</row>
-</lyxtabular>
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-and Fig.
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:epsart"
-
-\end_inset
-
-.
-\begin_inset Float figure
-placement b
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset Box Boxed
-position "t"
-hor_pos "c"
-has_inner_box 0
-inner_pos "t"
-use_parbox 0
-use_makebox 0
-width ""
-special "none"
-height "1in"
-height_special "totalheight"
-thickness "0.4pt"
-separation "3pt"
-shadowsize "4pt"
-framecolor "black"
-backgroundcolor "none"
-status open
-
-\begin_layout Plain Layout
-replace this bix with an image
-\end_layout
-
-\end_inset
-
-
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:epsart"
-
-\end_inset
-
- A figure caption.
- The figure captions are automatically numbered.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Section
-Floats: Figures, Tables, Videos, etc.
-\end_layout
-
-\begin_layout Standard
-The typical content of a figure is an image of some kind; that of a table
- is an alignment.
-\begin_inset Float figure
-wide true
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset Box Boxed
-position "t"
-hor_pos "c"
-has_inner_box 0
-inner_pos "t"
-use_parbox 0
-use_makebox 0
-width ""
-special "none"
-height "1in"
-height_special "totalheight"
-thickness "0.4pt"
-separation "3pt"
-shadowsize "4pt"
-framecolor "black"
-backgroundcolor "none"
-status open
-
-\begin_layout Plain Layout
-replace this bix with an image
-\end_layout
-
-\end_inset
-
-
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:wide"
-
-\end_inset
-
-This is a 
-\family sans
-Figure*
-\family default
- environment that spans the page in 
-\family typewriter
-twocolumn
-\family default
- formatting.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float table
-wide true
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "tab:table3"
-
-\end_inset
-
-This is a wide table that spans the full page width in a two-column layout.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Ruled Table
-\begin_inset Tabular
-<lyxtabular version="3" rows="4" columns="5">
-<features tabularvalignment="middle">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<row>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell multicolumn="1" alignment="none" valignment="top" usebox="none" special="c">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $D_{4h}^{1}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell multicolumn="2" alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell multicolumn="1" alignment="none" valignment="top" usebox="none" special="c">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $D_{4h}^{5}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell multicolumn="2" alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Ion
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-1st alternative
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2nd alternative
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-lst alternative 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2nd alternative
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Mn
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $(2g)$
-\end_inset
-
-
-\begin_inset Foot
-status collapsed
-
-\begin_layout Plain Layout
-The 
-\begin_inset Formula $z$
-\end_inset
-
- parameter of these positions is 
-\begin_inset Formula $z\sim\frac{1}{4}$
-\end_inset
-
-.
-\end_layout
-
-\end_inset
-
- 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $(a)+(b)+(c)+(d)$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $(4e)$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $(2a)+(2b)$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Cl
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $(a)+(b)+(c)+(d)$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $(2g)$
-\end_inset
-
-
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-footnotemark[1]
-\end_layout
-
-\end_inset
-
- 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $(4e)^{\text{a}}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="none" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-</row>
-</lyxtabular>
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-The best place to locate a figure or table is immediately following its
- first reference in text; this sample document illustrates this practice
- for Fig.
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:epsart"
-
-\end_inset
-
-, which shows a figure that is small enough to fit in a single column.
-\end_layout
-
-\begin_layout Standard
-In exceptional cases, you will need to move the float earlier in the document,
- as was done with Table
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:table3"
-
-\end_inset
-
-: \SpecialChar LaTeX
-'s float placement algorithms need to know about a full-page-width float
- earlier.
-\end_layout
-
-\begin_layout Standard
-Fig.
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:wide"
-
-\end_inset
-
- has content that is too wide for a single column, so the 
-\family typewriter
-Figure*
-\family default
- environment has been used.
-\end_layout
-
-\begin_layout Standard
-The doubled (or Scotch) rules that appear at the top and bottom of a table
- can be achieved enclosing the table within a 
-\family typewriter
-Ruled
-\begin_inset space ~
-\end_inset
-
-Table
-\family default
- environment.
- Tables
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:table1"
-
-\end_inset
-
-, 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:table3"
-
-\end_inset
-
-, and 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:table2"
-
-\end_inset
-
-
-\begin_inset Float table
-placement b
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "tab:table2"
-
-\end_inset
-
- A table with numerous columns that still fits into a single column.
- Here, several entries share the same footnote.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Ruled Table
-\begin_inset Tabular
-<lyxtabular version="3" rows="7" columns="8">
-<features tabularvalignment="middle">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<row>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $r_{c}$
-\end_inset
-
- (Å)
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $r_{0}$
-\end_inset
-
- (Å)
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $\kappa r_{0}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $r_{c}$
-\end_inset
-
- (Å) 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $r_{0}$
-\end_inset
-
- (Å)
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $\kappa r_{0}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Cu
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.800 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-14.10 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2.550 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Sn
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-footnotemark[1]
-\end_layout
-
-\end_inset
-
- 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.680 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-1.870 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-3.700 
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Ag
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.990 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-15.90 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2.710 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Pb
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-footnotemark[2]
-\end_layout
-
-\end_inset
-
- 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.450 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-1.930 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-3.760 
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Au
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-1.150 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-15.90 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2.710 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Ca
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-footnotemark[3]
-\end_layout
-
-\end_inset
-
- 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.750 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2.170 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-3.560 
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Mg
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.490 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-17.60 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-3.200 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Sr
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-footnotemark[4]
-\end_layout
-
-\end_inset
-
- 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.900 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2.370 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-3.720 
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Zn
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.300 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-15.20 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2.970 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Li
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-footnotemark[2]
-\end_layout
-
-\end_inset
-
- 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.380 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-1.730 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2.830 
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Cd
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.530 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-17.10 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-3.160 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Na
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-footnotemark[5]
-\end_layout
-
-\end_inset
-
- 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.760 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2.110 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-3.120 
-\end_layout
-
-\end_inset
-</cell>
-</row>
-</lyxtabular>
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-footnotetext[1]{
-\end_layout
-
-\end_inset
-
-Here's the first, from Ref.
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset Flex Online cite
-status open
-
-\begin_layout Plain Layout
-misc-full
-\end_layout
-
-\end_inset
-
-.
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-}
-\end_layout
-
-\end_inset
-
- 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-footnotetext[2]{
-\end_layout
-
-\end_inset
-
-Here's the second.
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-}
-\end_layout
-
-\end_inset
-
- 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-footnotetext[3]{
-\end_layout
-
-\end_inset
-
-Here's the third.
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-}
-\end_layout
-
-\end_inset
-
- 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-footnotetext[4]{
-\end_layout
-
-\end_inset
-
-Here's the fourth.
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-}
-\end_layout
-
-\end_inset
-
- 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-footnotetext[5]{
-\end_layout
-
-\end_inset
-
-And etc.
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-}
-\end_layout
-
-\end_inset
-
- 
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-show various effects.
- Table
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:table3"
-
-\end_inset
-
- is a wide table, set with the 
-\family typewriter
-Table*
-\family default
- environment.
- Long tables may need to break across pages.
- The most straightforward way to accomplish this is to specify the option
- 
-\family sans
-Here
-\begin_inset space ~
-\end_inset
-
-definitely
-\family default
- in the float settings.
- Alternatively one can use longtables, see sec.
-\begin_inset space \space{}
-\end_inset
-
-
-\emph on
-Longtables
-\emph default
- of \SpecialChar LyX
-'s 
-\emph on
-EmbeddedObjects
-\emph default
- manual.
-\end_layout
-
-\begin_layout Standard
-There are two methods for setting footnotes within a table (these footnotes
- will be displayed directly below the table rather than at the bottom of
- the page or in the bibliography).
- The easiest and preferred method is just to use a normal footnote inset.
- This will automatically enumerate the footnotes with lowercase roman letters.
- However, it is sometimes necessary to have multiple entries in the table
- share the same footnote.
- In this case, there is no choice but to manually create the footnotes using
- the \SpecialChar LaTeX
--command 
-\series bold
-
-\backslash
-footnotemark
-\series default
-, see sec.
-\begin_inset space \space{}
-\end_inset
-
-
-\emph on
-Footnotes
-\emph default
- of \SpecialChar LyX
-'s 
-\emph on
-EmbeddedObjects
-\emph default
- manual.
- Use tables
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:table1"
-
-\end_inset
-
- and 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:table2"
-
-\end_inset
-
- for examples.
-\end_layout
-
-\begin_layout Standard
-Video
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "vid:PRSTPER.4.010101"
-
-\end_inset
-
- illustrates several features new with REV\SpecialChar TeX
-4.1, starting with the 
-\family typewriter
-video
-\family default
- environment, which is in the same category with 
-\family typewriter
-figure
-\family default
- and 
-\family typewriter
-table
-\family default
-.
-\begin_inset Float video
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset CommandInset href
-LatexCommand href
-name "includegraphics{vid_1a}"
-target "http://prst-per.aps.org/multimedia/PRSTPER/v4/i1/e010101/e010101_vid1a.mpg"
-literal "false"
-
-\end_inset
-
-
-\begin_inset space \quad{}
-\end_inset
-
-
-\begin_inset CommandInset href
-LatexCommand href
-name "includegraphics{vid_1b}"
-target "http://prst-per.aps.org/multimedia/PRSTPER/v4/i1/e010101/e010101_vid1b.mpg"
-literal "false"
-
-\end_inset
-
-
-\begin_inset Flex Float Link
-status open
-
-\begin_layout Plain Layout
-
-http://link.aps.org/multimedia/PRSTPER/v4/i1/e010101
-\end_layout
-
-\end_inset
-
-
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "vid:PRSTPER.4.010101"
-
-\end_inset
-
-Students explain their initial idea about Newton's third law to a teaching
- assistant.
- Clip (a): same force.
- Clip (b): move backwards.
- 
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-The \SpecialChar LaTeX
--command 
-\series bold
-
-\backslash
-setfloatlink
-\series default
- causes the title of the video to be a hyperlink to the indicated URL; it
- may be used with any environment that can have a caption.
-\end_layout
-
-\begin_layout Standard
-
-\shape italic
-Physical Review
-\shape default
- style requires that the initial citation of figures or tables be in numerical
- order in text, so don't cite Fig.
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:wide"
-
-\end_inset
-
- until Fig.
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:epsart"
-
-\end_inset
-
- has been cited.
-\end_layout
-
-\begin_layout Acknowledgments
-We wish to acknowledge the support of the author community in using REV\SpecialChar TeX
-,
- offering suggestions and encouragement, testing new versions, ….
- 
-\end_layout
-
-\begin_layout Section
-\start_of_appendix
-Appendixes
-\end_layout
-
-\begin_layout Standard
-If there is only one appendix, then the letter 
-\begin_inset Quotes eld
-\end_inset
-
-A
-\begin_inset Quotes erd
-\end_inset
-
- should not appear.
- This is suppressed by using the star version of the appendix command: 
-\series bold
-
-\backslash
-appendix*
-\series default
- instead of 
-\series bold
-
-\backslash
-appendix
-\end_layout
-
-\begin_layout Standard
-This is not yet supported by \SpecialChar LyX
- so that you have to do that manually in the
- exported \SpecialChar LaTeX
--file.
-\end_layout
-
-\begin_layout Section
-A little more on appendixes
-\end_layout
-
-\begin_layout Standard
-
-\end_layout
-
-\begin_layout Standard
-Note the equation number in an appendix: 
-\begin_inset Formula 
-\begin{equation}
-E=mc^{2}.
-\end{equation}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsection
-\begin_inset CommandInset label
-LatexCommand label
-name "app:subsec"
-
-\end_inset
-
-A subsection in an appendix
-\end_layout
-
-\begin_layout Standard
-You can use a subsection or subsubsection in an appendix.
- Note the numbering: we are now in Appendix
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "app:subsec"
-
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-Note the equation numbers in this appendix, produced with the subequations
- environment: 
-\begin_inset Flex Subequations
-status open
-
-\begin_layout Plain Layout
-\begin_inset Formula 
-\begin{eqnarray}
-E & = & mc,\label{appa}\\
-E & = & mc^{2},\label{appb}\\
-E & \agt & mc^{3}.\label{appc}
-\end{eqnarray}
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
- They turn out to be Eqs.
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand eqref
-reference "appa"
-
-\end_inset
-
-, 
-\begin_inset CommandInset ref
-LatexCommand eqref
-reference "appb"
-
-\end_inset
-
-, and 
-\begin_inset CommandInset ref
-LatexCommand eqref
-reference "appc"
-
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Click on the following inset to add your Bib\SpecialChar TeX
- file (and replace 
-\begin_inset Quotes eld
-\end_inset
-
-apssamp
-\begin_inset Quotes erd
-\end_inset
-
-).
- Load as style file either 
-\emph on
-apsrev4-1.bst
-\emph default
- Physical Review or 
-\emph on
-apsrmp4-1.bst
-\emph default
- for Reviews of Modern Physics.
-\end_layout
-
-\end_inset
-
-
-\begin_inset CommandInset bibtex
-LatexCommand bibtex
-bibfiles "xampl"
-options "default"
-
-\end_inset
-
-
 \end_layout
 
 \end_body

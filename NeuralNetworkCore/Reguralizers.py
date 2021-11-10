@@ -57,9 +57,11 @@ regularizers = {
 
 
 class EarlyStopping:
-
+    @staticmethod
+    def default():
+        return 'loss', 'growth', 3, 1e-2
     def __init__(self, monitor='loss', mode='growth', patience=3, tolerance=1e-2):
-        self.__possible_modes = ['growth', 'invariant', 'absolute_growth']
+        self.__possible_modes = ['growth', 'stationary', 'absolute_growth']
         self.__possible_monitors = ['loss', 'val']
         self.__tolerance = tolerance
         self.__patience = patience
@@ -111,7 +113,7 @@ class EarlyStopping:
             if self.__mode == 'growth':
                 if x > first:
                     counter += 1
-            if self.__mode == 'invariant':
+            if self.__mode == 'stationary':
                 if np.abs(np.subtract(x, first)) < self.__tolerance:
                     counter += 1
         if counter == self.__patience:

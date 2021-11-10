@@ -1,10 +1,13 @@
-import tqdm
-
 from NeuralNetworkCore.Optimizers import *
-from NeuralNetworkCore.Reguralizers import EarlyStopping
+from NeuralNetworkCore.Reguralizers import EarlyStopping, regularizers
 
 
 class Model:
+
+    @staticmethod
+    def compile_default():
+        return 'sgd', 'squared', 'mee'
+
     def __init__(self, name="NN"):
         self.__name = name
         self.__layers = []
@@ -149,9 +152,15 @@ class Model:
         print('° Model Configuration')
         for x in self.__layers:
             if x.type == 'dense':
-                print('° Dense Layer: '+str(x.n_units)+' units °')
+                print('° Dense Layer: ' + str(x.input_dimension) + ' inputs °')
+                print('° Dense Layer: ' + str(x.n_units) + ' units °')
+                print('° Dense Layer: ' + str(x.weights.shape) + ' internal dims °')
+                if x.regularizer != None:
+                    print('° Regularizer: ' + list(regularizers.keys())[
+                        list(regularizers.values()).index(x.regularizer)] + ' °')
+                    print('° Regularizer param: ' + str(x.regularizer_param) + ' °')
             elif x.type == 'drop':
-                print('° Dropout Layer: '+str(x.probability*100)+'% °')
+                print('° Dropout Layer: ' + str(x.probability * 100) + '% °')
         print("°°°°°°°°°°°°°°°°°°°°°")
 
     def get_empty_struct(self):
@@ -192,7 +201,7 @@ class Model:
                 output = self.layers[layer].forward_pass(net_input)
             return output
 
-    def compile(self, optimizer='sgd', loss=None, metrics=None, early_stopping=False, patience=3, tolerance=1e-2,
+    def compile(self, optimizer='sgd', loss='squared', metrics='mee', early_stopping=False, patience=3, tolerance=1e-2,
                 monitor='loss', mode='growth'):
         """
         Prepares the network for training by assigning an optimizer to it and setting its parameters
@@ -209,18 +218,18 @@ class Model:
         :param lambd: (float) regularization parameter
         :param reg_type: (string) regularization type
         """
-        latest_units=0
-        for index,layer in enumerate(self.layers):
+        latest_units = 0
+        for index, layer in enumerate(self.layers):
 
-            if layer.type=='dense':
-                if index==0:
+            if layer.type == 'dense':
+                if index == 0:
                     layer.set_input_shape(self.input_shape)
                     layer.compile()
-                    latest_units=layer.n_units
+                    latest_units = layer.n_units
                 else:
                     layer.set_input_shape(latest_units)
                     layer.compile()
-
+                    latest_units = layer.n_units
 
         if isinstance(optimizer, str):
             self.optimizer = optimizers[optimizer]
@@ -259,49 +268,26 @@ class Model:
         self.training_targets = training_targets
         self.epochs = epochs
         self.batch_size = batch_size
-        # use validation data
-        # if val_x is not None and val_y is not None:
-        #     if val_split != 0:
-        #         warnings.warn(f"A validation split was given, but instead val_x and val_y will be used")
-        #     val_x, val_y = np.array(val_x), np.array(val_y)
-        #     n_patterns = val_x.shape[0] if len(val_x.shape) > 1 else 1
-        #     n_targets = val_y.shape[0] if len(val_y.shape) > 1 else 1
-        #     if n_patterns != n_targets:
-        #         raise AttributeError(f"Mismatching shapes {n_patterns} {n_targets}")
-        # else:
-        #     # use validation split
-        #     if val_split != 0:
-        #         if val_split < 0 or val_split > 1:
-        #             raise ValueError(f"val_split must be between 0 and 1, got {val_split}")
-        #         indexes = np.random.randint(low=0, high=len(training_data), size=math.floor(val_split * len(training_data)))
-        #         val_x = training_data[indexes]
-        #         val_y = training_targets[indexes]
-        #         training_data = np.delete(training_data, indexes, axis=0)
-        #         training_targets = np.delete(training_targets, indexes, axis=0)
 
-        # check that the shape of the target matches the net's architecture
+        if batch_size == 'all':
+            batch_size = 1
         if batch_size == None:
-            batch_size = len(training_data)
-            print("true")
+            batch_size=1
+
         target_len = training_targets.shape[1] if len(training_targets.shape) > 1 else 1
-        print("target_len")
-        print(target_len)
-        print(training_targets.shape)
         n_patterns = training_data.shape[0] if len(training_data.shape) > 1 else 1
-        print("n_patters")
-        print(n_patterns)
         n_targets = training_targets.shape[0] if len(training_targets.shape) > 1 else 1
-        print("n_targets")
-        print(n_targets)
+
         if target_len != self.__layers[-1].n_units or n_patterns != n_targets or batch_size > n_patterns:
             raise AttributeError(f"Mismatching shapes")
 
-        return self.optimizer.optimization_process(self, training_data, training_targets, epochs=self.epochs,
+        return self.optimizer.optimization_process(self, train_dataset=training_data, train_labels=training_targets,
+                                                   epochs=self.epochs,
                                                    batch_size=self.batch_size, shuffle=shuffle,
                                                    validation=validation_data, early_stopping=self.__early_stopping,
                                                    check_stop=self.__check_stop)
 
-    def predict(self, prediction_input, disable_tqdm=True):
+    def predict(self, prediction_input):
         """
         Computes the outputs for a batch of patterns, useful for testing w/ a blind test set
         :param net_input: batch of input patterns
@@ -315,7 +301,7 @@ class Model:
             predictions.append(self.forward(net_input=single_input, training=False))
         return np.array(predictions)
 
-    def evaluate(self, targets, metric, loss, net_outputs=None, net_input=None, disable_tqdm=True):
+    def evaluate(self, validation_data, targets, metric=None, loss=None):
         """
         Performs an evaluation of the network based on the targets and either the pre-computed outputs ('net_outputs')
         or the input data ('net_input'), on which the net will first compute the output.
@@ -328,10 +314,12 @@ class Model:
         :return: the loss and the metric
         :param disable_tqdm: (bool) if True disables the progress bar
         """
-        if net_outputs is None:
-            if net_input is None:
-                raise AttributeError("Both net_outputs and net_input cannot be None")
-            net_outputs = self.predict(net_input, disable_tqdm=disable_tqdm)
+        if metric == None:
+            metric = self.metrics
+        if loss == None:
+            loss = self.loss
+
+        net_outputs = self.predict(validation_data)
         metric_score = np.zeros(self.layers[-1].n_units)
         loss_scores = np.zeros(self.layers[-1].n_units)
         for x, y in zip(net_outputs, targets):

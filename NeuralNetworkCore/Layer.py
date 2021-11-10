@@ -87,7 +87,7 @@ class Dense(Layer):
 
     @activation_function.setter
     def activation_function(self, activation_function):
-        self.__activation_function = activation_function
+        self.__activation_function = activation_functions[activation_function]
 
     @property
     def act(self):
@@ -117,9 +117,40 @@ class Dense(Layer):
     def regularizer(self):
         return self.__regularizer
 
+    @regularizer.setter
+    def regularizer(self, regularizer):
+        if isinstance(regularizer, Function):
+            self.__regularizer = regularizer
+        else:
+            self.__regularizer = regularizers[regularizer]
+
     @property
     def regularizer_param(self):
         return self.__regularizer_param
+
+    @regularizer_param.setter
+    def regularizer_param(self, regularizer_param):
+        self.__regularizer_param = regularizer_param
+
+    @property
+    def weight_initializer(self):
+        return self.__weight_initializer
+
+    @weight_initializer.setter
+    def weight_initializer(self, weight_initializer):
+        self.__weight_initializer = weight_initializer
+
+    @property
+    def bias_initializer(self):
+        return self.__bias_initializer
+
+    @bias_initializer.setter
+    def bias_initializer(self, bias_initializer):
+        self.__bias_initializer = bias_initializer
+    @property
+    def input_dimension(self):
+        return self.__input_dimension
+
 
     def set_input_shape(self,value):
         self.__input_dimension=value
@@ -157,6 +188,7 @@ class Dense(Layer):
         for i in range(self.__input_dimension):
             for j in range(self.__n_units):
                 self.__gradient_w[i][j] = -delta[j] * self.__inputs[i]
+
         # the i-th row of the weights matrix corresponds to the vector formed by the i-th weight of each layer's unit
         new_upstream_delta = [np.dot(delta, self.weights[i]) for i in range(self.__input_dimension)]
         return new_upstream_delta, self.__gradient_w, self.__gradient_b

@@ -14,12 +14,12 @@ def binary_class_accuracy(predicted, target):
     """
     predicted = predicted[0]
     target = target[0]
-    if np.abs(predicted - target) < 0.3:
+    if np.abs(predicted - target) < 0.5:
         return [1]
     return [0]
 
 
-def euclidean_loss(predicted, target):
+def mean_euclidean_error(predicted, target):
     """
     Computes the euclidean error between the target vector and the output predicted by the net
     :param predicted: ndarray of shape (n, m) – Predictions for the n examples
@@ -61,35 +61,6 @@ def true_false_positive(predicted, target):
     fpr = false_positive.sum() / (false_positive.sum() + true_negative.sum())
 
     return tpr, fpr
-
-
-# def auc(x, y):
-#     if x.shape[0] < 2:
-#         raise ValueError('At least 2 points are needed to compute'
-#                          ' area under curve, but x.shape = %s' % x.shape)
-#
-#     direction = 1
-#     dx = np.diff(x)
-#     if np.any(dx < 0):
-#         if np.all(dx <= 0):
-#             direction = -1
-#         else:
-#             raise ValueError("x is neither increasing nor decreasing "
-#                              ": {}.".format(x))
-#
-#     area = direction * np.trapz(y, x)
-#     return area
-#
-
-#
-# def roc_from_scratch(probabilities, y_test, partitions=100):
-#     roc = np.array([])
-#     for i in range(partitions + 1):
-#         predicted = np.greater_equal(probabilities, i / partitions).astype(int)
-#         tpr, fpr = true_false_positive(predicted, y_test)
-#         roc = np.append(roc, [fpr, tpr])
-#
-#     return roc.reshape(-1, 2)
 
 
 def mean_absolute_error(predicted, target):
@@ -141,12 +112,18 @@ def r2_score(predicted, target):
     return 1 - (squared_error(predicted, target) / mean_target)
 
 
-BinClassAcc = Function('bin_class_acc', binary_class_accuracy)
-Euclidean = Function('euclidean', euclidean_loss)
+BinClassAcc = Function('binary', binary_class_accuracy)
+MEE = Function('mee', mean_euclidean_error)
 Accuracy = Function('accuracy', accuracy)
+MSE = Function('mse',mean_squared_error)
+MAE = Function('mae', mean_absolute_error)
+R2 = Function('r2', r2_score)
 metrics = {
-    'bin_class_acc': BinClassAcc,
-    'euclidean': Euclidean,
+    'binary': BinClassAcc,
+    'mee': MEE,
     'accuracy': Accuracy,
-    'acc': Accuracy
+    'acc': Accuracy,
+    'mse': MSE,
+    'mae': MAE,
+    'r2': R2
 }
