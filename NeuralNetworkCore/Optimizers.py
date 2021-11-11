@@ -87,67 +87,78 @@ class StochasticGradientDescent(Optimizer):
 
     def optimization_process(self, model, train_dataset, train_labels, epochs=1, batch_size=1, shuffle=False,
                              validation=None, early_stopping=False, check_stop=None):
+        #Checking if the early sotpping parameter is set to true in order to stop the epcochs loop based on the
+        #validation curve
         if early_stopping == True and check_stop is None:
             raise AttributeError("CheckStop value is invalid")
         stop_variable = False
-
+        #Getting the loss function if this was a string or directly the function
         if isinstance(model.loss, str):
             self.loss_function = losses[model.loss]
         else:
             self.loss_function = model.loss
-
+        # Getting the metric function if this was a string or directly the function
         if isinstance(model.metrics, str):
             self.metric = metrics[model.metrics]
         else:
             self.metric = model.metrics
+        #checking the dimension of the batch division in order to divide the training in more batches and checking the
+        #consistency of the subdivision in order to avoid runtime errors
         if batch_size == None:
             batch_size = 1
         if batch_size== 'all':
             batch_size=len(train_dataset)
         train_dataset = train_dataset[np.newaxis, :] if len(train_dataset.shape) < 2 else train_dataset
         train_labels = train_labels[np.newaxis, :] if len(train_labels.shape) < 2 else train_labels
-
+        #Creating a dictionary of all the results of the training in order to let the user analyze the result of the
+        #training and possibly finetune the results
         values_dict = {'training_error': [],
                        'training_metrics': [],
                        'validation_error': [],
                        'validation_metrics': []}
-
+        #Creating an empty copy of my network in order to store each delta and backpropagate the error through each
+        # layer
         momentum_network = model.get_empty_struct()
+        #copy of the empty struct used to compute the delta based on the momentum
         partial_momentum_network = momentum_network
         current_val_error = 0
         epoch = 0
         pbar = tqdm(total=epochs)
         while epoch < epochs and not stop_variable:
-
+            #Loop through each epoch and check for the eraly stopping
             epoch_training_error = np.zeros(model.layers[-1].n_units)
             epoch_training_error_metric = np.zeros(model.layers[-1].n_units)
 
             if batch_size != train_dataset.shape[0] and shuffle:
+                #if training set divided in batches and shuffle set to true shuffle the data
                 indexes = list(range(len(train_dataset)))
                 np.random.shuffle(indexes)
                 train_dataset = train_dataset[indexes]
                 train_labels = train_labels[indexes]
 
             for batch_index in range(math.ceil(len(train_dataset) / batch_size)):
+                #for each batch compute the forward the inputs of the batch and computw the error and store all the ones
+                # in the batch in order to apply only once for the whole batch the error correction
                 start = batch_index * batch_size
                 end = start + batch_size
                 train_batch = train_dataset[start: end]
                 targets_batch = train_labels[start: end]
                 gradient_network = model.get_empty_struct()
                 for current_input, current_target in zip(train_batch, targets_batch):
+                    #compute the propagation for each single input
                     net_outputs = model.forward(net_input=current_input, training=True)
 
-
+                    #Sum the loss over all the elements in the batch
                     epoch_training_error = np.add(epoch_training_error,
                                                   self.__loss_function.function(predicted=net_outputs,
                                                                                 target=current_target))
-
+                    #Sum the metric over all the elements in the batch
                     epoch_training_error_metric = np.add(epoch_training_error_metric,
                                                          self.__metric.function(predicted=net_outputs,
                                                                                 target=current_target))
-
+                    #compute the delta for the outmost layer
                     dErr_dOut = self.loss_function.derive(predicted=net_outputs, target=current_target)
-
+                    #accumulate all the deltas for each layer of the batch computation
                     gradient_network = model.propagate_back(dErr_dOut, gradient_network)
                 if self.nesterov:
                     # https://towardsdatascience.com/learning-parameters-part-2-a190bef2d12
@@ -161,7 +172,8 @@ class StochasticGradientDescent(Optimizer):
                             gradient_network[grad_net_index]['biases'],
                             partial_momentum_network[grad_net_index]['biases'])
                 for grad_net_index in range(len(model.dense_configuration)):
-
+                    #update the weights only of the dense layers and store the in a struct to then upadte the true
+                    # vector
                     layer_index = model.dense_configuration[grad_net_index]
 
                     gradient_network[grad_net_index]['weights'] /= batch_size
@@ -176,7 +188,8 @@ class StochasticGradientDescent(Optimizer):
                                                                         delta_b)
 
                     if model.layers[layer_index].regularizer != None:
-
+                    #apply regularizers if the users specified some. These depende layer by layer so different layers
+                    # can have different regularizers
                         model.layers[layer_index].weights = np.subtract(
                             np.add(model.layers[layer_index].weights, momentum_network[grad_net_index]['weights']),
                             model.layers[layer_index].regularizer.derive(
@@ -193,6 +206,7 @@ class StochasticGradientDescent(Optimizer):
                     )
                     partial_momentum_network = momentum_network
             if validation is not None:
+                #If validation is required compute it and store the result of each epoch in the return dictionary
                 val_x = validation[0][np.newaxis, :] if len(validation[0].shape) < 2 else validation[0]
                 val_y = validation[1][np.newaxis, :] if len(validation[1].shape) < 2 else validation[1]
                 epoch_val_error, epoch_val_metric = model.evaluate(validation_data=val_x, targets=val_y)
@@ -206,6 +220,7 @@ class StochasticGradientDescent(Optimizer):
             epoch_training_error_metric = np.sum(epoch_training_error_metric) / len(epoch_training_error_metric)
             values_dict['training_metrics'].append(epoch_training_error_metric / len(train_dataset))
             if early_stopping:
+                #if early stopping is require evaluate if it is necessary to stop or not
                 if check_stop.monitor == 'loss':
                     stop_variable = check_stop.apply_stop(current_loss_error)
                 elif check_stop.monitor == 'val':
@@ -219,6 +234,7 @@ class StochasticGradientDescent(Optimizer):
 class RMSProp(Optimizer):
     """
     Root Mean Square Propagation
+    https://towardsdatascience.com/understanding-rmsprop-faster-neural-network-learning-62e116fcf29a
     """
 
     def __init__(self, learning_rate=0.01, momentum=0.1, rho=0.9):
@@ -392,6 +408,7 @@ class RMSProp(Optimizer):
 class Adam(Optimizer):
     """
     Adaptive Moment Estimation
+    https://arxiv.org/abs/1412.6980
     """
 
     def __init__(self, learning_rate=0.1, momentum=0.00001, beta1=0.9, beta2=0.999, epsilon=1e-8):
