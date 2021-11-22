@@ -9,22 +9,22 @@ class LoadCSVData:
         
         Methods
         ----      
-        loadCSV(path, file_name, size_for_split, save_to_file, save_to_file_path, column_names, column_for_lable):  \n
+        loadCSV(path, file_name, size_for_split, save_to_file, save_to_file_path, column_names, column_for_label):  \n
         saveNewFile(path, file_name, df):                                                                           \n
         printSets(X_train, X_test):                                                                                 \n
     """
      
-    def loadCSV(path, file_name, size_for_split = 1, save_to_file = False, save_to_file_path = None, column_names = None, column_for_lable = None):
+    def loadCSV(path, file_name, size_for_split = 1, save_to_file = False, save_to_file_path = None, column_names = None, column_for_label = None):
         """
         The method loadCSV recives a csv file and splits it in testing and training DataFrames
         :param path: the path for the csv file.
         :param file_name: the name for the .csv file.
         :param size_for_split: the float value to indicate the size for the test DataFrame 1 = 100%, 0.9 = 90% and so on.
-        :param save_to_file: a boolena value to indicate if the splitted DataSet has to be saved into separated files. (True to save - False not to save)
+        :param save_to_file: a boolean value to indicate if the splitted DataSet has to be saved into separated files. (True to save - False not to save)
         :param save_to_file_path: the path to save the new separated DataFrames (None no specific path - path string for specific path)  
         :param column_names: list of names for the .csv file columns. 
                     If the number of names are less then the columns or is None the code will assign a standard name equal to c+"number of column"  
-        :param column_for_lable: the identifier for the label(s) column(s)
+        :param column_for_label: the identifier for the label(s) column(s)
                     The input can be both the numerical index(es) or the string name(s) for the column(s)      
         :return: The splitted DataSets as different Dataframes. X_test and X_train for the actual data, y_test and y_train for the lables
     """
@@ -54,25 +54,25 @@ class LoadCSVData:
         #adding the headers to the dataframe
         df = pd.read_csv(path+file_name, sep=',', names = columns_id)
        
-        """The following block of code checks if the value for the lables have been passed as an int 
-            if the lables are passed as int the code looks for the string vesion in the column_names
-            and passes the int index to y for the lable selection and the string version for the x to make the drop
-            of the lable column(s)
+        """The following block of code checks if the value for the labels have been passed as an int 
+            if the labels are passed as int the code looks for the string vesion in the column_names
+            and passes the int index to y for the label selection and the string version for the x to make the drop
+            of the label column(s)
         """ 
         column_for_y_index = list()        
-        if isinstance(column_for_lable, int):           
-            column_for_y_index.append(column_for_lable)  
+        if isinstance(column_for_label, int):           
+            column_for_y_index.append(column_for_label)  
             flag = list()  
-            if isinstance(column_for_lable, list):        
-                for column_index in column_for_lable:
+            if isinstance(column_for_label, list):        
+                for column_index in column_for_label:
                     flag = columns_id[column_index]                   
             else:
-                flag = columns_id[column_for_lable]
-            column_for_lable = flag  
+                flag = columns_id[column_for_label]
+            column_for_label = flag  
         else:
             i=0
-            for column_lable in columns_id:
-                if column_lable == column_for_lable:
+            for column_label in columns_id:
+                if column_label == column_for_label:
                    column_for_y_index.append(i)
                 i+=1
             
@@ -81,7 +81,7 @@ class LoadCSVData:
             X = df
         else:           
             y = df.iloc[:,column_for_y_index]                              #defines the labels (rows or column) 
-            X = df.drop(column_for_lable, axis=1)                          #the dataframe except for the labels; axis is 1 for columns, 0 for rows
+            X = df.drop(column_for_label, axis=1)                          #the dataframe except for the labels; axis is 1 for columns, 0 for rows
              
         X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=size_for_split) #splits the dataset in test and train
        
@@ -129,8 +129,8 @@ class LoadCSVData:
         
 
 #the following code is for testing purpose only
-columns = ['a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8', 'a9', 'a10', 'a11', 'a12', 'a13']
-LoadCSVData.loadCSV("datasets\cup","\CUP-INTERNAL-TEST.csv", 0.5)     
+#columns = ['a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8', 'a9', 'a10', 'a11', 'a12', 'a13']
+#LoadCSVData.loadCSV("datasets\cup","\CUP-INTERNAL-TEST.csv", 0.5)     
 #LoadCSVData.loadCSV("datasets\cup","\CUP-INTERNAL-TEST.csv", 0.5, True, save_to_file_path=None)     
 
 
