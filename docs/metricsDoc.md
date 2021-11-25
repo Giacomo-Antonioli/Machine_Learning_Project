@@ -1,5 +1,26 @@
 # Metrics.py
 
+<p>
+<h2>
+Classes documentation list:
+</h2>
+<h3>
+
+0. [Home](/README.md)
+1. [Main.py](/docs/mainDoc.md) 
+2. [Model.py](/docs/ModelDoc.md)
+3. [Model_selection.py](/docs/model_selectionDoc.md)
+4. [Layer.py](/docs/layerDoc.md)
+5. [Optimizer.py](/docs/OptimizersDoc.md)
+6. [Metrics.py](/docs/metricsDoc.md)
+7. [LoadCVSData.py](/docs/loadCSVDataDoc.md)
+
+</h3>
+
+</p>
+
+## Metrics
+
 <h3>binary_class_accuracy</h3>
 <p>
 Params: (predicted, target)

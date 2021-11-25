@@ -14,6 +14,7 @@ from NeuralNetworkCore.Layer import Dense, Dropout
 from NeuralNetworkCore.Model import Model
 from NeuralNetworkCore.Optimizers import RMSProp,StochasticGradientDescent
 from NeuralNetworkCore.Validation.Model_selection import GridSearch
+from NeuralNetworkCore.Utils.LoadCSVData import LoadCSVData
 
 columns = ['class', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'Id']
 for monk in ['monks-1','monks-2','monks-3']:#,
@@ -21,17 +22,8 @@ for monk in ['monks-1','monks-2','monks-3']:#,
     monk_test= monk+ '.test'
 
     print(os.getcwd())
-    monk_dataset = pd.read_csv("./datasets/monks/"+str(monk_train), sep=' ', names=columns)
-    monk_dataset.set_index('Id', inplace=True)
-    labels = monk_dataset.pop('class')
-
-    monk_dataset = OneHotEncoder().fit_transform(monk_dataset).toarray().astype(np.float32)
-    monk_labels = labels.to_numpy()[:, np.newaxis]
-    monk_dataset_test = pd.read_csv("./datasets/monks/"+str(monk_test), sep=' ', names=columns)
-    monk_dataset_test.set_index('Id', inplace=True)
-    labels_test = monk_dataset_test.pop('class')
-    monk_dataset_test = OneHotEncoder().fit_transform(monk_dataset_test).toarray().astype(np.float32)
-    monk_labels_test = labels_test.to_numpy()[:, np.newaxis]
+    monk_dataset, monk_labels= LoadCSVData.loadCSV(path = "./datasets/monks/", file_name = str(monk_train), separator=' ', column_names=columns, column_for_label='class')   
+    monk_dataset_test, monk_labels_test= LoadCSVData.loadCSV(path = "./datasets/monks/", file_name = str(monk_test), separator=' ', column_names=columns, column_for_label='class')
 
     model = Model(monk_train)
     model.set_input_shape(17)

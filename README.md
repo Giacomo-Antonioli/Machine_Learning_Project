@@ -37,7 +37,7 @@ The following section of the document is a guide to install and clone this proje
  Software used
 </h2>
 
-To organize this project development and to make a better list of features in development, features that will be developed, changeLogs and other annotations the git hub project board at: <a href="https://github.com/Giacomo-Antonioli/Machine_Learning_Project/projects/1">ML-CM Project Board</a>
+To organize this project development and to make a better list of features in development, features that will be developed, changeLogs and other annotations the git hub project board has been used at: <a href="https://github.com/Giacomo-Antonioli/Machine_Learning_Project/projects/1">ML-CM Project Board</a>
 
 To develop this project the following has been used:
 
