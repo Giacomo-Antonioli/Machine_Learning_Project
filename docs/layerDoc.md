@@ -6,7 +6,7 @@ Classes documentation list:
 </h2>
 <h3>
 
-0. [Home](./README.md)
+0. [Home](README.md)
 1. [Main.py](./mainDoc.md) 
 2. [Model.py](./ModelDoc.md)
 3. [Model_selection.py](./model_selectionDoc.md)
