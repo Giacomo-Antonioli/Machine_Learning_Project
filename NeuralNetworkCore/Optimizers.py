@@ -33,7 +33,7 @@ class Optimizer:
         self.metric = metric
         self.stop_flag = stop_flag
         self.check_stop = None
-        self.values_dict = {
+        self.__values_dict = {
             'training_error': [],
             'training_metrics': [],
             'validation_error': [],
@@ -59,6 +59,14 @@ class Optimizer:
 
     def set_values_dict_element(self, index, value):
         self.__values_dict[index].append(value)
+
+    def reset_dict(self):
+        self.__values_dict = {
+            'training_error': [],
+            'training_metrics': [],
+            'validation_error': [],
+            'validation_metrics': []
+        }
 
     @property
     def type(self):
@@ -276,6 +284,7 @@ class Optimizer:
             self.stop_flag = self.check_stop.apply_stop(current_val_error)
 
     def do_epochs(self, validation, epochs, shuffle, early_stopping, optimizer):
+            self.reset_dict()
             current_val_error = 0
             epoch = 0
             self.pbar = tqdm(total=epochs)
@@ -586,3 +595,4 @@ optimizers = {
     'rmsprop': RMSProp,
     'adam': Adam
 }
+optimizers_attributes=['lr','momentum','loss_function','metric','beta1','beta2','epsilon','rho','nesterov']
