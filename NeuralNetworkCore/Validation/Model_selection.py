@@ -6,31 +6,38 @@
 #
 #  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 import itertools
+import multiprocessing
 import os
 import warnings
 
-import matplotlib.pyplot as plt
+
 import numpy as np
-import multiprocessing
+
 from NeuralNetworkCore.Model import Model
 from NeuralNetworkCore.Optimizers import optimizers, optimizers_attributes
 from NeuralNetworkCore.Reguralizers import EarlyStopping
 
-from multiprocessing import Process, Manager, Pool
-os.environ['WANDB_NAME']= 'Machine_Learning_Project'
-os.environ['WANDB_API_KEY']= 'local-94c8ff41420f1a793c98053287704ca383313390'
+os.environ['WANDB_NAME'] = 'Machine_Learning_Project'
+os.environ['WANDB_API_KEY'] = 'local-94c8ff41420f1a793c98053287704ca383313390'
 import wandb
+
+
 def get_key(my_dict, val):
     for key, value in my_dict.items():
         if val == value:
             return key
+
+
 class NoDaemonProcess(multiprocessing.Process):
     # make 'daemon' attribute always return False
     def _get_daemon(self):
         return False
+
     def _set_daemon(self, value):
         pass
+
     daemon = property(_get_daemon, _set_daemon)
+
 
 # We sub-class multiprocessing.pool.Pool instead of multiprocessing.Pool
 # because the latter is only a wrapper function, not a proper class.
@@ -51,12 +58,15 @@ class NoDaemonProcess(multiprocessing.Process):
 class NoDaemonContext(type(multiprocessing.get_context())):
     Process = NoDaemonProcess
 
+
 # We sub-class multiprocessing.pool.Pool instead of multiprocessing.Pool
 # because the latter is only a wrapper function, not a proper class.
 class NestablePool(multiprocessing.pool.Pool):
     def __init__(self, *args, **kwargs):
         kwargs['context'] = NoDaemonContext()
         super(NestablePool, self).__init__(*args, **kwargs)
+
+
 class ValidationTechnique:
     def __init__(self, name):
         self.__name = name
@@ -261,7 +271,7 @@ class GridSearch(HyperparametersSearch):
     def __init__(self, model, param_list):
         super().__init__('GridSearch')
         self.__model = model
-        self.__pool_size=4
+        self.__pool_size = 4
         self.__look_up_dict = {
             **dict.fromkeys(['epochs'], 'epochs'),
             **dict.fromkeys(['batchsize', 'bs'], 'batch_size'),
@@ -570,7 +580,7 @@ class GridSearch(HyperparametersSearch):
         self.best_model = self.__model
         self.__best_params = param_combination
 
-    def update_best_results(self,param_combination):
+    def update_best_results(self, param_combination):
         if self.__best_val is None:
             self.update_best(param_combination)
         if self.__current_metric == 'mee':
@@ -584,10 +594,8 @@ class GridSearch(HyperparametersSearch):
 
         experiments = args[0]
         cv = args[1]
-        print("########################################################################################")
-        print("\t\t\t" + str(cv))
         for outmost_index, param_combination in enumerate(experiments):
-            config=param_combination
+            config = param_combination
             wandb.init(
                 # Set entity to specify your username or team name
                 # ex: entity="carey",
@@ -605,14 +613,14 @@ class GridSearch(HyperparametersSearch):
             self.__model.compile(optimizer=self.__evaluated_optimizer, loss=self.__current_loss,
                                  metrics=self.__current_metric, early_stopping=self.__es, patience=self.__patience,
                                  tolerance=self.__tol, monitor=self.__monitor, mode=self.__es_mode)
-            #self.__model.showLayers()
+            # self.__model.showLayers()
 
             self.reset_results()
             if cv is not None and cv > 0:
                 for index, training_set in enumerate(self.__training_set[0]):
                     print('Fold[' + str(index + 1) + ']')
-                    print('trainingSet: '+str(len(training_set)))
-                    print('epochs: '+str(self.__epochs))
+                    print('trainingSet: ' + str(len(training_set)))
+                    print('epochs: ' + str(self.__epochs))
                     res = self.__model.fit(training_set, self.__training_set[1][index],
                                            validation_data=(
                                                self.__validation_set[0][index], self.__validation_set[1][index]),
@@ -620,7 +628,7 @@ class GridSearch(HyperparametersSearch):
                                            batch_size=self.__batch_size, shuffle=self.__shuffle)
 
                     if index == 0:
-                        print("setting: "+str(len(res['training_error'])))
+                        print("setting: " + str(len(res['training_error'])))
                         self.set_results(res)
                     else:
                         print("adding: " + str(len(res['training_error'])))
@@ -670,10 +678,9 @@ class GridSearch(HyperparametersSearch):
                         self.__best_tr_loss = self.results['training_error'][-1]
                         self.__best_params = param_combination
             for x in self.results['training_error']:
-                wandb.log({ "error": x})
+                wandb.log({"error": x})
         wandb.finish()
         return [self.results, self.__best_params]
-
 
     def fit(self, training_data, training_targets, epochs=None, batch_size=None, shuffle=None, cv=3,
             filename='./curr_dataset'):
@@ -714,11 +721,11 @@ class GridSearch(HyperparametersSearch):
         print("EVALUATING " + str(len(experiments)) + ' Combinations for a total of' + str(
             len(experiments) * self.__cv) + ' times.')
 
-        parallel_split = np.array_split(np.asarray(experiments),  self.__pool_size)
+        parallel_split = np.array_split(np.asarray(experiments), self.__pool_size)
         parallel_args = []
         for x in parallel_split:
             parallel_args.append((x, cv))
-        with NestablePool( self.__pool_size) as pool:
+        with NestablePool(self.__pool_size) as pool:
             result_pool = pool.map(self.internal_runs, parallel_args)
             pool.close()
             pool.join()

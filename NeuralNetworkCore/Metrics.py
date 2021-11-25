@@ -115,7 +115,7 @@ def r2_score(predicted, target):
 BinClassAcc = Function('binary', binary_class_accuracy)
 MEE = Function('mee', mean_euclidean_error)
 Accuracy = Function('accuracy', accuracy)
-MSE = Function('mse',mean_squared_error)
+MSE = Function('mse', mean_squared_error)
 MAE = Function('mae', mean_absolute_error)
 R2 = Function('r2', r2_score)
 metrics = {

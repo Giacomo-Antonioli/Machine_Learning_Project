@@ -19,12 +19,13 @@ For each variable there is a getter and setter.
 </p>
 
 ### SimpleHoldout extends ValidationTechnique
+
 <hr>
 <h3>split</h3>
 <p>
 Params: (self, *args)
 
- Split data in 3 parts (50% training, 25% validation, 25% test-set or with a percentage used defined)
+Split data in 3 parts (50% training, 25% validation, 25% test-set or with a percentage used defined)
 </p>
 
 <hr>
@@ -32,19 +33,20 @@ Params: (self, *args)
 <p>
 Params: (self, data, labels)
 
-  Split dataset into training and validation with a 65%-35% split.
+Split dataset into training and validation with a 65%-35% split.
 </p>
 
 ### KFold extends ValidationTechnique
 
-The idea behind k-fold cross-validation is to divide all the available data items into roughly equal-sized sets. Each set is used exactly once as the test set while the remaining data is used as the training set.
+The idea behind k-fold cross-validation is to divide all the available data items into roughly equal-sized sets. Each
+set is used exactly once as the test set while the remaining data is used as the training set.
 
 <hr>
 <h3>split</h3>
 <p>
 Params: (self, data, splits=5)
 
- Split the data in splits sets 
+Split the data in splits sets
 </p>
 
 ## HyperparametersSearch
@@ -61,12 +63,10 @@ For each variable there is a getter and setter.
 | self.__history = {}                   |                                |
 | self.__best_model = None              |                                |
 
-
 </p>
 <hr>
 
 ### GridSearch extends HyperparametersSearch
-
 
 <h3>Class variables</h3>
 <p>
@@ -111,7 +111,7 @@ Params: (self, param_combination, param, x)
 - param
 - x
 
-(?) 
+(?)
 </p>
 
 <hr>
@@ -128,5 +128,6 @@ Params: (self, training_data, training_targets, epochs=None, batch_size=None, sh
 - cv
 - filename='./curr_dataset'
 
-Function fitting is the process of training a neural network on a set of inputs in order to produce an associated set of target outputs. 
+Function fitting is the process of training a neural network on a set of inputs in order to produce an associated set of
+target outputs.
 </p>

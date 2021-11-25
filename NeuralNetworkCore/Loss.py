@@ -1,6 +1,7 @@
-import numpy as np
-from math import log2
 from math import log
+
+import numpy as np
+
 from NeuralNetworkCore.Function import DerivableFunction
 
 
@@ -25,17 +26,19 @@ def squared_loss_derivative(predicted, target):
     return np.subtract(predicted, target)
 
 
-def binary_cross_entropy(predicted,target):
-    sum=0
+def binary_cross_entropy(predicted, target):
+    sum = 0
     for i in range(len(target)):
-        sum+=target[i]*log(predicted[i])+(1-predicted[i])*log(1-predicted[i])
-    return - sum/len(target)
+        sum += target[i] * log(predicted[i]) + (1 - predicted[i]) * log(1 - predicted[i])
+    return - sum / len(target)
 
-def binary_cross_entropy_derivative(predicted,target):
-    sum=0
+
+def binary_cross_entropy_derivative(predicted, target):
+    sum = 0
     for i in range(len(target)):
-        sum+=target[i]-predicted[i]
-    return - sum/len(target)
+        sum += target[i] - predicted[i]
+    return - sum / len(target)
+
 
 # calculate categorical cross entropy
 def categorical_cross_entropy(actual, predicted):
@@ -47,11 +50,9 @@ def categorical_cross_entropy(actual, predicted):
     return -mean_sum_score
 
 
-
-
 SquaredLoss = DerivableFunction(squared_loss, squared_loss_derivative, 'squared')
-Binary_cross_entropy= DerivableFunction(binary_cross_entropy,binary_cross_entropy_derivative,'binary_cross_entropy')
+Binary_cross_entropy = DerivableFunction(binary_cross_entropy, binary_cross_entropy_derivative, 'binary_cross_entropy')
 losses = {
     'squared': SquaredLoss,
-    'binary_cross_entropy':Binary_cross_entropy
+    'binary_cross_entropy': Binary_cross_entropy
 }
