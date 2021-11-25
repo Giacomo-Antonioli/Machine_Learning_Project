@@ -242,14 +242,6 @@ class Model:
             self.__early_stopping = True
             self.__check_stop = EarlyStopping(monitor=monitor, mode=mode, patience=patience, tolerance=tolerance)
 
-        # self.__params = {**self.__params, **{'loss': loss, 'metric': metric, 'lr': lr, 'lr_decay': lr_decay,
-        #                                      'limit_step': limit_step, 'decay_rate': decay_rate,
-        #                                      'decay_steps': decay_steps, 'staircase': staircase, 'momentum': momentum,
-        #                                      'reg_type': reg_type, 'lambd': lambd}}
-        # self.__opt = optimizers[opt](net=self, loss=loss, metric=metric, lr=lr, lr_decay=lr_decay, limit_step=limit_step,
-        #                              decay_rate=decay_rate, decay_steps=decay_steps, staircase=staircase,
-        #                              momentum=momentum, reg_type=reg_type, lambd=lambd)
-
     def fit(self, training_data, training_targets, validation_data=None, epochs=1, batch_size=None, validation_split=0,
             shuffle=False):
         """
