@@ -7,7 +7,7 @@ Classes documentation list:
 <h3>
 
 0. [Home](/README.md)
-1. [Main.py](/docs/mainDoc.md) 
+1. [Main.py](./docs/mainDoc.md) 
 2. [Model.py](/docs/ModelDoc.md)
 3. [Model_selection.py](/docs/model_selectionDoc.md)
 4. [Layer.py](/docs/layerDoc.md)
