@@ -52,14 +52,16 @@ for each property is defined a getter and setter
 
 <p>
 
-<h3>.check_instances</h3> 
+<h3>.check_instances</h3>
 <p>
 
 <b>Params</b>:
- - early_stopping 
- - check_stop
 
-checks the validity of: <i>early_stopping</i>, <i>self.loss_function</i> and <i>self.metric</i>, and sets <i>check_stop</i>
+- early_stopping
+- check_stop
+
+checks the validity of: <i>early_stopping</i>, <i>self.loss_function</i> and <i>self.metric</i>, and sets <i>
+check_stop</i>
 
 </p>
 <hr>
@@ -67,9 +69,10 @@ checks the validity of: <i>early_stopping</i>, <i>self.loss_function</i> and <i>
 <p>
 
 <b>Params</b>:
- - train_dataset
- - train_labels
- - batch_size
+
+- train_dataset
+- train_labels
+- batch_size
 
 checks if <i>batch_size</i> is well setted and shapes <i>train_dataset</i> and <i>train_labels</i>
 
@@ -79,7 +82,8 @@ checks if <i>batch_size</i> is well setted and shapes <i>train_dataset</i> and <
 <p>
 
 <b>Params</b>:
- - batch_index
+
+- batch_index
 
 sets training_data into batches with given <i>batch_index</i>
 </p>
@@ -89,10 +93,11 @@ sets training_data into batches with given <i>batch_index</i>
 <p>
 
 <b>Params</b>:
- - train_dataset
- - train_labels
 
-shuffles the <i>training_dataset</i> and <i>train_labels</i> 
+- train_dataset
+- train_labels
+
+shuffles the <i>training_dataset</i> and <i>train_labels</i>
 
 </p>
 <hr>
@@ -101,8 +106,9 @@ shuffles the <i>training_dataset</i> and <i>train_labels</i>
 <p>
 
 <b>Params</b>:
- - input
- - target
+
+- input
+- target
 
 compute weights and biases using gradient with given <i>input</i> and <i>target</i> then apply back propagation
 </p>
@@ -120,34 +126,37 @@ initialize <i>self.training_error</i> and <i>self.training_erorr_metric</i> for 
 <p>
 
 <b>Param</b>:
- - validation
 
-compute <i>validation</i> error 
+- validation
+
+compute <i>validation</i> error
 </p>
 <hr>
 <h3> .apply_stopping </h3>
 <p>
 
 <b>Param</b>:
- - current_loss_error
- - current_val_error
-apply the stopping criteria to <i>current_loss_error</i> and <i>current_val_error</i>
+
+- current_loss_error
+- current_val_error apply the stopping criteria to <i>current_loss_error</i> and <i>current_val_error</i>
+
 </p>
 <hr>
 <h3> .do_epochs </h3>
 <p>
 
 <b>Params</b>:
- - validation
- - epochs
- - shuffle
- - early_stopping
- - optimizer
 
-do training epochs to the model with the given <i>optimizer</i>, checks if <i>shuffle</i> datasets and if <i>early_stopping</i> is applied
+- validation
+- epochs
+- shuffle
+- early_stopping
+- optimizer
+
+do training epochs to the model with the given <i>optimizer</i>, checks if <i>shuffle</i> datasets and if <i>
+early_stopping</i> is applied
 </p>
 <hr>
-
 
 # StochasticGradientDescent extends Optimizer
 
@@ -184,7 +193,8 @@ apply stochastic gradient descend
 <p>
 
 <b>Param</b>:
- - args
+
+- args
 
 apply SGD and nesterov, <i>args</i> is support parameter not used in SGD
 </p>
@@ -198,7 +208,8 @@ apply stochastic gradient descend
 <p>
 
 <b>Params</b>:
- - model
+
+- model
 
 initialize <i>model</i> and SGD matrices to optimize
 
@@ -209,17 +220,18 @@ initialize <i>model</i> and SGD matrices to optimize
 <p>
 
 <b>Param</b>:
- - model
- - train_dataset
- - train_labels
- - epochs
- - batch_size
- - shuffle
- - validation
- - early_stopping
- - check_stop
 
- process to apply SGD method to train the model
+- model
+- train_dataset
+- train_labels
+- epochs
+- batch_size
+- shuffle
+- validation
+- early_stopping
+- check_stop
+
+process to apply SGD method to train the model
 
 </p>
 
@@ -243,9 +255,10 @@ This class computes the gradient descend using RMSProp approach
 <p>
 
 <b>Param</B>:
- - model
 
- initialize <i>model</i> and RMSPROP matrices to optimize
+- model
+
+initialize <i>model</i> and RMSPROP matrices to optimize
 <hr>
 </p>
 
@@ -253,30 +266,30 @@ This class computes the gradient descend using RMSProp approach
 <p>
 
 <b>Param</B>:
- - args
 
- apply RMSPROP method for training model. <i>args</i> is a support param, not used here
+- args
+
+apply RMSPROP method for training model. <i>args</i> is a support param, not used here
 </p>
 <hr>
 <h3>.optimization_process</h3>
 <p>
 
 <b>Param</b>:
- - model
- - train_dataset
- - train_labels
- - epochs
- - batch_size
- - shuffle
- - validation
- - early_stopping
- - check_stop
 
- process to apply RMSPROP method to train the model
+- model
+- train_dataset
+- train_labels
+- epochs
+- batch_size
+- shuffle
+- validation
+- early_stopping
+- check_stop
+
+process to apply RMSPROP method to train the model
 
 </p>
-
-
 
 # Adam extends Optimizer
 
@@ -301,9 +314,10 @@ This class computes the gradient descend using ADAM approach
 <p>
 
 <b>Params</b>:
- - model
 
-  initialize <i>model</i> and ADAM matrices to optimize
+- model
+
+initialize <i>model</i> and ADAM matrices to optimize
 </p>
 
 <hr>
@@ -311,26 +325,28 @@ This class computes the gradient descend using ADAM approach
 <p>
 
 <b>Param</b>:
- - batch_index
 
- apply adam to model
+- batch_index
+
+apply adam to model
 </p>
 <hr>
 <h3>.optimization_process</h3>
 <p>
 
 <b>Params</b>:
- - model
- - train_dataset
- - train_labels
- - epochs
- - batch_size
- - shuffle
- - validation
- - early_stopping
- - check_stop
 
- process to apply ADAM method to train the model
+- model
+- train_dataset
+- train_labels
+- epochs
+- batch_size
+- shuffle
+- validation
+- early_stopping
+- check_stop
+
+process to apply ADAM method to train the model
 
 </p>
 

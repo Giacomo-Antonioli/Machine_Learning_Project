@@ -46,7 +46,6 @@ For each variable there is a getter and setter.
 | self.__check_stop = None              |                                                          |
 | self.__input_shape = 0                | Shape of the input data                                  |               
 
-
 </p>
 
 <hr>
@@ -54,7 +53,8 @@ For each variable there is a getter and setter.
 <p>
 Params: (self, object)
 
-This methods adds a new layer to the layers. It checks if the new layer is a dense layer as well; if it is adds the layer to the dense layers as well. 
+This methods adds a new layer to the layers. It checks if the new layer is a dense layer as well; if it is adds the
+layer to the dense layers as well.
 </p>
 
 <hr>
@@ -74,8 +74,7 @@ Params: (self, net_input, training)
 |param net_input    | Net's input vector/matrix      |
 |training           | Is currently training (?)      |
 
-Performs a forward pass on the whole Network.
-returns a net's output vector/matrix
+Performs a forward pass on the whole Network. returns a net's output vector/matrix
 </p>
 
 <hr>
@@ -88,8 +87,8 @@ Params: (self, optimizer='sgd', loss='squared', metrics='mee', early_stopping=Fa
 - loss: (str) the type of loss function
 - metric: (str) the type of metric to track (accuracy etc)
 
-- monitor:                        (?)        
-- mode:           (?)         
+- monitor:                        (?)
+- mode:           (?)
 
 Prepares the network for training by assigning an optimizer to it and setting its parameters
 </p>
@@ -105,7 +104,7 @@ Params: (self, training_data, training_targets, validation_data=None, epochs=1, 
 - batch_size: (integer) the size of the batch
 - epochs: (integer) number of epochs
 - val_split: percentage of training data to use as validation data (alternative to val_x and val_y)
-- shuffle: 
+- shuffle:
 
 Execute the training of the network
 </p>
@@ -115,10 +114,9 @@ Execute the training of the network
 <p>
 Params: (self, prediction_input)
 
-- prediction_input: batch of input patterns                  
+- prediction_input: batch of input patterns
 
- Computes the outputs for a batch of patterns, useful for testing w/ a blind test set.
- Returns an array of net's outputs
+Computes the outputs for a batch of patterns, useful for testing w/ a blind test set. Returns an array of net's outputs
 </p>
 
 <hr>
@@ -130,10 +128,9 @@ Params: (self, validation_data, targets, metric=None, loss=None)
 - metric: the metric to track for the evaluation
 - loss: the loss to track for the evaluation
 
-
- Performs an evaluation of the network based on the targets and either the pre-computed outputs ('net_outputs')
- or the input data ('net_input'), on which the net will first compute the output.
- If both 'predicted' and 'net_input' are None, an AttributeError is raised
+Performs an evaluation of the network based on the targets and either the pre-computed outputs ('net_outputs')
+or the input data ('net_input'), on which the net will first compute the output. If both 'predicted' and 'net_input' are
+None, an AttributeError is raised
 
 Returns the loss and the metric
 </p>
@@ -144,7 +141,8 @@ Returns the loss and the metric
 Params: (self, dErr_dOut, gradient_network)
 
 - dErr_dOut: derivatives of the error wrt the outputs
-- gradient_network: a structure with the same topology of the neural network in question, but used to store the gradients. It will be updated and returned back to the caller
+- gradient_network: a structure with the same topology of the neural network in question, but used to store the
+  gradients. It will be updated and returned back to the caller
 
 Propagates back the error to update each layer's gradient, returns the updated grad_net
 

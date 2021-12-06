@@ -1,6 +1,8 @@
-from tqdm import tqdm
-import numpy as np
 import math
+
+import numpy as np
+from tqdm import tqdm
+
 from NeuralNetworkCore.Loss import losses
 from NeuralNetworkCore.Metrics import metrics
 
@@ -48,7 +50,7 @@ class Optimizer:
         self.epoch_training_error = ''
         self.epoch_training_error_metric = ''
 
-    #region Optimezer properties
+    # region Optimezer properties
     @property
     def values_dict(self):
         return self.__values_dict
@@ -190,7 +192,7 @@ class Optimizer:
     def epoch_training_error_metric(self, epoch_training_error_metric):
         self.__epoch_training_error_metric = epoch_training_error_metric
 
-    #endregion
+    # endregion
 
     def check_instances(self, early_stopping=False, check_stop=None):
         # function to check consistency of variables
@@ -284,30 +286,30 @@ class Optimizer:
             self.stop_flag = self.check_stop.apply_stop(current_val_error)
 
     def do_epochs(self, validation, epochs, shuffle, early_stopping, optimizer):
-            self.reset_dict()
-            current_val_error = 0
-            epoch = 0
-            self.pbar = tqdm(total=epochs)
-            while epoch < epochs and not self.stop_flag:
-                self.init_epoch_training_error()
-                if self.batch_size != self.train_dataset.shape[0] and shuffle:
-                    self.shuffle_data(self.train_dataset, self.train_labels)
+        self.reset_dict()
+        current_val_error = 0
+        epoch = 0
+        self.pbar = tqdm(total=epochs)
+        while epoch < epochs and not self.stop_flag:
+            self.init_epoch_training_error()
+            if self.batch_size != self.train_dataset.shape[0] and shuffle:
+                self.shuffle_data(self.train_dataset, self.train_labels)
 
-                for batch_index in range(math.ceil(len(self.train_dataset) / self.batch_size)):
-                    train_batch, targets_batch = self.set_batches(batch_index)
-                    self.gradient_network = self.model.get_empty_struct()
-                    for current_input, current_target in zip(train_batch, targets_batch):
-                        self.fit_with_gradient(current_input, current_target)
-                    optimizer(batch_index)
-                if validation is not None:
-                    current_val_error = self.validate(validation)
+            for batch_index in range(math.ceil(len(self.train_dataset) / self.batch_size)):
+                train_batch, targets_batch = self.set_batches(batch_index)
+                self.gradient_network = self.model.get_empty_struct()
+                for current_input, current_target in zip(train_batch, targets_batch):
+                    self.fit_with_gradient(current_input, current_target)
+                optimizer(batch_index)
+            if validation is not None:
+                current_val_error = self.validate(validation)
 
-                current_loss_error = self.compute_training_error()
-                if early_stopping:
-                    self.apply_stopping(current_loss_error, current_val_error)
-                epoch += 1
-                self.pbar.update(1)
-            self.pbar.close()
+            current_loss_error = self.compute_training_error()
+            if early_stopping:
+                self.apply_stopping(current_loss_error, current_val_error)
+            epoch += 1
+            self.pbar.update(1)
+        self.pbar.close()
 
 
 class StochasticGradientDescent(Optimizer):
@@ -328,7 +330,7 @@ class StochasticGradientDescent(Optimizer):
         self.partial_momentum_network = ''
         self.nesterov = nesterov
 
-    #region SGD properties
+    # region SGD properties
     @property
     def nesterov(self):
         return self.__nesterov
@@ -362,7 +364,8 @@ class StochasticGradientDescent(Optimizer):
     @partial_momentum_network.setter
     def partial_momentum_network(self, partial_momentum_network):
         self.__partial_momentum_network = partial_momentum_network
-    #endregion
+
+    # endregion
 
     def apply_nesterov(self):
         # https://towardsdatascience.com/learning-parameters-part-2-a190bef2d12
@@ -442,7 +445,7 @@ class RMSProp(Optimizer):
         self.__epsilon = 1e-8
         self.rmsprop_network = ''
 
-    #region RMSProp properties
+    # region RMSProp properties
     @property
     def rho(self):
         return self.__rho
@@ -454,7 +457,8 @@ class RMSProp(Optimizer):
     @rmsprop_network.setter
     def rmsprop_network(self, rmsprop_network):
         self.__rmsprop_network = rmsprop_network
-    #endregion
+
+    # endregion
 
     def init_rms_network_with_model(self, model):
         self.model = model
@@ -510,7 +514,7 @@ class Adam(Optimizer):
         self.momentum_network_1 = ''
         self.momentum_network_2 = ''
 
-    #region Adam properties
+    # region Adam properties
     @property
     def momentum(self):
         return self.__momentum
@@ -536,7 +540,8 @@ class Adam(Optimizer):
     @momentum_network_2.setter
     def momentum_network_2(self, momentum_network_2):
         self.__momentum_network_2 = momentum_network_2
-    #endregion
+
+    # endregion
 
     def init_Adam_network_with_model(self, model):
         self.model = model
@@ -595,4 +600,4 @@ optimizers = {
     'rmsprop': RMSProp,
     'adam': Adam
 }
-optimizers_attributes=['lr','momentum','loss_function','metric','beta1','beta2','epsilon','rho','nesterov']
+optimizers_attributes = ['lr', 'momentum', 'loss_function', 'metric', 'beta1', 'beta2', 'epsilon', 'rho', 'nesterov']

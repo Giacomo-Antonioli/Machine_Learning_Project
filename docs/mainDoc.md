@@ -27,8 +27,7 @@ The following are methods in the main.py explained
 <p> 
 something = pd.read_csv(directory + file, sep=',', names=col_names, skiprows=range(7), usecols=range(1, 11))
 
-cvs = comma separated values
-pd.read_csv() = Pandas read_csv() function imports a CSV file to DataFrame format.
+cvs = comma separated values pd.read_csv() = Pandas read_csv() function imports a CSV file to DataFrame format.
 
 | Method property      | Explanation                                               |  
 | -------------------- | --------------------------------------------------------- |
@@ -45,12 +44,12 @@ pd.read_csv() = Pandas read_csv() function imports a CSV file to DataFrame forma
 <p> 
 devset_x = tr_data.to_numpy(dtype=np.float32)
 
-Convert the DataFrame to a NumPy array. By default, the dtype of the returned array will be the common NumPy dtype of all types in the DataFrame.
+Convert the DataFrame to a NumPy array. By default, the dtype of the returned array will be the common NumPy dtype of
+all types in the DataFrame.
 
 | Method property      | Explanation                                               |  
 | -------------------- | --------------------------------------------------------- |
 | dtype=np.float32     | The dtype to pass to numpy.asarry()                       |  
-
 
 </p>
 
