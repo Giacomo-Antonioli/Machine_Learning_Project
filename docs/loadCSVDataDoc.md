@@ -1,12 +1,37 @@
 # LoadCSVData.py
 
-This class contains the methods to read and split the .csv Datasets and eventually save the new datasets to file
+
+<p>
+<h2>
+Classes documentation list:
+</h2>
+<h3>
+
+0. [Home](README.md)
+1. [Main.py](./mainDoc.md) 
+2. [Model.py](./ModelDoc.md)
+3. [Model_selection.py](./model_selectionDoc.md)
+4. [Layer.py](./layerDoc.md)
+5. [Optimizer.py](./OptimizersDoc.md)
+6. [Metrics.py](./metricsDoc.md)
+7. [LoadCVSData.py](./loadCSVDataDoc.md)
+
+</h3>
+
+</p>
+
+## LoadCSVData
+
+ This class contains the methods to read and split the .csv Datasets and eventually save the new datasets to file
+        
+=======
 
 <h2> Methods </h2>
 
 - loadCSV(path, file_name, size_for_split, save_to_file, save_to_file_path, column_names, column_for_label):
 - saveNewFile(path, file_name, df):
 - printSets(X_train, X_test):
+
 
 <h3>loadCSV</h3>
 <p>
@@ -17,17 +42,24 @@ Params: (path, file_name, size_for_split, save_to_file, save_to_file_path, colum
 - path: the path for the csv file.
 - file_name: .csv file name.
 - size_for_split: the float value to indicate the size for the test DataFrame 1 = 100%, 0.9 = 90% and so on.
-- save_to_file: a boolean value to indicate if the splirted DataSet has to be saved into separated files. (True to save
-  - False not to save)
-- save_to_file_path: the path to save the new separated DataFrames (None no specific path - path string for specific
-  path)
-- column_names: list of names for the .csv file columns. If the number of names are less then the columns or is None the
-  code will assign a standard name equal to c+"number of column"
-- column_for_label: the identifier for the label(s) column(s)
-  The input can be both the numerical index(es) or the string name(s) for the column(s)
 
-Return: The splitted DataSets as different Dataframes. X_test and X_train for the actual data, y_test and y_train for
-the labels.
+- save_to_file: a boolean value to indicate if the splitted DataSet has to be saved into separated files. (True to save - False not to save)
+- save_to_file_path: the path to save the new separated DataFrames (None no specific path - path string for specific path)  
+- column_names: list of names for the .csv file columns. 
+                    If the number of names are less then the columns or is None the code will assign a standard name equal to c+"number of column"  
+- column_for_label: the identifier for the label(s) column(s)
+                    The input can be both the numerical index(es) or the string name(s) for the column(s)      
+- returnFit: a boolean value to determine if the X_train and X_test value are to be returned as an array
+        
+If the size_for_split == 1 and returnFit = False
+Return: The DataSets as Dataframe and it's Label. X_train and y_train
+If the size_for_split == 1 and returnFit = True
+Return: The DataSets as Dataframe and it's Label. X_train as an array and y_train
+If the size_for_split != 1 and returnFit = False
+Return: The splitted DataSets as different Dataframes. X_test and X_train for the actual data, y_test and y_train for the labels.
+If the size_for_split != 1 and returnFit = True
+Return: The splitted DataSets as different Dataframes. X_test and X_train for the actual data as an array, y_test and y_train for the labels.
+
 </p>
 
 <hr>
