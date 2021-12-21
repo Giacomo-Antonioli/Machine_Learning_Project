@@ -13,9 +13,6 @@ def weights_initializers(init_type, **kwargs):
     return inits[init_type](**kwargs)
 
 
-
-
-
 def _rand_init(fan_in, fan_out, limits=(-0.1, 0.1)):
     lower_lim, upper_lim = limits[0], limits[1]
     if lower_lim >= upper_lim:

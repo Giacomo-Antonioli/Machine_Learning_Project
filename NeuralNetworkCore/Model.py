@@ -264,7 +264,7 @@ class Model:
         if batch_size == 'all':
             batch_size = 1
         if batch_size == None:
-            batch_size=1
+            batch_size = 1
 
         target_len = training_targets.shape[1] if len(training_targets.shape) > 1 else 1
         n_patterns = training_data.shape[0] if len(training_data.shape) > 1 else 1

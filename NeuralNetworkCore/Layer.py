@@ -1,9 +1,10 @@
 import numpy as np
 
 from NeuralNetworkCore.Activations import activation_functions
-from NeuralNetworkCore.Weight_Initializer import weights_initializers
-from NeuralNetworkCore.Reguralizers import regularizers
 from NeuralNetworkCore.Function import Function
+from NeuralNetworkCore.Reguralizers import regularizers
+from NeuralNetworkCore.Weight_Initializer import weights_initializers
+
 
 class Layer:
     """
@@ -27,7 +28,7 @@ class Dense(Layer):
     Class that represent a dense layer of a neural network
     """
 
-    def __init__(self, n_units, type='dense',weight_initializer='glorot_uniform', bias_initializer='glorot_uniform',
+    def __init__(self, n_units, type='dense', weight_initializer='glorot_uniform', bias_initializer='glorot_uniform',
                  regularizer=None, activation_function='linear'):
         """
         Function constructor of a dense layer
@@ -39,10 +40,10 @@ class Dense(Layer):
         :param activation_function:
         """
         super().__init__(type)
-        self.__weight_initializer=weight_initializer
-        self.__bias_initializer=bias_initializer
-        self.__weights=[]
-        self.__biases=[]
+        self.__weight_initializer = weight_initializer
+        self.__bias_initializer = bias_initializer
+        self.__weights = []
+        self.__biases = []
         self.__input_dimension = 0
         self.__n_units = n_units
         self.__activation_function = activation_functions[activation_function]
@@ -56,20 +57,21 @@ class Dense(Layer):
             self.__regularizer = None
             self.__regularizer_param = None
         else:
-            if isinstance(regularizer[0],Function):
+            if isinstance(regularizer[0], Function):
                 self.__regularizer = regularizer[0]
                 self.__regularizer_param = regularizer[1]
             else:
-                self.__regularizer=regularizers[regularizer[0]]
+                self.__regularizer = regularizers[regularizer[0]]
                 self.__regularizer_param = regularizer[1]
+
     @property
     def get_dim(self):
         return self.__input_dimension
-    
+
     @property
     def weights(self):
         return self.__weights
-    
+
     @weights.setter
     def weights(self, weights):
         self.__weights = weights
@@ -77,10 +79,11 @@ class Dense(Layer):
     @property
     def biases(self):
         return self.__biases
-    
+
     @biases.setter
     def biases(self, biases):
         self.__biases = biases
+
     @property
     def activation_function(self):
         return self.__activation_function
@@ -98,8 +101,8 @@ class Dense(Layer):
         return self.__n_units
 
     @n_units.setter
-    def n_units(self,n_units):
-        self.__n_units=n_units
+    def n_units(self, n_units):
+        self.__n_units = n_units
 
     @property
     def inputs(self):
@@ -147,16 +150,17 @@ class Dense(Layer):
     @bias_initializer.setter
     def bias_initializer(self, bias_initializer):
         self.__bias_initializer = bias_initializer
+
     @property
     def input_dimension(self):
         return self.__input_dimension
 
-
-    def set_input_shape(self,value):
-        self.__input_dimension=value
+    def set_input_shape(self, value):
+        self.__input_dimension = value
 
     def compile(self):
-        self.__weights = weights_initializers(init_type=self.__weight_initializer, fan_in=self.__input_dimension, fan_out=self.__n_units)
+        self.__weights = weights_initializers(init_type=self.__weight_initializer, fan_in=self.__input_dimension,
+                                              fan_out=self.__n_units)
         self.__biases = weights_initializers(init_type=self.__bias_initializer, fan_in=1, fan_out=self.__n_units)
 
     def forward_pass(self, input):
@@ -207,7 +211,7 @@ class Dropout(Layer):
         """
         super().__init__('drop')
         self.__original_inputs = None
-        self.__outputs=[0]
+        self.__outputs = [0]
         self.__probability = probability
         self.__seed = seed
         self.__rng_generator = np.random.default_rng(seed)
@@ -259,10 +263,10 @@ class Dropout(Layer):
         :return: the vector of the current layer's outputs
         """
         self.original_inputs = input
-        self.outputs=self.original_inputs
+        self.outputs = self.original_inputs
         for x in range(len(self.original_inputs)):
-            if self.rng_generator.uniform()<self.probability:
-                self.outputs[x]=0
+            if self.rng_generator.uniform() < self.probability:
+                self.outputs[x] = 0
         return self.outputs
 
     def backward_pass(self, upstream_delta):
@@ -277,4 +281,4 @@ class Dropout(Layer):
         :return gradient_b: gradient wrt biases
         """
 
-        return upstream_delta,0,0
+        return upstream_delta, 0, 0
