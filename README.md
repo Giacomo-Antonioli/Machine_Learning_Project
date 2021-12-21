@@ -11,18 +11,18 @@ Classes documentation list:
 <h3>
 
 
-1. [Main.py](./mainDoc.md) 
-2. [Model.py](./ModelDoc.md)
-3. [Model_selection.py](./model_selectionDoc.md)
-4. [Layer.py](./layerDoc.md)
-5. [Optimizer.py](./OptimizersDoc.md)
-6. [Metrics.py](./metricsDoc.md)
-7. [LoadCVSData.py](./loadCSVDataDoc.md)
-8. [Activations.py](./activations.md)
-9. [Loss.py](./loss.md)
-10. [Monk.py](./monk.md)
-11. [Reguralizers.py](./reguralizers.md)
-12. [Weight_Initializer.py](./weightInizializer.md)
+1. [Main.py](./docs/mainDoc.md) 
+2. [Model.py](./docs/ModelDoc.md)
+3. [Model_selection.py](./docs/model_selectionDoc.md)
+4. [Layer.py](./docs/layerDoc.md)
+5. [Optimizer.py](./docs/OptimizersDoc.md)
+6. [Metrics.py](./docs/metricsDoc.md)
+7. [LoadCVSData.py](./docs/loadCSVDataDoc.md)
+8. [Activations.py](./docs/activations.md)
+9. [Loss.py](./docs/loss.md)
+10. [Monk.py](./docs/monk.md)
+11. [Reguralizers.py](./docs/reguralizers.md)
+12. [Weight_Initializer.py](./docs/weightInizializer.md)
 
 </h3>
 
