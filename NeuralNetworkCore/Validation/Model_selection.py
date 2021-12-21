@@ -600,10 +600,10 @@ class GridSearch(HyperparametersSearch):
                 # Set entity to specify your username or team name
                 # ex: entity="carey",
                 # Set the project where this run will be logged
-                project="test" + self.__model.name,
-                group="experiment_" + self.__model.name,
+             #   project="test" + self.__model.name,
+            #    group="experiment_" + self.__model.name,
                 # Track hyperparameters and run metadata
-                config=config)
+              #  config=config)
             print(param_combination)
             self.__optimizer_seen = False
             self.__reguralizers = {}
@@ -684,7 +684,7 @@ class GridSearch(HyperparametersSearch):
 
     def fit(self, training_data, training_targets, epochs=None, batch_size=None, shuffle=None, cv=3,
             filename='./curr_dataset'):
-        wandb.login()
+        #wandb.login()
         if cv is not None and cv > 0:
             splitter = KFold()
             self.__training_set, self.__validation_set = splitter.split((training_data, training_targets), cv)
@@ -730,5 +730,6 @@ class GridSearch(HyperparametersSearch):
             pool.close()
             pool.join()
 
-        # print(result_pool)
+            print("\n here 1 \n")
+            print(result_pool)
         # print(len(result_pool))
