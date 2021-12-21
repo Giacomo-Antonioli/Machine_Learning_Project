@@ -17,9 +17,9 @@ from NeuralNetworkCore.Optimizers import optimizers, optimizers_attributes
 from NeuralNetworkCore.Reguralizers import EarlyStopping
 
 from multiprocessing import Process, Manager, Pool
-os.environ['WANDB_NAME']= 'Machine_Learning_Project'
-os.environ['WANDB_API_KEY']= 'local-94c8ff41420f1a793c98053287704ca383313390'
-import wandb
+#os.environ['WANDB_NAME']= 'Machine_Learning_Project'
+#os.environ['WANDB_API_KEY']= 'local-94c8ff41420f1a793c98053287704ca383313390'
+#import wandb
 def get_key(my_dict, val):
     for key, value in my_dict.items():
         if val == value:
@@ -588,14 +588,14 @@ class GridSearch(HyperparametersSearch):
         print("\t\t\t" + str(cv))
         for outmost_index, param_combination in enumerate(experiments):
             config=param_combination
-            wandb.init(
+          #  wandb.init(
                 # Set entity to specify your username or team name
                 # ex: entity="carey",
                 # Set the project where this run will be logged
-                project="test" + self.__model.name,
-                group="experiment_" + self.__model.name,
+             #   project="test" + self.__model.name,
+            #    group="experiment_" + self.__model.name,
                 # Track hyperparameters and run metadata
-                config=config)
+              #  config=config)
             print(param_combination)
             self.__optimizer_seen = False
             self.__reguralizers = {}
@@ -669,15 +669,15 @@ class GridSearch(HyperparametersSearch):
                         self.best_model = self.__model
                         self.__best_tr_loss = self.results['training_error'][-1]
                         self.__best_params = param_combination
-            for x in self.results['training_error']:
-                wandb.log({ "error": x})
-        wandb.finish()
+           # for x in self.results['training_error']:
+              #  wandb.log({ "error": x})
+            #wandb.finish()
         return [self.results, self.__best_params]
 
 
     def fit(self, training_data, training_targets, epochs=None, batch_size=None, shuffle=None, cv=3,
             filename='./curr_dataset'):
-        wandb.login()
+        #wandb.login()
         if cv is not None and cv > 0:
             splitter = KFold()
             self.__training_set, self.__validation_set = splitter.split((training_data, training_targets), cv)
@@ -723,5 +723,6 @@ class GridSearch(HyperparametersSearch):
             pool.close()
             pool.join()
 
-        # print(result_pool)
+            print("\n here 1 \n")
+            print(result_pool)
         # print(len(result_pool))

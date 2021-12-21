@@ -41,6 +41,11 @@ for monk in ['monks-1','monks-2','monks-3']:
                               { 'opt': ['sgd','rmsprop'],'mom':[0.1,0.2,0.3,0.4,0.5,0.9], 'lr':[0.3,0.4,0.5,0.6,0.7,0.8,0.9] ,'metrics':['binary'], 'loss':['squared']}
                               )
         gridsearch_1.fit(monk_dataset, monk_labels, epochs=200, batch_size=10, shuffle=False, cv=3,filename=monk)
+       
+        print("\n here")
+        print(gridsearch_1)
+        print("\n")
+       
         best_1=gridsearch_1.best_model
         int_test_1=best_1.evaluate(monk_dataset_test,monk_labels_test)
         print("#######################################")
