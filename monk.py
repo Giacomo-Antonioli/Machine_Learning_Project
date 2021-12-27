@@ -25,10 +25,13 @@ for monk in ['monks-1', 'monks-2', 'monks-3']:
     monk_test = monk + '.test'
 
 
-    print(os.getcwd())
-    monk_dataset, monk_labels= LoadCSVData.loadCSV(path = "./datasets/monks/", file_name = str(monk_train), separator=' ', column_names=columns, column_for_label='class', returnFit=True)   
+    #print(os.getcwd())
+    monk_dataset, monk_labels= LoadCSVData.loadCSV(path = "./datasets/monks/", file_name = str(monk_train), separator=' ', column_names=columns, column_for_label=0, returnFit=True)   
     monk_dataset_test, monk_labels_test= LoadCSVData.loadCSV(path = "./datasets/monks/", file_name = str(monk_test), separator=' ', column_names=columns, column_for_label='class', returnFit=True)
 
+    print("-here-")
+    print(monk_labels)
+    print(monk_dataset)
 
     model = Model(monk)
     model.set_input_shape(17)
@@ -41,7 +44,8 @@ for monk in ['monks-1', 'monks-2', 'monks-3']:
                               {'opt': ['sgd', 'rmsprop'], 'mom': [0.1, 0.2, 0.3, 0.4, 0.5, 0.9],
                                'lr': [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9], 'metrics': ['binary'], 'loss': ['squared']}
                               )
-    gridsearch_1.fit(monk_dataset, monk_labels, epochs=200, batch_size=10, shuffle=False, cv=3, filename=monk)
+    if __name__ == '__main__':
+        gridsearch_1.fit(monk_dataset, monk_labels, epochs=10, batch_size=10, shuffle=False, cv=3, filename=monk)
     # best_1=gridsearch_1.best_model
     # int_test_1=best_1.evaluate(monk_dataset_test,monk_labels_test)
     # print("#######################################")
