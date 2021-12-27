@@ -97,8 +97,10 @@ class LoadCSVData:
              
         X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=size_for_split) #splits the dataset in test and train
        
-        y_train = y_train.to_list() 
+        y_train = y_train.to_list()
+        y_train = np.reshape(y_train, (len(y_train), 1)) 
         y_test = y_test.to_list() 
+        y_test = np.reshape(y_test, (len(y_test), 1))
         
         if(save_to_file):
             LoadCSVData.saveNewFile(save_to_file_path,"X-train",X_train)
@@ -151,7 +153,11 @@ class LoadCSVData:
         
 
 #the following code is for testing purpose only
- 
+#columns = ['class', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'Id']
+#monk_dataset, monk_labels= LoadCSVData.loadCSV(path = "./datasets/monks/", file_name = "monks-1.train", separator=' ', column_names=columns, column_for_label=0, returnFit=True)   
+#print("-here-")
+#print(monk_labels)
+#print(monk_dataset)
 #LoadCSVData.loadCSV(path = "./datasets/monks/", file_name = 'monks-1.train', separator=' ', column_names=columns, column_for_label='class')
 
 # the following code is for testing purpose only

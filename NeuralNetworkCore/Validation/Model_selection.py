@@ -17,9 +17,9 @@ from NeuralNetworkCore.Model import Model
 from NeuralNetworkCore.Optimizers import optimizers, optimizers_attributes
 from NeuralNetworkCore.Reguralizers import EarlyStopping
 
-os.environ['WANDB_NAME'] = 'Machine_Learning_Project'
-os.environ['WANDB_API_KEY'] = 'local-94c8ff41420f1a793c98053287704ca383313390'
-import wandb
+#os.environ['WANDB_NAME'] = 'Machine_Learning_Project'
+#os.environ['WANDB_API_KEY'] = 'local-94c8ff41420f1a793c98053287704ca383313390'
+#import wandb
 
 
 def get_key(my_dict, val):
@@ -271,7 +271,7 @@ class GridSearch(HyperparametersSearch):
     def __init__(self, model, param_list):
         super().__init__('GridSearch')
         self.__model = model
-        self.__pool_size = 4
+        self.__pool_size = 1
         self.__look_up_dict = {
             **dict.fromkeys(['epochs'], 'epochs'),
             **dict.fromkeys(['batchsize', 'bs'], 'batch_size'),
@@ -677,9 +677,9 @@ class GridSearch(HyperparametersSearch):
                         self.best_model = self.__model
                         self.__best_tr_loss = self.results['training_error'][-1]
                         self.__best_params = param_combination
-            for x in self.results['training_error']:
-                wandb.log({"error": x})
-        wandb.finish()
+           # for x in self.results['training_error']:
+               # wandb.log({"error": x})
+       # wandb.finish()
         return [self.results, self.__best_params]
 
     def fit(self, training_data, training_targets, epochs=None, batch_size=None, shuffle=None, cv=3,
