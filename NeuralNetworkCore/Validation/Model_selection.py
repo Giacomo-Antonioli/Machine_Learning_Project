@@ -596,7 +596,7 @@ class GridSearch(HyperparametersSearch):
         cv = args[1]
         for outmost_index, param_combination in enumerate(experiments):
             config = param_combination
-            wandb.init(
+            #wandb.init(
                 # Set entity to specify your username or team name
                 # ex: entity="carey",
                 # Set the project where this run will be logged

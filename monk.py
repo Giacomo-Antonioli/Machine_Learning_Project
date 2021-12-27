@@ -25,10 +25,12 @@ for monk in ['monks-1', 'monks-2', 'monks-3']:
     monk_test = monk + '.test'
 
 
-    print(os.getcwd())
-    monk_dataset, monk_labels= LoadCSVData.loadCSV(path = "./datasets/monks/", file_name = str(monk_train), separator=' ', column_names=columns, column_for_label='class', returnFit=True)   
+    #print(os.getcwd())
+    monk_dataset, monk_labels= LoadCSVData.loadCSV(path = "./datasets/monks/", file_name = str(monk_train), separator=' ', column_names=columns, column_for_label=0, returnFit=True)   
     monk_dataset_test, monk_labels_test= LoadCSVData.loadCSV(path = "./datasets/monks/", file_name = str(monk_test), separator=' ', column_names=columns, column_for_label='class', returnFit=True)
 
+    print("-here-")
+    print(monk_labels)
 
     model = Model(monk)
     model.set_input_shape(17)

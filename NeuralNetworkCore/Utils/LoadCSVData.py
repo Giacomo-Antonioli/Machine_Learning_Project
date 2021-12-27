@@ -61,10 +61,9 @@ class LoadCSVData:
                 c += 1
                 
         #adding the headers to the dataframe
-        df = pd.read_csv(path+file_name, sep=separator, names = columns_id)
+        df = pd.read_csv(path+file_name, sep=separator, names = columns_id)        
         df.set_index('Id', inplace=True)
-       
-               
+
 
         """The following block of code checks if the value for the labels have been passed as an int 
             if the labels are passed as int the code looks for the string version in the column_names
@@ -72,33 +71,34 @@ class LoadCSVData:
             of the label column(s)
         """
         column_for_y_index = list()
-        if isinstance(column_for_label, int):
-            column_for_y_index.append(column_for_label)
-            flag = list()
-            if isinstance(column_for_label, list):
-                for column_index in column_for_label:
-                    flag = columns_id[column_index]
-            else:
-                flag = columns_id[column_for_label]
-            column_for_label = flag
+        column_for_drop_index = ""
+        if isinstance(column_for_label, int):                         
+            column_for_y_index = column_for_label
+            i = 0
+            for column_label in columns_id:
+                if i == column_for_label:
+                    column_for_drop_index = column_label
+                i += 1
         else:
             i = 0
             for column_label in columns_id:
                 if column_label == column_for_label:
-                    column_for_y_index.append(i)
+                    column_for_y_index = i
                 i += 1
+            column_for_drop_index = column_for_label
 
         if column_for_y_index == None or column_for_y_index == []:
             y = df.iloc[:, 0]
             X = df
 
-        else:           
-            y = df.iloc[:,column_for_y_index]                              #defines the labels (rows or column) 
-            X = df.drop(column_for_label, axis=1)                          #the dataframe except for the labels; axis is 1 for columns, 0 for rows
+        else:     
+            y = df.iloc[:,column_for_y_index] 
+            X = df.drop(column_for_drop_index, axis=1)                          #the dataframe except for the labels; axis is 1 for columns, 0 for rows           
              
         X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=size_for_split) #splits the dataset in test and train
        
-        #LoadCSVData.printSets('X_train', X_train)
+        y_train = y_train.to_list() 
+        y_test = y_test.to_list() 
         
         if(save_to_file):
             LoadCSVData.saveNewFile(save_to_file_path,"X-train",X_train)
@@ -118,8 +118,6 @@ class LoadCSVData:
              X_test = OneHotEncoder().fit_transform(X_test).toarray().astype(np.float32)
              return  X_train, X_test, y_train, y_test
         
-    
-
 
     def saveNewFile(path, file_name, df):
         """
@@ -153,13 +151,8 @@ class LoadCSVData:
         
 
 #the following code is for testing purpose only
-    
-#columns = ['class', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'Id']
+ 
 #LoadCSVData.loadCSV(path = "./datasets/monks/", file_name = 'monks-1.train', separator=' ', column_names=columns, column_for_label='class')
-
-
-
-
 
 # the following code is for testing purpose only
 # columns = ['a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8', 'a9', 'a10', 'a11', 'a12', 'a13']
