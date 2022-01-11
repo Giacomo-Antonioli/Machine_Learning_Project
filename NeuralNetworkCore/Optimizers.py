@@ -47,8 +47,15 @@ class Optimizer:
         self.batch_size = 0
         self.pbar = ''
         self.gradient_network = ''
-        self.epoch_training_error = ''
-        self.epoch_training_error_metric = ''
+        self.epoch_training_error =0
+        self.epoch_training_error_vector =[]
+        self.epoch_training_error_metric = 0
+        self.epoch_training_error_metric_vector = []
+        self.outputs=[]
+        self.accumulate_labels=[]
+        self.batch_trainig_error=0
+        self.batch_training_error_vector=[]
+        self.batch_training_error_metric=0
 
     # region Optimezer properties
     @property
@@ -240,30 +247,37 @@ class Optimizer:
         self.train_dataset = train_dataset[indexes]
         self.train_labels = train_labels[indexes]
 
+    def accumulate_errors(self,net_outputs,target):
+        
+        self.batch_training_error_vector.append(self.__loss_function.function(predicted=net_outputs,target=target))#calcolo l'errore dell'input e lo sommo all'accumulatore
+        # Sum the metric over all the elements in the batch
+        self.outputs.append(net_outputs)#salvo gli output
+        self.accumulate_labels.append(target)
+
+        
+
     def fit_with_gradient(self, input, target):
         # compute the propagation for each single input
-        net_outputs = self.model.forward(net_input=input, training=True)
+        net_outputs = self.model.forward(net_input=input, training=True)#calcolo l'output per l'elemento preso in input
 
-        # Sum the loss over all the elements in the batch
-        self.epoch_training_error = np.add(self.epoch_training_error,
-                                           self.__loss_function.function(predicted=net_outputs,
-                                                                         target=target))
-        # Sum the metric over all the elements in the batch
-        self.epoch_training_error_metric = np.add(self.epoch_training_error_metric,
-                                                  self.__metric.function(predicted=net_outputs,
-                                                                         target=target))
+        self.accumulate_errors(net_outputs,target)
+      
+        #print("metric " + str(self.__metric.function(predicted=net_outputs, target=target)))
+        #print("fit_with_gradient " + str(self.epoch_training_error_metric))
         # compute the delta for the outmost layer
         dErr_dOut = self.loss_function.derive(predicted=net_outputs, target=target)
         # accumulate all the deltas for each layer of the batch computation
-        gradient_network = self.model.propagate_back(dErr_dOut, self.gradient_network)
+        self.gradient_network = self.model.propagate_back(dErr_dOut, self.gradient_network)# calcolo tutti i delta e accumulo
 
     def compute_training_error(self):
-        self.epoch_training_error = np.sum(self.epoch_training_error) / len(self.epoch_training_error)
-        current_loss_error = self.epoch_training_error / len(self.train_dataset)
+        #ERROR
+        self.epoch_training_error = np.sum(self.epoch_training_error_vector) / len(self.epoch_training_error_vector)
+       # current_loss_error = self.epoch_training_error / len(self.train_dataset)
+        current_loss_error=self.epoch_training_error
         self.set_values_dict_element('training_error', current_loss_error)
-        self.epoch_training_error_metric = np.sum(self.epoch_training_error_metric) / len(
-            self.epoch_training_error_metric)
-        self.set_values_dict_element('training_metrics', self.epoch_training_error_metric / len(self.train_dataset))
+        #METRIC
+        self.epoch_training_error_metric = np.sum(self.epoch_training_error_metric_vector) / len(self.epoch_training_error_metric_vector)
+        self.set_values_dict_element('training_metrics', self.epoch_training_error_metric*100)
         return current_loss_error
 
     def init_epoch_training_error(self):
@@ -276,7 +290,7 @@ class Optimizer:
         epoch_val_error, epoch_val_metric = self.model.evaluate(validation_data=val_x, targets=val_y)
         current_val_error = epoch_val_error
         self.set_values_dict_element('validation_error', current_val_error)
-        self.set_values_dict_element('validation_metrics', epoch_val_metric)
+        self.set_values_dict_element('validation_metrics', epoch_val_metric*100)
         return current_val_error
 
     def apply_stopping(self, current_loss_error, current_val_error):
@@ -284,28 +298,50 @@ class Optimizer:
             self.stop_flag = self.check_stop.apply_stop(current_loss_error)
         elif self.check_stop.monitor == 'val':
             self.stop_flag = self.check_stop.apply_stop(current_val_error)
+    
+    def compute_batch_errors(self):
+        
+        self.batch_trainig_error=np.sum(self.batch_training_error_vector)/len(self.batch_training_error_vector)
+        #TODO METRICS
+        self.batch_training_error_metric=self.__metric.function(predicted=self.outputs,target=self.accumulate_labels)
+
 
     def do_epochs(self, validation, epochs, shuffle, early_stopping, optimizer):
-        self.reset_dict()
+        self.reset_dict()#resetto per il training corrente
         current_val_error = 0
         epoch = 0
         self.pbar = tqdm(total=epochs)
-        while epoch < epochs and not self.stop_flag:
-            self.init_epoch_training_error()
-            if self.batch_size != self.train_dataset.shape[0] and shuffle:
+        
+        while epoch < epochs and not self.stop_flag:#ciclo sulle epoche
+            self.init_epoch_training_error()#inizializzo gli errori a 0 per l'epoca corrente
+            self.epoch_training_error_metric_vector=[]
+            self.epoch_training_error_vector=[]
+            if self.batch_size != self.train_dataset.shape[0] and shuffle:#divido in batch
                 self.shuffle_data(self.train_dataset, self.train_labels)
 
-            for batch_index in range(math.ceil(len(self.train_dataset) / self.batch_size)):
+            for batch_index in range(math.ceil(len(self.train_dataset) / self.batch_size)):#ciclo su ogni batch
                 train_batch, targets_batch = self.set_batches(batch_index)
+                self.outputs=[]
+                self.accumulate_labels=[]
+                self.batch_training_error_vector=[]
+                
+                #print("do_epochs: ")
                 self.gradient_network = self.model.get_empty_struct()
-                for current_input, current_target in zip(train_batch, targets_batch):
-                    self.fit_with_gradient(current_input, current_target)
-                optimizer(batch_index)
-            if validation is not None:
+                for current_input, current_target in zip(train_batch, targets_batch):#ciclo su ogni elemento in una batch
+                    #print("do_epochs: ")
+                    #print(current_input)
+                    #print(current_target)
+                    self.fit_with_gradient(current_input, current_target)#calcolo il gradiente per ogni elemento in una batch
+                self.compute_batch_errors()
+                self.epoch_training_error_vector.append(self.batch_trainig_error)
+                self.epoch_training_error_metric_vector.append(self.batch_training_error_metric)
+                optimizer(batch_index)# applico l'ottimizzazione
+                
+            if validation is not None:# controllo se validare o meno
                 current_val_error = self.validate(validation)
 
-            current_loss_error = self.compute_training_error()
-            if early_stopping:
+            current_loss_error = self.compute_training_error()#calcolo la loss per l'epoca
+            if early_stopping:#controllo l'early stopping
                 self.apply_stopping(current_loss_error, current_val_error)
             epoch += 1
             self.pbar.update(1)

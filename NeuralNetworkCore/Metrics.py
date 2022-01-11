@@ -4,6 +4,7 @@ import numpy as np
 
 from NeuralNetworkCore.Function import Function
 
+#region Classification metrics
 
 def binary_class_accuracy(predicted, target):
     """
@@ -12,24 +13,28 @@ def binary_class_accuracy(predicted, target):
     correctly classified (returns 1). Else returns 0
     The threshold is 0.3
     """
-    predicted = predicted[0]
-    target = target[0]
-    if np.abs(predicted - target) < 0.5:
-        return [1]
-    return [0]
+    
+    result=[]
+    for index,i in enumerate(predicted):
+        if type(predicted)==  'numpy.ndarray':
+            predicted = i[0]
+            target_curr = target[index][0]
+           
+        else:
+            predicted=i
+            target_curr=target[index]
+        if np.abs(predicted - target_curr) < 0.5:
+            result.append(1)
+        else:
+            result.append(0)
+            
 
-
-def mean_euclidean_error(predicted, target):
-    """
-    Computes the euclidean error between the target vector and the output predicted by the net
-    :param predicted: ndarray of shape (n, m) – Predictions for the n examples
-    :param target: ndarray of shape (n, m) – Ground truth for each of n examples
-    :return: error in terms of euclidean error
-    """
-    return np.linalg.norm(np.subtract(predicted, target))
-
+    total=np.sum(result)/len(result)
+    return total
 
 def accuracy(predicted, target):
+    #TODO
+    #len(target) = 1
     counter = 0
     for index in range(len(target)):
         if predicted[index] == target[index]:
@@ -38,7 +43,6 @@ def accuracy(predicted, target):
         return counter
     else:
         return counter / len(target)
-
 
 def true_false_positive(predicted, target):
     """
@@ -62,6 +66,18 @@ def true_false_positive(predicted, target):
 
     return tpr, fpr
 
+#endregion 
+
+#region Regression metrics
+
+def mean_euclidean_error(predicted, target):
+    """
+    Computes the euclidean error between the target vector and the output predicted by the net
+    :param predicted: ndarray of shape (n, m) – Predictions for the n examples
+    :param target: ndarray of shape (n, m) – Ground truth for each of n examples
+    :return: error in terms of euclidean error
+    """
+    return np.linalg.norm(np.subtract(predicted, target))
 
 def mean_absolute_error(predicted, target):
     '''
@@ -73,10 +89,8 @@ def mean_absolute_error(predicted, target):
     '''
     return abs(np.subtract(predicted, target)) / len(target)
 
-
 def squared_error(predicted, target):
     return pow(np.subtract(predicted, target), 2)
-
 
 def mean_squared_error(predicted, target):
     '''
@@ -87,7 +101,6 @@ def mean_squared_error(predicted, target):
     :return:
     '''
     return squared_error(predicted, target) / len(target)
-
 
 def r2_score(predicted, target):
     '''
@@ -104,26 +117,47 @@ def r2_score(predicted, target):
     :param target:
     :return:
     '''
+    
+    ## si sta passando un solo target, len(target) = 1
+    #print("predicted "+ str(predicted))
+    #print("target "+str(target))
     sum = 0
     mean_target = np.mean(target)
-    for index in len(range(target)):
+    for index in range(len(target)):
         sum += pow(predicted[index] - mean_target, 2)
 
-    return 1 - (squared_error(predicted, target) / mean_target)
+    #print("sum = " + str(sum))
+    #print("squared err = " + str(squared_error(predicted, target)))
+    #print("R2 METRIC: " + str(1 - (squared_error(predicted, target) / sum)))
+    return 1 - (squared_error(predicted, target) / sum)
+#endregion
 
-
+####Classification metrics#####
 BinClassAcc = Function('binary', binary_class_accuracy)
-MEE = Function('mee', mean_euclidean_error)
 Accuracy = Function('accuracy', accuracy)
+TF = Function('truefalse', true_false_positive)
+
+####Regressin metrics####
+MEE = Function('mee', mean_euclidean_error)
+SquaredError = Function('squared_error', squared_error)
 MSE = Function('mse', mean_squared_error)
 MAE = Function('mae', mean_absolute_error)
 R2 = Function('r2', r2_score)
+
 metrics = {
     'binary': BinClassAcc,
+    'TF': TF,
     'mee': MEE,
     'accuracy': Accuracy,
     'acc': Accuracy,
+    'squared': SquaredError,
     'mse': MSE,
     'mae': MAE,
     'r2': R2
 }
+
+#TODO
+#TF
+#r2
+#accuracy
+#
