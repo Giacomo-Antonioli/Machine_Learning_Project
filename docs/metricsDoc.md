@@ -26,8 +26,14 @@ Classes documentation list:
 
 ## Metrics
 
+Metrics are used to monitor and measure the performance of a model (during training and testing)
+
 <h3>binary_class_accuracy</h3>
 <p>
+
+Accuracy shows us how comfortable the model is with detecting the positive and negative class. It’s computed by the sum of True Positives and True Negatives divided by the total population.
+Accuracy = [TP + TN] / Total Population
+
 Params: (predicted, target)
 
 Applies a threshold for computing classification accuracy (correct classification rate). If the difference in absolute

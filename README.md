@@ -30,11 +30,99 @@ Classes documentation list:
 
 <p>
 <h2>
- Quick start:
+ Quick start: 
 </h2>
 
 The following section of the document is a guide to install and clone this project.
+For a fully functional project, before cloning and starting it some python libraries must be installed.
 
+<h3><strong>numpy</strong></h3>  
+
+ To install numpy use the following commands in a terminal.
+
+PIP
+
+    If you use pip, you can install NumPy with:
+
+    - pip install numpy
+
+
+
+CONDA
+
+    If you use conda, you can install NumPy from the defaults or conda-forge channels:
+
+    # Best practice, use an environment rather than install in the base env
+    - conda create -n my-env
+    - conda activate my-env
+    # If you want to install from conda-forge
+    - conda config --env --add channels conda-forge
+    # The actual install command
+    - conda install numpy
+
+
+ If you have any problems installing numpy, check this [numpy guide to installation](https://numpy.org/install/)  
+
+<h3><strong>pandas</strong></h3>  
+
+To install pandas use the following commands in a terminal.  
+
+On Windows
+
+    - pip install pandas
+ 
+On Ubuntu
+    
+    - sudo apt-get install python3-pandas
+
+If you have any problems installing pandas, check this [pandas guide to installation](https://pandas.pydata.org/docs/getting_started/install.html)
+
+<h3><strong>scikit_learn</strong></h3>  
+
+To install scikit-learn use the following commands in a terminal.  
+
+PIP
+
+    - pip install -U scikit-learn
+ 
+If you have any problems installing scikit-learn, check this [scikit-learn guide to installation](https://scikit-learn.org/stable/install.html)
+
+<h3><strong>tqdm</strong></h3>  
+
+To install tqdm use the following commands in a terminal.  
+
+PIP
+
+    - pip install tqdm
+
+CONDA
+    
+    - conda install -c conda-forge tqdm
+
+If you have any problems installing tqdm, check this [tqdm guide to installation](https://pypi.org/project/tqdm/)
+
+
+<h3><strong>wandb</strong></h3>  
+
+To use wandb you must download and install Docker first: [get docker here](https://www.docker.com/products/docker-desktop)  
+You will need a wandb account as well: [signUp to wandb here](https://wandb.ai/site)  
+
+To install wandb use the following commands in a terminal.  
+PIP
+
+    - pip install wandb
+   
+     
+To make wandb work on local server write the following in a terminal:
+
+    - wandb local
+
+Behind the scenes the wandb client library is running the wandb/local docker image, forwarding port 8080 to the host, and configuring your machine to send metrics to your local instance instead of our hosted cloud. If you want to run our local container manually, you can run the following docker command:
+
+    - docker run --rm -d -v wandb:/vol -p 8080:8080 --name wandb-local wandb/local
+
+If you have any problems installing wandb, check this [wandb guide to installation](https://docs.wandb.ai/quickstart)
+If you have any problems running wandb on local server, check this [wandb locl server guide](https://docs.wandb.ai/guides/self-hosted/local)
 
 </p>
 
@@ -55,6 +143,10 @@ To develop this project the following has been used:
 | Software kind     | Software version     |
 | ----------------  | -------------------  | 
 | Language          | Python 3.9.9         |
-| IDE               | Visual Studio Code   | 
+| Python Library    | numpy==1.18.5        |
+| Python Library    | pandas==1.2.4        |
+| Python Library    | scikit_learn==1.0.1  |
+| Python Library    | tqdm==4.59.0         |
+| Python Library    | wandb==0.12.7        |
 
 </p>
