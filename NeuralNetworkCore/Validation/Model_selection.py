@@ -17,9 +17,12 @@ from NeuralNetworkCore.Model import Model
 from NeuralNetworkCore.Optimizers import optimizers, optimizers_attributes
 from NeuralNetworkCore.Reguralizers import EarlyStopping
 
-#os.environ['WANDB_NAME'] = 'Machine_Learning_Project'
+os.environ['WANDB_NAME'] = 'Machine_Learning_Project'
 #os.environ['WANDB_API_KEY'] = 'local-94c8ff41420f1a793c98053287704ca383313390'
-#import wandb
+#malio 20eb6383f49b2e6f666de5b53b5db5ece12bb3a1
+os.environ['WANDB_API_KEY'] = '20eb6383f49b2e6f666de5b53b5db5ece12bb3a1'
+
+import wandb
 
 
 def get_key(my_dict, val):
@@ -591,19 +594,19 @@ class GridSearch(HyperparametersSearch):
                 self.update_best(param_combination)
 
     def internal_runs(self, args):
-
         experiments = args[0]
         cv = args[1]
         for outmost_index, param_combination in enumerate(experiments):
+            print(param_combination)
             config = param_combination
-            #wandb.init(
-                # Set entity to specify your username or team name
-                # ex: entity="carey",
-                # Set the project where this run will be logged
-             #   project="test" + self.__model.name,
-            #    group="experiment_" + self.__model.name,
-                # Track hyperparameters and run metadata
-              #  config=config)
+            wandb.init(
+                #Set entity to specify your username or team name
+                #entity="malio",
+                #Set the project where this run will be logged
+                project="test" + self.__model.name,
+                group="experiment_" + self.__model.name,
+                #Track hyperparameters and run metadata
+                config=config,reinit=True)
             print(param_combination)
             self.__optimizer_seen = False
             self.__reguralizers = {}
@@ -677,14 +680,36 @@ class GridSearch(HyperparametersSearch):
                         self.best_model = self.__model
                         self.__best_tr_loss = self.results['training_error'][-1]
                         self.__best_params = param_combination
-           # for x in self.results['training_error']:
-               # wandb.log({"error": x})
-       # wandb.finish()
+   #         for x in self.results['training_error']:
+   #             wandb.log({"error": x})
+   #         for x in self.results['training_metrics']:
+   #             wandb.log({"accuracy": x })
+   #         for x in self.results['validation_error']:
+   #             wandb.log({"validation_error": x })
+   #         for x in self.results['validation_metrics']:
+   #             wandb.log({"validation_accuracy": x })
+            for index,epoch in enumerate(range(len(self.results['training_error']))):
+                wandb.log({ #'Epoch': epoch,
+                            "Train Loss": self.results['training_error'][index],
+                            "Train Acc "+self.__current_metric: self.results['training_metrics'][index],
+                            "Valid Loss": self.results['validation_error'][index],
+                            "Valid Acc "+self.__current_metric: self.results['validation_metrics'][index]
+                
+                })
+                
+        wandb.finish()
+        print("result")
+        print(self.results)
+        
+        print("best params")
+        print(self.__best_params)
+        print("ABC")
+        print(len(self.results['training_error']))
         return [self.results, self.__best_params]
 
     def fit(self, training_data, training_targets, epochs=None, batch_size=None, shuffle=None, cv=3,
             filename='./curr_dataset'):
-        #wandb.login()
+        wandb.login()
         if cv is not None and cv > 0:
             splitter = KFold()
             self.__training_set, self.__validation_set = splitter.split((training_data, training_targets), cv)
@@ -718,7 +743,7 @@ class GridSearch(HyperparametersSearch):
         keys, values = zip(*self.__param_list.items())
         experiments = [dict(zip(keys, v)) for v in itertools.product(*values)]
 
-        print("EVALUATING " + str(len(experiments)) + ' Combinations for a total of' + str(
+        print("EVALUATING " + str(len(experiments)) + ' Combinations for a total of ' + str(
             len(experiments) * self.__cv) + ' times.')
 
         parallel_split = np.array_split(np.asarray(experiments), self.__pool_size)
@@ -731,5 +756,5 @@ class GridSearch(HyperparametersSearch):
             pool.join()
 
             print("\n here 1 \n")
-            print(result_pool)
+            #print(result_pool)
         # print(len(result_pool))
