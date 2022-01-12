@@ -242,14 +242,6 @@ class Model:
             self.__early_stopping = True
             self.__check_stop = EarlyStopping(monitor=monitor, mode=mode, patience=patience, tolerance=tolerance)
 
-        # self.__params = {**self.__params, **{'loss': loss, 'metric': metric, 'lr': lr, 'lr_decay': lr_decay,
-        #                                      'limit_step': limit_step, 'decay_rate': decay_rate,
-        #                                      'decay_steps': decay_steps, 'staircase': staircase, 'momentum': momentum,
-        #                                      'reg_type': reg_type, 'lambd': lambd}}
-        # self.__opt = optimizers[opt](net=self, loss=loss, metric=metric, lr=lr, lr_decay=lr_decay, limit_step=limit_step,
-        #                              decay_rate=decay_rate, decay_steps=decay_steps, staircase=staircase,
-        #                              momentum=momentum, reg_type=reg_type, lambd=lambd)
-
     def fit(self, training_data, training_targets, validation_data=None, epochs=1, batch_size=None, validation_split=0,
             shuffle=False):
         """
@@ -272,7 +264,7 @@ class Model:
         if batch_size == 'all':
             batch_size = 1
         if batch_size == None:
-            batch_size=1
+            batch_size = 1
 
         target_len = training_targets.shape[1] if len(training_targets.shape) > 1 else 1
         n_patterns = training_data.shape[0] if len(training_data.shape) > 1 else 1
@@ -323,12 +315,13 @@ class Model:
         metric_score = np.zeros(self.layers[-1].n_units)
         loss_scores = np.zeros(self.layers[-1].n_units)
         for x, y in zip(net_outputs, targets):
-            metric_score = np.add(metric_score, metrics[metric].function(predicted=x, target=y))
+            #metric_score = np.add(metric_score, metrics[metric].function(predicted=x, target=y))
             loss_scores = np.add(loss_scores, losses[loss].function(predicted=x, target=y))
+        metric_score = metrics[metric].function(predicted=net_outputs,target=targets)
         loss_scores = np.sum(loss_scores) / len(loss_scores)
-        metric_score = np.sum(metric_score) / len(metric_score)
+        #metric_score = np.sum(metric_score) / len(metric_score)
         loss_scores /= len(net_outputs)
-        metric_score /= len(net_outputs)
+        #metric_score /= len(net_outputs)
         return loss_scores, metric_score
 
     def propagate_back(self, dErr_dOut, gradient_network):

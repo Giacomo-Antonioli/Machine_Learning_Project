@@ -63,11 +63,6 @@ def tanh_function_derivative(x):
         np.power(np.tanh(x), 2)
     )
 
-def softmax_function(x):
-    """Computes the probability of a multi-class problem"""
-    out = np.exp(x)
-    return out/np.sum(out)
-
 
 # activation functions
 Identity = DerivableFunction(identity_function, identity_function_derivative, 'identity')
