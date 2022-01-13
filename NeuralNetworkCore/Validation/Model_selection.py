@@ -8,10 +8,13 @@
 import itertools
 import multiprocessing
 import os
+import sys
 import warnings
 
 
 import numpy as np
+import tqdm
+
 
 from NeuralNetworkCore.Model import Model
 from NeuralNetworkCore.Optimizers import optimizers, optimizers_attributes
@@ -21,9 +24,9 @@ os.environ['WANDB_NAME'] = 'Machine_Learning_Project'
 #os.environ['WANDB_API_KEY'] = 'local-94c8ff41420f1a793c98053287704ca383313390'
 #malio 20eb6383f49b2e6f666de5b53b5db5ece12bb3a1
 os.environ['WANDB_API_KEY'] = '20eb6383f49b2e6f666de5b53b5db5ece12bb3a1'
+os.environ["WANDB_SILENT"] = "true"
 
 import wandb
-
 
 def get_key(my_dict, val):
     for key, value in my_dict.items():
@@ -274,7 +277,7 @@ class GridSearch(HyperparametersSearch):
     def __init__(self, model, param_list):
         super().__init__('GridSearch')
         self.__model = model
-        self.__pool_size = 1
+        self.__pool_size = 4
         self.__look_up_dict = {
             **dict.fromkeys(['epochs'], 'epochs'),
             **dict.fromkeys(['batchsize', 'bs'], 'batch_size'),
@@ -358,7 +361,7 @@ class GridSearch(HyperparametersSearch):
         parameters_new = {}
         try:  ## Control if parameters list has to search over optimizers
             param_optmiziers = self.__param_list['opt']
-            print(param_optmiziers)
+            ##print(param_optmiziers)
 
             for opti in param_optmiziers:  ## if so for each optimizer select attributes that are significant to him
                 if isinstance(opti, str):  # otherwise remove them from his cycles to avoid repeteade cycles
@@ -369,16 +372,16 @@ class GridSearch(HyperparametersSearch):
                     selected_opti = opti
                     current_key = get_key(optimizers, opti)
                     parameters_new[current_key] = {}
-                print(current_key)
+                #print(current_key)
                 for key in self.__param_list:
                     if key != 'opt':
-                        print("\tsearching key: " + key)
+                        #print("\tsearching key: " + key)
                         try:
-                            print(self.__look_up_dict[key])
+                            #print(self.__look_up_dict[key])
                             if self.__look_up_dict[key] in optimizers_attributes:
                                 if hasattr(selected_opti, self.__look_up_dict[key]):
 
-                                    print("\t\t" + key + " found")
+                                    #print("\t\t" + key + " found")
 
                                     if not key in parameters_new[current_key]:
                                         parameters_new[current_key][key] = []
@@ -446,8 +449,8 @@ class GridSearch(HyperparametersSearch):
                 if self.__evaluated_optimizer.name == 'adam':
                     self.__evaluated_optimizer.beta2 = param_combination[param]
                 else:
-                    warnings.warn(str(self.__evaluated_optimizer().name) + ' has no param ' + param + '.',
-                                  category='Warning', stacklevel=2)
+                    message = str(self.__evaluated_optimizer().name) + ' has no param ' + param + '.'
+                    warnings.warn(message)
 
 
             else:
@@ -536,7 +539,7 @@ class GridSearch(HyperparametersSearch):
             if x[0] == 'tol' or x[0] == 'tolerance' or x[0] == 'tollerance':
                 self.__tol = param_combination[param]
 
-        print("__________-")
+        #print("__________-")
 
         for reg in self.__reguralizers:
             if self.__model.layers[self.__model.dense_configuration[int(reg) - 1]].regularizer != None:
@@ -594,119 +597,97 @@ class GridSearch(HyperparametersSearch):
                 self.update_best(param_combination)
 
     def internal_runs(self, args):
-        experiments = args[0]
         cv = args[1]
-        for outmost_index, param_combination in enumerate(experiments):
-            print(param_combination)
-            config = param_combination
-            wandb.init(
-                #Set entity to specify your username or team name
-                #entity="malio",
-                #Set the project where this run will be logged
-                project="test" + self.__model.name,
-                group="experiment_" + self.__model.name,
-                #Track hyperparameters and run metadata
-                config=config,reinit=True)
-            print(param_combination)
-            self.__optimizer_seen = False
-            self.__reguralizers = {}
+        total_runs = []
+        param_combination = args[0][0]
 
-            self.generate_current_experiment(param_combination)
+        config = param_combination
+        wandb.init(
+            #Set entity to specify your username or team name
+            #entity="",
+            #Set the project where this run will be logged
+            project="test" + self.__model.name,
+            group="experiment_" + self.__model.name,
+            #Track hyperparameters and run metadata
+            config=config,reinit=True)
+        self.__optimizer_seen = False
+        self.__reguralizers = {}
 
-            self.__model.compile(optimizer=self.__evaluated_optimizer, loss=self.__current_loss,
-                                 metrics=self.__current_metric, early_stopping=self.__es, patience=self.__patience,
-                                 tolerance=self.__tol, monitor=self.__monitor, mode=self.__es_mode)
-            # self.__model.showLayers()
+        self.generate_current_experiment(param_combination)
 
-            self.reset_results()
-            if cv is not None and cv > 0:
-                for index, training_set in enumerate(self.__training_set[0]):
-                    print('Fold[' + str(index + 1) + ']')
-                    print('trainingSet: ' + str(len(training_set)))
-                    print('epochs: ' + str(self.__epochs))
-                    res = self.__model.fit(training_set, self.__training_set[1][index],
-                                           validation_data=(
-                                               self.__validation_set[0][index], self.__validation_set[1][index]),
-                                           epochs=self.__epochs,
-                                           batch_size=self.__batch_size, shuffle=self.__shuffle)
+        self.__model.compile(optimizer=self.__evaluated_optimizer, loss=self.__current_loss,
+                                metrics=self.__current_metric, early_stopping=self.__es, patience=self.__patience,
+                                tolerance=self.__tol, monitor=self.__monitor, mode=self.__es_mode)
+        # self.__model.showLayers()
 
-                    if index == 0:
-                        print("setting: " + str(len(res['training_error'])))
-                        self.set_results(res)
-                    else:
-                        print("adding: " + str(len(res['training_error'])))
-                        self.accumulate_results(res)
+        self.reset_results()
+        if cv is not None and cv > 0:
+            for index, training_set in enumerate(self.__training_set[0]):
+                #print('Fold[' + str(index + 1) + ']')
+                #print('trainingSet: ' + str(len(training_set)))
+                #print('epochs: ' + str(self.__epochs))
+                res = self.__model.fit(training_set, self.__training_set[1][index],
+                                        validation_data=(
+                                            self.__validation_set[0][index], self.__validation_set[1][index]),
+                                        epochs=self.__epochs,
+                                        batch_size=self.__batch_size, shuffle=self.__shuffle)
 
-                self.get_mean_error()
-                self.update_best_results(param_combination)
+                if index == 0:
+                    #print("setting: " + str(len(res['training_error'])))
+                    self.set_results(res)
+                else:
+                    #print("adding: " + str(len(res['training_error'])))
+                    self.accumulate_results(res)
 
-            elif self.__cv != -1:
+            self.get_mean_error()
 
-                res = self.__model.fit(self.__training_set[0], self.__training_set[1],
-                                       validation_data=(
-                                           self.__validation_set[0], self.__validation_set[1]),
-                                       epochs=self.__epochs,
-                                       batch_size=self.__batch_size, shuffle=self.__shuffle)
+            total_runs.append([self.results, param_combination])
 
-                self.set_results(res)
+        elif self.__cv != -1:
 
-                self.update_best_results(param_combination)
-            else:
-                print(self.__model.optimizer.lr)
-                print(self.__model.optimizer.momentum)
-                res = self.__model.fit(self.__training_set[0], self.__training_set[1],
-                                       epochs=self.__epochs,
-                                       batch_size=self.__batch_size, shuffle=self.__shuffle)
+            res = self.__model.fit(self.__training_set[0], self.__training_set[1],
+                                    validation_data=(
+                                        self.__validation_set[0], self.__validation_set[1]),
+                                    epochs=self.__epochs,
+                                    batch_size=self.__batch_size, shuffle=self.__shuffle)
 
-                self.results['training_error'] = res['training_error']
-                self.results['training_metrics'] = res['training_metrics']
+            self.set_results(res)
+            total_runs.append([self.results, param_combination])
+        else:
+            #print(self.__model.optimizer.lr)
+            #print(self.__model.optimizer.momentum)
+            res = self.__model.fit(self.__training_set[0], self.__training_set[1],
+                                    epochs=self.__epochs,
+                                    batch_size=self.__batch_size, shuffle=self.__shuffle)
 
-                if self.__best_val is None:
-                    self.__best_val = self.results['training_metrics'][-1]
-                    self.best_model = self.__model
-                    self.__best_params = param_combination
-                    self.__best_tr_metric = self.results['training_metrics'][-1]
-                    self.__best_tr_loss = self.results['training_error'][-1]
-                if self.__current_metric == 'mee':
-                    if self.__best_val > self.results['training_metrics'][-1]:
-                        self.__best_tr_metric = self.results['training_metrics'][-1]
-                        self.best_model = self.__model
-                        self.__best_params = param_combination
-                        self.__best_tr_loss = self.results['training_error'][-1]
-                elif self.__current_metric == 'binary':
-                    if self.__best_val < self.results['training_metrics'][-1]:
-                        self.__best_val = self.results['training_metrics'][-1]
-                        self.__best_tr_metric = self.results['training_metrics'][-1]
-                        self.best_model = self.__model
-                        self.__best_tr_loss = self.results['training_error'][-1]
-                        self.__best_params = param_combination
-   #         for x in self.results['training_error']:
-   #             wandb.log({"error": x})
-   #         for x in self.results['training_metrics']:
-   #             wandb.log({"accuracy": x })
-   #         for x in self.results['validation_error']:
-   #             wandb.log({"validation_error": x })
-   #         for x in self.results['validation_metrics']:
-   #             wandb.log({"validation_accuracy": x })
-            for index,epoch in enumerate(range(len(self.results['training_error']))):
-                wandb.log({ #'Epoch': epoch,
-                            "Train Loss": self.results['training_error'][index],
-                            "Train Acc "+self.__current_metric: self.results['training_metrics'][index],
-                            "Valid Loss": self.results['validation_error'][index],
-                            "Valid Acc "+self.__current_metric: self.results['validation_metrics'][index]
-                
-                })
-                
+            self.results['training_error'] = res['training_error']
+            self.results['training_metrics'] = res['training_metrics']
+            
+            total_runs.append([self.results, param_combination])
+
+        for index,epoch in enumerate(range(len(self.results['training_error']))):
+            wandb.log({ #'Epoch': epoch,
+                        "Train Loss": self.results['training_error'][index],
+                        "Train Acc "+self.__current_metric: self.results['training_metrics'][index],
+                        "Valid Loss": self.results['validation_error'][index],
+                        "Valid Acc "+self.__current_metric: self.results['validation_metrics'][index]
+            
+            })
+            
         wandb.finish()
-        print("result")
-        print(self.results)
-        
-        print("best params")
-        print(self.__best_params)
-        print("ABC")
-        print(len(self.results['training_error']))
-        return [self.results, self.__best_params]
 
+        return total_runs
+    
+    def best_param(self, arg):
+        best_valid_error = sys.maxsize
+        best_param = ''
+        for x in arg:
+           for result in x:
+                if result[0]['validation_error'][-1] < best_valid_error:
+                    best_valid_error = result[0]['validation_error'][-1]
+                    best_param = result[1]
+        return best_param
+    
     def fit(self, training_data, training_targets, epochs=None, batch_size=None, shuffle=None, cv=3,
             filename='./curr_dataset'):
         wandb.login()
@@ -746,15 +727,15 @@ class GridSearch(HyperparametersSearch):
         print("EVALUATING " + str(len(experiments)) + ' Combinations for a total of ' + str(
             len(experiments) * self.__cv) + ' times.')
 
-        parallel_split = np.array_split(np.asarray(experiments), self.__pool_size)
+        parallel_split = np.array_split(np.asarray(experiments), len(experiments))
         parallel_args = []
         for x in parallel_split:
             parallel_args.append((x, cv))
+            
         with NestablePool(self.__pool_size) as pool:
-            result_pool = pool.map(self.internal_runs, parallel_args)
+            result_pool = list(tqdm.tqdm(pool.imap(self.internal_runs, parallel_args), total=len(experiments)))
             pool.close()
             pool.join()
 
-            print("\n here 1 \n")
-            #print(result_pool)
-        # print(len(result_pool))
+        print("--------------------------------------------")
+        print("best params: " + str(self.best_param(result_pool)))
