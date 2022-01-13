@@ -1,7 +1,7 @@
 import math
 
 import numpy as np
-from tqdm import tqdm
+#from tqdm import tqdm
 
 from NeuralNetworkCore.Loss import losses
 from NeuralNetworkCore.Metrics import metrics
@@ -310,7 +310,7 @@ class Optimizer:
         self.reset_dict()#resetto per il training corrente
         current_val_error = 0
         epoch = 0
-        self.pbar = tqdm(total=epochs)
+        #self.pbar = tqdm(total=epochs)
         
         while epoch < epochs and not self.stop_flag:#ciclo sulle epoche
             self.init_epoch_training_error()#inizializzo gli errori a 0 per l'epoca corrente
@@ -344,8 +344,8 @@ class Optimizer:
             if early_stopping:#controllo l'early stopping
                 self.apply_stopping(current_loss_error, current_val_error)
             epoch += 1
-            self.pbar.update(1)
-        self.pbar.close()
+            #self.pbar.update(1)
+        #self.pbar.close()
 
 
 class StochasticGradientDescent(Optimizer):
@@ -576,6 +576,31 @@ class Adam(Optimizer):
     @momentum_network_2.setter
     def momentum_network_2(self, momentum_network_2):
         self.__momentum_network_2 = momentum_network_2
+    
+    @property
+    def beta1(self):
+        return self.__beta1
+    
+    @beta1.setter
+    def beta1(self, beta1):
+        self.beta1 = beta1
+    
+    @property
+    def beta2(self):
+        return self.__beta2
+    
+    @beta2.setter
+    def beta2(self, beta2):
+        self.beta2 = beta2
+
+    @property
+    def epsilon(self):
+        return self.__epsilon
+    
+    @epsilon.setter
+    def epsilon(self, epsilon):
+        self.epsilon = epsilon
+
 
     # endregion
 

@@ -315,12 +315,13 @@ class Model:
         metric_score = np.zeros(self.layers[-1].n_units)
         loss_scores = np.zeros(self.layers[-1].n_units)
         for x, y in zip(net_outputs, targets):
-            metric_score = np.add(metric_score, metrics[metric].function(predicted=x, target=y))
+            #metric_score = np.add(metric_score, metrics[metric].function(predicted=x, target=y))
             loss_scores = np.add(loss_scores, losses[loss].function(predicted=x, target=y))
+        metric_score = metrics[metric].function(predicted=net_outputs,target=targets)
         loss_scores = np.sum(loss_scores) / len(loss_scores)
-        metric_score = np.sum(metric_score) / len(metric_score)
+        #metric_score = np.sum(metric_score) / len(metric_score)
         loss_scores /= len(net_outputs)
-        metric_score /= len(net_outputs)
+        #metric_score /= len(net_outputs)
         return loss_scores, metric_score
 
     def propagate_back(self, dErr_dOut, gradient_network):

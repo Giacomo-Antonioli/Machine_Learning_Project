@@ -33,8 +33,6 @@ def binary_class_accuracy(predicted, target):
     return total
 
 def accuracy(predicted, target):
-    #TODO
-    #len(target) = 1
     counter = 0
     for index in range(len(target)):
         if predicted[index] == target[index]:
@@ -56,15 +54,54 @@ def true_false_positive(predicted, target):
         tpr is the true positive rate
         fpr is the false positive rate
     """
-    true_positive = np.equal(predicted, 1) & np.equal(target, 1)
-    true_negative = np.equal(predicted, 0) & np.equal(target, 0)
-    false_positive = np.equal(predicted, 1) & np.equal(target, 0)
-    false_negative = np.equal(predicted, 0) & np.equal(target, 1)
+    true_positive=[]
+    true_negative=[]
+    false_positive=[]
+    false_negative=[]
+    
+    ''' print('!!!!!!!!!!!!!')
+    print(predicted)
+    print('!!!!!!!!!!!!!')
+    print(target) '''
+    #1 positive e 0 negative
+    #predicted>0.7 e label=1 true positive
+    #predicted>0.7 e label=0 false positive
+    #predicted<0.3 e label=0 true negative
+    #predicted<0.3 e label=0 false negative
+    P=[]
+    N=[]
+    for index,x in enumerate(range(len(predicted))):
+        if predicted[index]>=0.7 and np.equal(target[index], 1):
+            true_positive.append(1)
+        elif predicted[index]>=0.7 and np.equal(target[index], 0):
+            false_positive.append(1)
+        elif predicted[index]<=0.3 and np.equal(target[index], 0):
+            true_negative.append(1)
+        else:
+            false_negative.append(1)
+        if target[index]==0:
+            N.append(1)
+        else:
+            P.append(1)
 
-    tpr = true_positive.sum() / (true_positive.sum() + false_negative.sum())
-    fpr = false_positive.sum() / (false_positive.sum() + true_negative.sum())
-
-    return tpr, fpr
+    ''' print("TP")    
+    print(true_positive)
+    print('TN')
+    print(true_negative)
+    print('FP')
+    print(false_positive)
+    print('FN') 
+    print(false_negative)'''
+    tpr = np.array(true_positive).sum() / np.array(P).sum()
+    fpr = np.array(false_positive).sum() /np.array(N).sum()
+    acc = ( np.array(true_positive).sum()+np.array(true_negative).sum()) / (np.array(P).sum()+np.array(N).sum())
+    '''     print("-----tpr-----")
+    print(tpr)
+    print("-----fpr-----")
+    print(fpr)
+    print("----acc-----")
+    print(acc) '''
+    return acc#, fpr
 
 #endregion 
 
@@ -90,7 +127,11 @@ def mean_absolute_error(predicted, target):
     return abs(np.subtract(predicted, target)) / len(target)
 
 def squared_error(predicted, target):
-    return pow(np.subtract(predicted, target), 2)
+    
+    sum = 0
+    for x, y in zip(predicted, target):
+        sum += pow(x - y, 2)
+    return sum
 
 def mean_squared_error(predicted, target):
     '''
@@ -157,7 +198,5 @@ metrics = {
 }
 
 #TODO
-#TF
-#r2
 #accuracy
 #

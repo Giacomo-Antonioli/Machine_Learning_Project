@@ -17,9 +17,10 @@ class LoadCSVData:
         saveNewFile(path, file_name, df):                                                                           \n
         printSets(X_train, X_test):                                                                                 \n
     """
-
+    #columns = None
+    #monk_dataset, monk_labels= LoadCSVData.loadCSV(path = "datasets/cup/", file_name = 'ML-CUP21-TR.csv', separator=',', column_names=columns, column_for_label=10, drop_rows=[0,1,2,3,4,5,6], drop_cols = [11])
      
-    def loadCSV(path, file_name, size_for_split = 1, separator = ',',save_to_file = False, save_to_file_path = None, column_names = None, column_for_label = None, returnFit = False):
+    def loadCSV(path, file_name, size_for_split = 1, separator = ',',save_to_file = False, save_to_file_path = None, column_names = None, column_for_label = None, returnFit = False, drop_rows = [], drop_cols = [], shuffle_split = False):
 
         """
         The method loadCSV recives a csv file and splits it in testing and training DataFrames
@@ -33,13 +34,15 @@ class LoadCSVData:
         :param column_for_label: the identifier for the label(s) column(s)
                     The input can be both the numerical index(es) or the string name(s) for the column(s)      
         :param returnFit: a boolean value to determin if the X_train and X_test value are to be returned as an array
+        :param drop_rows: an array of int that indicate the rows to drop by id
+        :param drop_cols: an array of int that indicate the columns to drop by id
+        :param shuffle_split: if true the values of the csv file will be shuffled before splitting
         :return: The splitted DataSets as different Dataframes. X_test and X_train for the actual data, y_test and y_train for the lables
     """
 
-        rows = pd.read_csv(path+file_name, sep=separator) #Reads the csv file
-        df = pd.DataFrame(rows)                     #Create DataFrame               
+        rows = pd.read_csv(path+file_name, skiprows = drop_rows, sep=separator) #Reads the csv file
+        df = pd.DataFrame(rows)                     #Create DataFrame                       
         
-
         if size_for_split == None:
             size_for_split = 0.5
 
@@ -47,23 +50,26 @@ class LoadCSVData:
             columns_id = list(column_names)
         else:
             columns_id = list()
+            columns_id.append('Id')
             c = 0
             while len(df.columns) < c:
                 columns_id.append("c" + str(c))
                 c += 1
 
+        
             
         #defines the header names for the csv file if the column names in input are less then the csv column count
         if(len(df.columns) - 1 > len(columns_id)):
-            c = len(columns_id) + 1 
+            c = len(columns_id) 
             while(len(df.columns) > len(columns_id)):
                 columns_id.append("c"+str(c))
                 c += 1
                 
         #adding the headers to the dataframe
-        df = pd.read_csv(path+file_name, sep=separator, names = columns_id)        
+        df = pd.read_csv(path+file_name, skiprows = drop_rows, sep=separator, names = columns_id)        
         df.set_index('Id', inplace=True)
-
+       
+        df.drop(df.columns[drop_cols], axis=1, inplace=True) 
 
         """The following block of code checks if the value for the labels have been passed as an int 
             if the labels are passed as int the code looks for the string version in the column_names
@@ -72,7 +78,9 @@ class LoadCSVData:
         """
         column_for_y_index = list()
         column_for_drop_index = ""
-        if isinstance(column_for_label, int):                         
+        if isinstance(column_for_label, int):     
+            if drop_cols != None:
+                column_for_label -= len(drop_cols)                    
             column_for_y_index = column_for_label
             i = 0
             for column_label in columns_id:
@@ -95,7 +103,7 @@ class LoadCSVData:
             y = df.iloc[:,column_for_y_index] 
             X = df.drop(column_for_drop_index, axis=1)                          #the dataframe except for the labels; axis is 1 for columns, 0 for rows           
              
-        X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=size_for_split) #splits the dataset in test and train
+        X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=size_for_split, shuffle = shuffle_split) #splits the dataset in test and train
        
         y_train = y_train.to_list()
         y_train = np.reshape(y_train, (len(y_train), 1)) 
@@ -158,7 +166,7 @@ class LoadCSVData:
 #print("-here-")
 #print(monk_labels)
 #print(monk_dataset)
-#LoadCSVData.loadCSV(path = "./datasets/monks/", file_name = 'monks-1.train', separator=' ', column_names=columns, column_for_label='class')
+#LoadCSVData.loadCSV(path = "/datasets/cup/", file_name = 'ML-CUP21-TR.csv', separator=',', column_for_label=10, drop_cols=['#'])
 
 # the following code is for testing purpose only
 # columns = ['a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8', 'a9', 'a10', 'a11', 'a12', 'a13']
