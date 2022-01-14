@@ -485,6 +485,16 @@ class RMSProp(Optimizer):
     @property
     def rho(self):
         return self.__rho
+    @rho.setter
+    def rho(self, rho):
+        self.__rho = rho
+    
+    @property
+    def epsilon(self):
+        return self.__epsilon
+    @epsilon.setter
+    def epsilon(self, epsilon):
+        self.__epsilon = epsilon
 
     @property
     def rmsprop_network(self):
@@ -583,7 +593,7 @@ class Adam(Optimizer):
     
     @beta1.setter
     def beta1(self, beta1):
-        self.beta1 = beta1
+        self.__beta1 = beta1
     
     @property
     def beta2(self):
@@ -591,7 +601,7 @@ class Adam(Optimizer):
     
     @beta2.setter
     def beta2(self, beta2):
-        self.beta2 = beta2
+        self.__beta2 = beta2
 
     @property
     def epsilon(self):
@@ -599,7 +609,7 @@ class Adam(Optimizer):
     
     @epsilon.setter
     def epsilon(self, epsilon):
-        self.epsilon = epsilon
+        self.__epsilon = epsilon
 
 
     # endregion
@@ -611,6 +621,9 @@ class Adam(Optimizer):
         self.momentum_network_2 = self.model.get_empty_struct()
 
     def apply_adam(self, batch_index):
+        print('beta1: ' + str(self.beta1))
+        print('beta2: ' + str(self.beta2))
+        print('epsilon: ' + str(self.epsilon))
         for grad_net_index in range(len(self.model.dense_configuration)):
             layer_index = self.model.dense_configuration[grad_net_index]
 

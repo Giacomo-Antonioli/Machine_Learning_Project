@@ -1,3 +1,4 @@
+from NeuralNetworkCore.Layer import Dense, Dropout
 from NeuralNetworkCore.Optimizers import *
 from NeuralNetworkCore.Reguralizers import EarlyStopping, regularizers
 
@@ -144,8 +145,37 @@ class Model:
         self.net_configuration_types.append(object.type)
 
     def get_layer_depth(self):
-
         return len(self.layers) - 1
+    
+    def create_net(self, num_layer=1, drop_frequency=1, num_unit=[4], act_func=['linear'], weight_init=['glorot_uniform'], regularizer=None,
+                   bias_init=['glorot_uniform'],  drop_percentage=[0.3], drop_seed=[10]):
+        drop = drop_frequency
+        for i in range(num_layer):
+            #adding a dropout layer
+            if drop == 0 and i != num_layer-1:
+                seed = drop_seed.pop(0)
+                prob = drop_percentage.pop(0)
+                self.add(Dropout(drop_percentage[0]))
+                drop_seed.append(seed)
+                drop_percentage.append(prob)
+                drop = drop_frequency
+            #adding a dense layer
+            else:
+                drop-=1
+                n_unit = num_unit.pop(0) if i != num_layer-1 else 1
+                activation_function = act_func.pop(0)
+                w_init = weight_init.pop(0)
+                b_init = bias_init.pop(0)
+                reg = None
+                if regularizer != None: 
+                    reg = regularizer.pop(0)
+                    regularizer.append(reg)
+                self.add(Dense(n_units=n_unit, weight_initializer=w_init, bias_initializer=b_init, activation_function=activation_function, regularizer=reg))
+                if i != num_layer-1: 
+                    num_unit.append(n_unit)
+                    act_func.append(activation_function)
+                    weight_init.append(w_init)
+                    bias_init.append(b_init)
 
     def showLayers(self):
         print("°°°°°°°°°°°°°°°°°°°°°")
