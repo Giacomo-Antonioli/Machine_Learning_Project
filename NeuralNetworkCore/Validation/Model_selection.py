@@ -409,18 +409,18 @@ class GridSearch(HyperparametersSearch):
     def add_optimizer_parameters(self, param_combination, param, x):
         if x[0] == 'mom' or x[0] == 'momentum' or x[0] == 'm':
             if self.__optimizer_seen:
-                self.__evaluated_optimizer.momentum = float(param_combination[param])
+                self.__evaluated_optimizer().momentum = float(param_combination[param])
             else:
                 self.__temp_suspended[param] = float(param_combination[param])
         if x[0] == 'learningrate' or x[0] == 'lr':
             if self.__optimizer_seen:
-                self.__evaluated_optimizer.lr = float(param_combination[param])
+                self.__evaluated_optimizer().lr = float(param_combination[param])
             else:
                 self.__temp_suspended[param] = float(param_combination[param])
         if x[0] == 'nesterov':
             if self.__optimizer_seen:
-                if self.__evaluated_optimizer.name == 'sgd':
-                    self.__evaluated_optimizer.momentum = param_combination[param]
+                if self.__evaluated_optimizer().name == 'sgd':
+                    self.__evaluated_optimizer().momentum = param_combination[param]
                 else:
                     warnings.warn(str(self.__evaluated_optimizer().name) + ' has no param ' + param + '.')
 
@@ -428,8 +428,8 @@ class GridSearch(HyperparametersSearch):
                 self.__temp_suspended[param] = param_combination[param]
         if x[0] == 'rho':
             if self.__optimizer_seen:
-                if self.__evaluated_optimizer.name == 'rmsprop':
-                    self.__evaluated_optimizer.rho = param_combination[param]
+                if self.__evaluated_optimizer().name == 'rmsprop':
+                    self.__evaluated_optimizer().rho = param_combination[param]
                 else:
                     warnings.warn(str(self.__evaluated_optimizer().name) + ' has no param ' + param + '.')
 
@@ -437,8 +437,8 @@ class GridSearch(HyperparametersSearch):
                 self.__temp_suspended[param] = param_combination[param]
         if x[0] == 'beta1' or x[0] == 'b1':
             if self.__optimizer_seen:
-                if self.__evaluated_optimizer.name == 'adam':
-                    self.__evaluated_optimizer.beta1 = param_combination[param]
+                if self.__evaluated_optimizer().name == 'adam':
+                    self.__evaluated_optimizer().beta1 = param_combination[param]
                 else:
                     message = str(self.__evaluated_optimizer().name) + ' has no param ' + param + '.'
                     warnings.warn(message)
@@ -446,8 +446,8 @@ class GridSearch(HyperparametersSearch):
                 self.__temp_suspended[param] = param_combination[param]
         if x[0] == 'beta2' or x[0] == 'b2':
             if self.__optimizer_seen:
-                if self.__evaluated_optimizer.name == 'adam':
-                    self.__evaluated_optimizer.beta2 = param_combination[param]
+                if self.__evaluated_optimizer().name == 'adam':
+                    self.__evaluated_optimizer().beta2 = param_combination[param]
                 else:
                     message = str(self.__evaluated_optimizer().name) + ' has no param ' + param + '.'
                     warnings.warn(message)
@@ -457,8 +457,8 @@ class GridSearch(HyperparametersSearch):
                 self.__temp_suspended[param] = param_combination[param]
         if x[0] == 'epsilon' or x[0] == 'e':
             if self.__optimizer_seen:
-                if self.__evaluated_optimizer.name == 'adam':
-                    self.__evaluated_optimizer.epsilon = param_combination[param]
+                if self.__evaluated_optimizer().name == 'adam':
+                    self.__evaluated_optimizer().epsilon = param_combination[param]
                 else:
                     warnings.warn(str(self.__evaluated_optimizer().name) + ' has no param ' + param + '.')
 
@@ -612,7 +612,6 @@ class GridSearch(HyperparametersSearch):
             config=config,reinit=True)
         self.__optimizer_seen = False
         self.__reguralizers = {}
-
         self.generate_current_experiment(param_combination)
 
         self.__model.compile(optimizer=self.__evaluated_optimizer, loss=self.__current_loss,
@@ -723,6 +722,8 @@ class GridSearch(HyperparametersSearch):
 
         keys, values = zip(*self.__param_list.items())
         experiments = [dict(zip(keys, v)) for v in itertools.product(*values)]
+
+        experiments = self.parameters_skimming()
 
         print("EVALUATING " + str(len(experiments)) + ' Combinations for a total of ' + str(
             len(experiments) * self.__cv) + ' times.')
