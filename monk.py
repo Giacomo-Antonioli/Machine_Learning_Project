@@ -23,11 +23,15 @@ from NeuralNetworkCore.Utils.LoadCSVData import LoadCSVData
 columns = ['class', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'Id']
 
 #parameters
-opt = ['sgd', 'rmsprop']
-mom = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-lr = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-metrics = ['binary', 'TF']
-loss = ['squared', 'binary_cross_entropy']
+opt = ['adam', 'rmsprop', 'sgd']
+mom = [0.1, 0.2]
+lr = [0.1]
+metrics = ['binary']
+loss = ['squared']
+beta1 = [0.9, 0.8]
+beta2 = [0.999, 0.888]
+epsilon = [1e-9]
+rho = [0.9, 0.8]
 
 for monk in ['monks-1']:#, 'monks-2', 'monks-3'
     monk_train = monk + '.train'
@@ -40,17 +44,24 @@ for monk in ['monks-1']:#, 'monks-2', 'monks-3'
 
     model = Model(monk)
     model.set_input_shape(17)
-    model.add(Dense(4, activation_function='tanh'))
-    model.add(Dense(1, activation_function='sigmoid'))
+    model.create_net(num_layer = 4, drop_frequency=1, num_unit=[4], act_func=['tanh', 'sigmoid'], weight_init= ['glorot_uniform', 'glorot_normal'],
+                     bias_init=['glorot_normal', 'glorot_uniform'], drop_percentage=[0.3, 0.4], drop_seed=[10])
+    
+    #model.add(Dense(4, activation_function='tanh'))
+    #model.add(Dense(1, activation_function='sigmoid'))
     optimizer = StochasticGradientDescent()
     model.compile(optimizer=optimizer, metrics='binary', loss='squared')
-
+    
     gridsearch_1 = GridSearch(model,
                               {'opt': opt,
                                'mom': mom,
                                'lr': lr,
                                'metrics': metrics,
-                               'loss': loss
+                               'loss': loss,
+                               'b1': beta1,
+                               'b2': beta2,
+                               'e': epsilon,
+                               'rho': rho
                                }
                               )
     
