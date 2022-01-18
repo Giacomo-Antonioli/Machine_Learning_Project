@@ -149,19 +149,19 @@ class Model:
     
     def create_net(self, num_layer=1, drop_frequency=1, num_unit=[4], act_func=['linear'], weight_init=['glorot_uniform'], regularizer=None,
                    bias_init=['glorot_uniform'],  drop_percentage=[0.3], drop_seed=[10]):
-        drop = drop_frequency
+        drop_count = drop_frequency
         for i in range(num_layer):
             #adding a dropout layer
-            if drop == 0 and i != num_layer-1:
+            if drop_count == 0 and i != num_layer-1:
                 seed = drop_seed.pop(0)
                 prob = drop_percentage.pop(0)
-                self.add(Dropout(drop_percentage[0]))
+                self.add(Dropout(prob))
                 drop_seed.append(seed)
                 drop_percentage.append(prob)
-                drop = drop_frequency
+                drop_count = drop_frequency
             #adding a dense layer
             else:
-                drop-=1
+                drop_count-=1
                 n_unit = num_unit.pop(0) if i != num_layer-1 else 1
                 activation_function = act_func.pop(0)
                 w_init = weight_init.pop(0)
@@ -301,6 +301,17 @@ class Model:
         n_targets = training_targets.shape[0] if len(training_targets.shape) > 1 else 1
 
         if target_len != self.__layers[-1].n_units or n_patterns != n_targets or batch_size > n_patterns:
+            print("----target_len----")
+            print(target_len)
+            print("----layer[-1].n_units----")
+            print(self.__layers[-1].n_units)
+            print("----n_patterns----")
+            print(n_patterns)
+            print("----n_targets----")
+            print(n_targets)
+            print("----batch_size----")
+            print(batch_size)
+            input()
             raise AttributeError(f"Mismatching shapes")
 
         return self.optimizer.optimization_process(self, train_dataset=training_data, train_labels=training_targets,
