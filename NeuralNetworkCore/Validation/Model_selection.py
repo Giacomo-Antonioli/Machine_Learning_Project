@@ -374,12 +374,18 @@ class GridSearch(HyperparametersSearch):
                     parameters_new[current_key] = {}
                 #print(current_key)
                 for key in self.__param_list:
+                    #if key == 'act' or key == 'actfun' or key == 'activationfunction':
+                    ''' print("----skimming----")
+                    print(key)
+                    print('--------') '''
+                    key_name = key.split('_')
                     if key != 'opt':
                         #print("\tsearching key: " + key)
+                        #print(self.__param_list[key[0]])
                         try:
                             #print(self.__look_up_dict[key])
-                            if self.__look_up_dict[key] in optimizers_attributes:
-                                if hasattr(selected_opti, self.__look_up_dict[key]):
+                            if self.__look_up_dict[key_name[0]] in optimizers_attributes:
+                                if hasattr(selected_opti, self.__look_up_dict[key_name[0]]):
 
                                     #print("\t\t" + key + " found")
 
@@ -401,7 +407,7 @@ class GridSearch(HyperparametersSearch):
         for opts in parameters_new:
             curr_dict = parameters_new[opts]
             curr_dict['opt'] = [opts]
-            keys, values = zip(*curr_dict.items())
+            keys, values = zip(*curr_dict.items())            
             partial = [dict(zip(keys, v)) for v in itertools.product(*values)]
             experimets = experimets + partial
         return experimets
@@ -612,7 +618,9 @@ class GridSearch(HyperparametersSearch):
             config=config,reinit=True)
         self.__optimizer_seen = False
         self.__reguralizers = {}
+
         self.generate_current_experiment(param_combination)
+
 
         self.__model.compile(optimizer=self.__evaluated_optimizer, loss=self.__current_loss,
                                 metrics=self.__current_metric, early_stopping=self.__es, patience=self.__patience,
