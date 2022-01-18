@@ -301,17 +301,6 @@ class Model:
         n_targets = training_targets.shape[0] if len(training_targets.shape) > 1 else 1
 
         if target_len != self.__layers[-1].n_units or n_patterns != n_targets or batch_size > n_patterns:
-            print("----target_len----")
-            print(target_len)
-            print("----layer[-1].n_units----")
-            print(self.__layers[-1].n_units)
-            print("----n_patterns----")
-            print(n_patterns)
-            print("----n_targets----")
-            print(n_targets)
-            print("----batch_size----")
-            print(batch_size)
-            input()
             raise AttributeError(f"Mismatching shapes")
 
         return self.optimizer.optimization_process(self, train_dataset=training_data, train_labels=training_targets,
