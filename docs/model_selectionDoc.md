@@ -24,134 +24,54 @@ Classes documentation list:
 
 </p>
 
+# Model Selection
+<p>
+
+Model selection is the process of selecting one final machine learning model from among a collection of candidate machine learning models for a training dataset.
+
+Model selection is a process that can be applied both across different types of models (e.g. logistic regression, SVM, KNN, etc.) and across models of the same type configured with different model hyperparameters (e.g. different kernels in an SVM).
+
+</p>
+
 ## ValidationTechnique
 
-<h3> Class variables</h3>
 <p>
-For each variable there is a getter and setter.
-
-| Method property                       | Explanation                                              |  
-| ------------------------------------- | ----------------------------   |
-| self.__name = name                    | Name to identify the model     |
-| self.__training_set = []              |                                |     
-| self.__validation_set = []            |                                |
-| self.__test_set = []                  |                                |
-| self.__training_set_labels = []       |                                |
-| self.__validation_set_labels = []     |                                |
-| self.__test_set_labels = []           |                                |
-
+Using proper validation techniques helps you understand your model, but most importantly, estimate an unbiased generalization performance.
+There is no single validation method that works in all scenarios. It is important to understand if you are dealing with groups, time-indexed data, or if you are leaking data in your validation procedure.
 </p>
 
 ### SimpleHoldout extends ValidationTechnique
 
-<hr>
-<h3>split</h3>
-<p>
-Params: (self, *args)
-
-Split data in 3 parts (50% training, 25% validation, 25% test-set or with a percentage used defined)
-</p>
-
-<hr>
-<h3>double_split</h3>
-<p>
-Params: (self, data, labels)
-
-Split dataset into training and validation with a 65%-35% split.
-</p>
+Hold-out is when you split up your dataset into a ‘train’ and ‘test’ set. The training set is what the model is trained on, and the test set is used to see how well that model performs on unseen data. A common split when using the hold-out method is using 80% of data for training and the remaining 20% of the data for testing.
 
 ### KFold extends ValidationTechnique
 
 The idea behind k-fold cross-validation is to divide all the available data items into roughly equal-sized sets. Each
 set is used exactly once as the test set while the remaining data is used as the training set.
 
-<hr>
-<h3>split</h3>
-<p>
-Params: (self, data, splits=5)
-
-Split the data in splits sets
-</p>
-
 ## HyperparametersSearch
 
-<h3>Class variables</h3>
 <p>
-For each variable there is a getter and setter.
-
-| Method property                       | Explanation                                              |  
-| ------------------------------------- | ----------------------------   |
-| self.__name = name                    | Name to identify the model     |
-| self.__best_val = None                |                                |     
-| self.__best_parameters = []           |                                |
-| self.__history = {}                   |                                |
-| self.__best_model = None              |                                |
-
+Most common learning algorithms feature a set of hyperparameters that must be determined before training commences. The choice of hyperparameters can significantly affect the resulting model's performance, but determining good values can be complex; hence a disciplined, theoretically sound search strategy is essential.
 </p>
 <hr>
 
 ### GridSearch extends HyperparametersSearch
 
-<h3>Class variables</h3>
 <p>
-For each variable there is a getter and setter.
-
-| Method property                       | Explanation                    |  
-| ------------------------------------- | ----------------------------   |
-| self.__model = model                  | \\                             |
-| self.__param_list = param_list        |                                |     
-| self.__training_set = []              | \\                             |
-| self.__validation_set = []            | \\                             |
-| self.__evaluated_optimizer            |                                |
-| self.__optimizer_seen = False         |                                |
-| self.__temp_suspended = {}            |                                |
-| self.__current_loss                   | \\                             |
-| self.__current_metric                 | \\                             |
-| self.__all_reg_mode = False           |                                |
-| self.__reguralizers = {}              |                                |
-| self.__es = False                     |                                |
-| self.__monitor                        | \\                             |
-| self.__es_mode                        |                                |
-| self.__patience                       | \\                             |
-| self.__tol                            |                                |
-| self.__epochs                         | \\                             |
-| self.__batch_size                     | \\                             |
-| self.__shuffle                        |                                |
-| self.__cv = 3                         |                                |
-| self.__best_val = None                |  \\                            |
-| self.__best_params = None             |  \\                            |
-| self.__best_tr_metric = None          |  \\                            |
-| self.__best_tr_loss = None            |  \\                            |
-| self.__best_val_metric = None         |  \\                            |
-
+Grid search is an approach to hyperparameter tuning that will methodically build and evaluate a model for each combination of algorithm parameters specified in a grid.
 </p>
 
-<hr>
-<h3>add_optimizer_parameters</h3>
-<p>
-Params: (self, param_combination, param, x)
+---
 
-- param_combination:
-- param
-- x
+<h3> References </h3>
 
-(?)
-</p>
+- <a href="https://machinelearningmastery.com/a-gentle-introduction-to-model-selection-for-machine-learning/#:~:text=Model%20selection%20is%20the%20process%20of%20selecting%20one%20final%20machine,SVM%2C%20KNN%2C%20etc.)"> https://machinelearningmastery.com/a-gentle-introduction-to-model-selection-for-machine-learning/#:~:text=Model%20selection%20is%20the%20process%20of%20selecting%20one%20final%20machine,SVM%2C%20KNN%2C%20etc.) </a>
 
-<hr>
-<h3>fit</h3>
-<p>
-Params: (self, training_data, training_targets, epochs=None, batch_size=None, shuffle=None, cv=3,
-            filename='./curr_dataset')
+- <a href="https://www.datacamp.com/community/tutorials/parameter-optimization-machine-learning-models"> https://www.datacamp.com/community/tutorials/parameter-optimization-machine-learning-models </a>
 
-- training_data:
-- training_targets
-- epochs=None
-- batch_size=None
-- shuffle=None
-- cv
-- filename='./curr_dataset'
+- <a href="https://www.researchgate.net/publication/272195620_Hyperparameter_Search_in_Machine_Learning"> https://www.researchgate.net/publication/272195620_Hyperparameter_Search_in_Machine_Learning </a>
 
-Function fitting is the process of training a neural network on a set of inputs in order to produce an associated set of
-target outputs.
-</p>
+- <a href="https://medium.com/@eijaz/holdout-vs-cross-validation-in-machine-learning-7637112d3f8f"> https://medium.com/@eijaz/holdout-vs-cross-validation-in-machine-learning-7637112d3f8f </a>
+
+- <a href="https://towardsdatascience.com/validating-your-machine-learning-model-25b4c8643fb7"> https://towardsdatascience.com/validating-your-machine-learning-model-25b4c8643fb7 </a>

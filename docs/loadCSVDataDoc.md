@@ -55,6 +55,9 @@ Params: (path, file_name, size_for_split, save_to_file, save_to_file_path, colum
 - column_for_label: the identifier for the label(s) column(s)
                     The input can be both the numerical index(es) or the string name(s) for the column(s)      
 - returnFit: a boolean value to determine if the X_train and X_test value are to be returned as an array
+- drop_rows: an array of int that indicate the rows to drop by id
+- drop_cols: an array of int that indicate the columns to drop by id
+- shuffle_split: if true the values of the csv file will be shuffled before splitting
         
 If the size_for_split == 1 and returnFit = False
 Return: The DataSets as Dataframe and it's Label. X_train and y_train

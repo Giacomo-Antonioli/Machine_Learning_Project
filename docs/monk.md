@@ -25,7 +25,7 @@ Classes documentation list:
 
 ## Monk 
 
-
+Monk.py is the class that launches the Monk dataset analysis, the Monk data-set, splitted in three different sets, is used to create a baseline to evaluate the correct functioning of the Network.
 
 
 
@@ -35,4 +35,4 @@ Classes documentation list:
 
 <h3> References </h3>
 
-- <a href=""> </a>
+- <a href="https://archive.ics.uci.edu/ml/datasets/MONK's+Problems"> https://archive.ics.uci.edu/ml/datasets/MONK's+Problems </a>

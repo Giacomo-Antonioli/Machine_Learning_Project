@@ -26,7 +26,7 @@ Classes documentation list:
 
 ## Model
 
-The following are methods in the Model.py explained
+A machine learning model is an expression of an algorithm that combs through mountains of data to find patterns or make predictions. Fueled by data, machine learning (ML) models are the mathematical engines of artificial intelligence.
 
 <h3>Model variables</h3>
 <p>
@@ -152,3 +152,9 @@ Params: (self, dErr_dOut, gradient_network)
 Propagates back the error to update each layer's gradient, returns the updated grad_net
 
 </p>
+
+---
+
+<h3> References </h3>
+
+- <a href="https://blogs.nvidia.com/blog/2021/08/16/what-is-a-machine-learning-model/#:~:text=A%20machine%20learning%20model%20is,mathematical%20engines%20of%20artificial%20intelligence."> https://blogs.nvidia.com/blog/2021/08/16/what-is-a-machine-learning-model/#:~:text=A%20machine%20learning%20model%20is,mathematical%20engines%20of%20artificial%20intelligence. </a>
