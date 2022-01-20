@@ -16,59 +16,70 @@ test_set_file = "ML-CUP21-TS.csv"
 cupPath = "./datasets/cup/"
 
 opt = ['sgd']
-''' mom = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6,0.7, 0.8, 0.9]
-lr = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6,0.7, 0.8, 0.9]
+mom = [0.5, 0.9, 0.99]
+lr = [0.1, 0.01, 1e-4, 1e-5]
 metrics = ['mee']
 loss = ['squared']
-beta1 = [0.95, 0.9, 0.85, 0.8]
-beta2 = [0.999, 0.995, 0.99, 0.95]
-epsilon = [1e-9, 1e-8]
-rho = [0.95, 0.9, 0.85, 0.8] '''
-mom = [0.1]
-lr = [0.1]
-metrics = ['mee']
-loss = ['squared']
+beta1 = [0.95, 0.9]
+beta2 = [0.999, 0.995]
+epsilon = [1e-8]
+rho = [0.95, 0.9]
+
+n_layer = 2
+n_unit_1 = [10]
+n_unit_2 = [1]
+ac_fun_1 = ['sigmoid']
+ac_fun_2 = ['linear']
+weight_init = ['glorot_normal']
+bias_init = ['glorot_normal']
+# drop_percent = [0.1,0.2,0.3]
+epochs = 100
+cross_validation = 3
+batch_size = [32]
+# reg = ['l1']
+# reg_param = [0.0003]
 
 cup_dataset, cup_lables= LoadCSVData.loadCSV(path = "datasets/cup/", file_name = 'ML-CUP21-TR.csv', separator=',', column_names=None, column_for_label=10, drop_rows=[0,1,2,3,4,5,6], drop_cols = [11])
 cup_dataset1, cup_lables1= LoadCSVData.loadCSV(path = "datasets/cup/", file_name = 'ML-CUP21-TR.csv', separator=',', column_names=None, column_for_label=11, drop_rows=[0,1,2,3,4,5,6], drop_cols = [10])
 
-''' print(cup_dataset)
-print("--------")
-print(cup_lables) '''
-
 model = Model("cup1")
 
-model.create_net(num_layer = 4, drop_frequency=1, num_unit=[4], act_func=['relu'], weight_init= ['glorot_normal'],
-                     bias_init=['glorot_normal'], drop_percentage=[0.3], drop_seed=[10])
+''' model.create_net(num_layer = n_layer, drop_frequency=1, num_unit=[10], act_func=['linear'], weight_init= ['glorot_normal'],
+                     bias_init=['glorot_normal'], drop_percentage=[0.3]) '''
 model.set_input_shape(10)
 
-''' model.set_input_shape(10)
-model.add(Dense(20, regularizer=('l1', 0.0003), activation_function='relu'))
-model.add(Dropout(0.3))
-model.add(Dense(1, activation_function='linear')) '''
+model.add(Dense(10, regularizer=('l1', 0.0003), activation_function='relu'))
+
+model.add(Dense(1, activation_function='linear'))
 optimizer = StochasticGradientDescent()
 model.compile(optimizer=optimizer, metrics='mee', loss='squared')
-
-''' gridsearch_1 = GridSearch(model,
-                            {'opt': opt,
-                            'mom': mom,
-                            'lr': lr,
-                            'metrics': metrics,
-                            'loss': loss,
-                            'b1': beta1,
-                            'b2': beta2,
-                            'e': epsilon,
-                            'rho': rho
-                            }
-                            ) '''
+model.showLayers()
 gridsearch_1 = GridSearch(model,
                             {'opt': opt,
-                            'mom': mom,
-                            'lr': lr,
-                            'metrics': metrics,
-                            'loss': loss,
+                              'mom': mom,
+                              'lr': lr,
+                              'metrics': metrics,
+                              'loss': loss,
+                              'b1': beta1,
+                              'b2': beta2,
+                              'epsilon': epsilon,
+                              'rho': rho,
+                              'weightinit_1': weight_init,
+                              #'weightinit_2': weight_init,
+                              'biasinit_1': bias_init,
+                              #'biasinit_2': bias_init,
+                              'actfun_1': ac_fun_1,
+                              'actfun_2': ac_fun_2,
+                              'units_1': n_unit_1,
+                              #'units_2': n_unit_2,
+                              'batchsize': batch_size,
+                           #    'reg_1': reg,
+                           #    'regparam_1': reg_param,
+                           #    'reg_2': reg,
+                           #    'regparam_2': reg_param
                             }
                             )
 
 if __name__ == '__main__':
-    gridsearch_1.fit(cup_dataset, cup_lables, epochs=600, batch_size=32, shuffle=True, cv=5)
+    
+    gridsearch_1.fit(cup_dataset, cup_lables, epochs=100, batch_size=32, shuffle=True, cv=5)

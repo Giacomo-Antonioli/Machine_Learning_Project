@@ -7,6 +7,7 @@ import os.path
 from sklearn.preprocessing import OneHotEncoder
 
 
+
 class LoadCSVData:
     """
         This class contains the methods to read and split the .csv Datasets
@@ -104,7 +105,6 @@ class LoadCSVData:
             X = df.drop(column_for_drop_index, axis=1)                          #the dataframe except for the labels; axis is 1 for columns, 0 for rows           
              
         X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=size_for_split, shuffle = shuffle_split) #splits the dataset in test and train
-       
         y_train = y_train.to_list()
         y_train = np.reshape(y_train, (len(y_train), 1)) 
         y_test = y_test.to_list() 
@@ -117,12 +117,12 @@ class LoadCSVData:
             LoadCSVData.saveNewFile(save_to_file_path,"y-test",y_train)
  
         if size_for_split == 1 and returnFit == False:
-            return X_train, y_train
+            return X_train.to_numpy().astype(np.float32), y_train.astype(np.float32)
         if size_for_split == 1:
             X_train = OneHotEncoder().fit_transform(X_train).toarray().astype(np.float32)
             return X_train, y_train
         if returnFit == False:
-            return  X_train, X_test, y_train, y_test
+            return  X_train.to_numpy().astype(np.float32), X_test.to_numpy().astype(np.float32), y_train.astype(np.float32), y_test.astype(np.float32)
         else:
              X_train = OneHotEncoder().fit_transform(X_train).toarray().astype(np.float32)
              X_test = OneHotEncoder().fit_transform(X_test).toarray().astype(np.float32)

@@ -148,21 +148,21 @@ class Model:
     def get_layer_depth(self):
         return len(self.layers) - 1
     
-    def create_net(self, num_layer=1, drop_frequency=1, num_unit=[4], act_func=['linear'], weight_init=['glorot_uniform'], regularizer=None,
+    def create_net(self, num_layer=1, drop_frequency=None, num_unit=[4], act_func=['linear'], weight_init=['glorot_uniform'], regularizer=None,
                    bias_init=['glorot_uniform'],  drop_percentage=[0.3], drop_seed=[10]):
-        drop_count = drop_frequency
+        drop_count = 0
         for i in range(num_layer):
             #adding a dropout layer
-            if drop_count == 0 and i != num_layer-1:
+            if drop_frequency != None and drop_count == drop_frequency and i != num_layer-1:
                 seed = drop_seed.pop(0)
                 prob = drop_percentage.pop(0)
                 self.add(Dropout(prob))
                 drop_seed.append(seed)
                 drop_percentage.append(prob)
-                drop_count = drop_frequency
+                drop_count = 0
             #adding a dense layer
             else:
-                drop_count-=1
+                drop_count+=1
                 n_unit = num_unit.pop(0) if i != num_layer-1 else 1
                 activation_function = act_func.pop(0)
                 w_init = weight_init.pop(0)
@@ -322,6 +322,7 @@ class Model:
         predictions = []
         for single_input in (prediction_input):
             predictions.append(self.forward(net_input=single_input, training=False))
+
         return np.array(predictions)
 
     def evaluate(self, validation_data, targets, metric=None, loss=None):
@@ -348,6 +349,13 @@ class Model:
         for x, y in zip(net_outputs, targets):
             #metric_score = np.add(metric_score, metrics[metric].function(predicted=x, target=y))
             loss_scores = np.add(loss_scores, losses[loss].function(predicted=x, target=y))
+        """ print("----predictions--------")
+        print(np.array(net_outputs))
+        print("---------------------")
+        print("----targets--------")
+        print(np.array(targets))
+        print("---------------------")
+        input() """
         metric_score = metrics[metric].function(predicted=net_outputs,target=targets)
         loss_scores = np.sum(loss_scores) / len(loss_scores)
         #metric_score = np.sum(metric_score) / len(metric_score)
