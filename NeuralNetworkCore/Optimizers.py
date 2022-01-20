@@ -621,9 +621,9 @@ class Adam(Optimizer):
         self.momentum_network_2 = self.model.get_empty_struct()
 
     def apply_adam(self, batch_index):
-        print('beta1: ' + str(self.beta1))
-        print('beta2: ' + str(self.beta2))
-        print('epsilon: ' + str(self.epsilon))
+        # print('beta1: ' + str(self.beta1))
+        # print('beta2: ' + str(self.beta2))
+        # print('epsilon: ' + str(self.epsilon))
         for grad_net_index in range(len(self.model.dense_configuration)):
             layer_index = self.model.dense_configuration[grad_net_index]
 
