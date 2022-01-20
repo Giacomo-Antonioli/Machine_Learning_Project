@@ -3,6 +3,7 @@ from NeuralNetworkCore.Optimizers import *
 from NeuralNetworkCore.Reguralizers import EarlyStopping, regularizers
 
 
+
 class Model:
 
     @staticmethod

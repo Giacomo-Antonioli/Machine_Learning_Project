@@ -23,10 +23,11 @@ from NeuralNetworkCore.Utils.LoadCSVData import LoadCSVData
 columns = ['class', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'Id']
 
 #hyper-parameters
-opt = ['adam', 'rmsprop', 'sgd']
+#hyper-parameters
+opt = ['sgd','adam', 'rmsprop']
 mom = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 lr = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-metrics = ['mee']
+metrics = ['binary']
 loss = ['squared']
 beta1 = [0.95, 0.9]
 beta2 = [0.999, 0.995]
@@ -34,20 +35,20 @@ epsilon = [1e-9, 1e-8]
 rho = [0.95, 0.9]
 
 n_layer = 2
-n_unit_1 = [20]
+n_unit_1 = [10]
 n_unit_2 = [1]
-ac_fun_1 = ['tanh']
+ac_fun_1 = ['tanh','sigmoid']
 ac_fun_2 = ['sigmoid']
 weight_init = ['glorot_normal']
 bias_init = ['glorot_normal']
-drop_percent = [0.3]
-epochs = 100
+drop_percent = [0.3,0.5]
+epochs = 500
 cross_validation = 5
-batch_size = [1, 5]
+batch_size = [1, 30]
 reg = ['l1']
 reg_param = [0.0003]
 
-for monk in ['monks-1']:#, 'monks-2', 'monks-3'
+for monk in ['monks-3']:#, 'monks-2', 'monks-3'
     monk_train = monk + '.train'
     monk_test = monk + '.test'
 
@@ -58,11 +59,11 @@ for monk in ['monks-1']:#, 'monks-2', 'monks-3'
 
     model = Model(monk)
     model.set_input_shape(17)
-    model.create_net(num_layer = n_layer, drop_frequency=1, num_unit=[30], act_func=['tanh', 'sigmoid'], weight_init= ['glorot_normal'],
-                     bias_init=['glorot_normal'], drop_percentage=[0.3, 0.4], drop_seed=[10])
+    # model.create_net(num_layer = n_layer, drop_frequency=1, num_unit=[10], act_func=['sigmoid', 'linear'], weight_init= ['glorot_normal'],
+    #                  bias_init=['glorot_normal'], drop_percentage=[1])
     
-    #model.add(Dense(30, activation_function='tanh'))
-    #model.add(Dense(40, activation_function='sigmoid'))
+    model.add(Dense(10, activation_function='sigmoid'))
+    model.add(Dense(1, activation_function='tanh'))
     optimizer = StochasticGradientDescent()
     model.compile(optimizer=optimizer, metrics='binary', loss='squared')
     
@@ -85,14 +86,17 @@ for monk in ['monks-1']:#, 'monks-2', 'monks-3'
                                'units_1': n_unit_1,
                                'units_2': n_unit_2,
                                'batchsize': batch_size,
-                               'reg_1': reg,
-                               'regparam_1': reg_param,
-                               'reg_2': reg,
-                               'regparam_2': reg_param
+                              #  'reg_1': reg,
+                              #  'regparam_1': reg_param,
+                              #  'reg_2': reg,
+                              #  'regparam_2': reg_param
                                }
                             )
     
     if __name__ == '__main__':
+        print("---------------------------MODEL---------------------------------")
+        model.showLayers()
+        print("-----------------------------------------------------------------")
         gridsearch_1.fit(monk_dataset, monk_labels, epochs=epochs, batch_size=batch_size, shuffle=True, cv=cross_validation)
         print("Done")
         ''' best_1=gridsearch_1.best_model
