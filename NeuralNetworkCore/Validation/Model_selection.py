@@ -23,7 +23,7 @@ from NeuralNetworkCore.Reguralizers import EarlyStopping
 os.environ['WANDB_NAME'] = 'Machine_Learning_Project'
 #os.environ['WANDB_API_KEY'] = 'local-94c8ff41420f1a793c98053287704ca383313390'
 #malio 20eb6383f49b2e6f666de5b53b5db5ece12bb3a1
-os.environ['WANDB_API_KEY'] = '20eb6383f49b2e6f666de5b53b5db5ece12bb3a1'
+os.environ['WANDB_API_KEY'] = '3d7e6046094467e3e7f7c71bc4d2e5f2aa025ba0'
 os.environ["WANDB_SILENT"] = "true"
 
 import wandb
@@ -622,13 +622,14 @@ class GridSearch(HyperparametersSearch):
         self.generate_current_experiment(param_combination)
 
 
-        self.__model.compile(optimizer=self.__evaluated_optimizer, loss=self.__current_loss,
-                                metrics=self.__current_metric, early_stopping=self.__es, patience=self.__patience,
-                                tolerance=self.__tol, monitor=self.__monitor, mode=self.__es_mode)
+      
         # self.__model.showLayers()
 
         self.reset_results()
         if cv is not None and cv > 0:
+            self.__model.compile(optimizer=self.__evaluated_optimizer, loss=self.__current_loss,
+                                metrics=self.__current_metric, early_stopping=self.__es, patience=self.__patience,
+                                tolerance=self.__tol, monitor=self.__monitor, mode=self.__es_mode)
             for index, training_set in enumerate(self.__training_set[0]):
                 #print('Fold[' + str(index + 1) + ']')
                 #print('trainingSet: ' + str(len(training_set)))
