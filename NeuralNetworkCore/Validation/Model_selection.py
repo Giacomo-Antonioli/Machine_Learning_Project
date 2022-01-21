@@ -23,9 +23,10 @@ from NeuralNetworkCore.Reguralizers import EarlyStopping
 os.environ['WANDB_NAME'] = 'Machine_Learning_Project'
 #os.environ['WANDB_API_KEY'] = 'local-94c8ff41420f1a793c98053287704ca383313390'
 #malio 20eb6383f49b2e6f666de5b53b5db5ece12bb3a1
-os.environ['WANDB_API_KEY'] = '3d7e6046094467e3e7f7c71bc4d2e5f2aa025ba0'
+os.environ['WANDB_API_KEY'] = '901293c0ca73c38b66f42c4cd465a7e11073915e'
+#os.environ['WANDB_MODE']='offline'
 os.environ["WANDB_SILENT"] = "true"
-
+os
 import wandb
 
 def get_key(my_dict, val):
@@ -567,6 +568,8 @@ class GridSearch(HyperparametersSearch):
         self.results['training_metrics'] = np.asarray(res['training_metrics'])
         self.results['validation_error'] = np.asarray(res['validation_error'])
         self.results['validation_metrics'] = np.asarray(res['validation_metrics'])
+        # print("££££££££££££££££££££££££££££££££££3Setting:")
+        # print(res['validation_metrics'][-1])
 
     def accumulate_results(self, res):
         self.results['training_error'] = np.add(self.results['training_error'], np.asarray(res['training_error']))
@@ -577,6 +580,10 @@ class GridSearch(HyperparametersSearch):
                                                   np.asarray(res['validation_error']))
         self.results['validation_metrics'] = np.add(self.results['validation_metrics'],
                                                     np.asarray(res['validation_metrics']))
+
+        # print("££££££££££££££££££££££££££££££££££3ACCUMULATING:")
+        # print(res['validation_metrics'][-1])
+        
 
     def get_mean_error(self):
         self.results['training_error'] = np.divide(self.results['training_error'], self.__cv)
@@ -606,15 +613,19 @@ class GridSearch(HyperparametersSearch):
         cv = args[1]
         total_runs = []
         param_combination = args[0][0]
+        run_number=args[2]
 
         config = param_combination
+        # print(config)
+
         wandb.init(
             #Set entity to specify your username or team name
-            #entity="",
+            entity="ml_project",
             #Set the project where this run will be logged
+            name="run number: "+str(run_number),
             project="test" + self.__model.name,
             group="experiment_" + self.__model.name,
-            #Track hyperparameters and run metadata
+    	    #Track hyperparameters and run metadata
             config=config,reinit=True)
         self.__optimizer_seen = False
         self.__reguralizers = {}
@@ -622,7 +633,7 @@ class GridSearch(HyperparametersSearch):
         self.generate_current_experiment(param_combination)
 
 
-      
+       
         # self.__model.showLayers()
 
         self.reset_results()
@@ -631,23 +642,32 @@ class GridSearch(HyperparametersSearch):
                                 metrics=self.__current_metric, early_stopping=self.__es, patience=self.__patience,
                                 tolerance=self.__tol, monitor=self.__monitor, mode=self.__es_mode)
             for index, training_set in enumerate(self.__training_set[0]):
-                #print('Fold[' + str(index + 1) + ']')
-                #print('trainingSet: ' + str(len(training_set)))
-                #print('epochs: ' + str(self.__epochs))
+                # print('Fold[' + str(index + 1) + ']')
+                # print('trainingSet: ' + str(len(training_set)))
+                # print('epochs: ' + str(self.__epochs))
                 res = self.__model.fit(training_set, self.__training_set[1][index],
                                         validation_data=(
                                             self.__validation_set[0][index], self.__validation_set[1][index]),
                                         epochs=self.__epochs,
                                         batch_size=self.__batch_size, shuffle=self.__shuffle)
-
+                # print("cccccccccccccccccccccccccc")
+                # print(self.__validation_set[1][index])
+                # print(self.__validation_set[0][index])
+                # print("cccccccccccccccccccccccc")
                 if index == 0:
                     #print("setting: " + str(len(res['training_error'])))
                     self.set_results(res)
                 else:
                     #print("adding: " + str(len(res['training_error'])))
                     self.accumulate_results(res)
-
+            #
+            # print("££££££££££££££££££££££££££££££££££££TOTAL")
+            # print(self.results['validation_metrics'][-1])
             self.get_mean_error()
+            # print("££££££££££££££££££££££££££££££££££££££££MEAN")
+            # print(self.results['validation_metrics'][-1])
+            # print("-----------------------------------------------")
+
 
             total_runs.append([self.results, param_combination])
 
@@ -739,13 +759,14 @@ class GridSearch(HyperparametersSearch):
 
         parallel_split = np.array_split(np.asarray(experiments), len(experiments))
         parallel_args = []
-        for x in parallel_split:
-            parallel_args.append((x, cv))
-            
+        for index,x in enumerate(parallel_split):
+            parallel_args.append((x, cv,index))
+        
+
         with NestablePool(self.__pool_size) as pool:
             result_pool = list(tqdm.tqdm(pool.imap(self.internal_runs, parallel_args), total=len(experiments)))
             pool.close()
             pool.join()
 
-        print("--------------------------------------------")
-        print("best params: " + str(self.best_param(result_pool)))
+        # print("--------------------------------------------")
+        # print("best params: " + str(self.best_param(result_pool)))

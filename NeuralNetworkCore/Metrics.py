@@ -1,4 +1,5 @@
 from math import pow
+from typing import List
 
 import numpy as np
 
@@ -14,22 +15,34 @@ def binary_class_accuracy(predicted, target):
     The threshold is 0.3
     """
     
-    result=[]
-    for index,i in enumerate(predicted):
-        if type(predicted)==  'numpy.ndarray':
-            predicted = i[0]
-            target_curr = target[index][0]
+    result=0
+    if isinstance(predicted, list) or isinstance(predicted,np.ndarray):
+        for index in range(len(predicted)):
+            if np.abs(predicted[index] - target[index]) < 0.3:
+                result+=1
+    elif isinstance(predicted,float):
+        if np.abs(predicted - target) < 0.3:
+            result+=1
+    
+        
+    # for index,i in enumerate(predicted):
+    #     if type(predicted)==  'numpy.ndarray':
+    #         predicted = i[0]
+    #         target_curr = target[index][0]
            
-        else:
-            predicted=i
-            target_curr=target[index]
-        if np.abs(predicted - target_curr) < 0.5:
-            result.append(1)
-        else:
-            result.append(0)
+    #     else:
+    #         predicted=i
+    #         target_curr=target[index]
+    #     if np.abs(predicted - target_curr) < 0.3:
+    #         result.append(1)
+    #     else:
+    #         result.append(0)
             
 
-    total=np.sum(result)/len(result)
+    total=result/len(predicted)
+    # print("$$$$$$TOTAL$$$$$$$$$$$$$$$$$")
+    # print(total*100)
+    # print("$$$$$$TOTAL$$$$$$$$$$$$$$$$$")
     return total
 
 def accuracy(predicted, target):
@@ -40,7 +53,7 @@ def accuracy(predicted, target):
     if counter == 0:
         return counter
     else:
-        return counter / len(target)
+        return (counter / len(target))*100
 
 def true_false_positive(predicted, target):
     """

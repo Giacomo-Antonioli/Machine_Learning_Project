@@ -277,7 +277,7 @@ class Optimizer:
         self.set_values_dict_element('training_error', current_loss_error)
         #METRIC
         self.epoch_training_error_metric = np.sum(self.epoch_training_error_metric_vector) / len(self.epoch_training_error_metric_vector)
-        self.set_values_dict_element('training_metrics', self.epoch_training_error_metric*100)
+        self.set_values_dict_element('training_metrics', self.epoch_training_error_metric)
         return current_loss_error
 
     def init_epoch_training_error(self):
@@ -290,7 +290,7 @@ class Optimizer:
         epoch_val_error, epoch_val_metric = self.model.evaluate(validation_data=val_x, targets=val_y)
         current_val_error = epoch_val_error
         self.set_values_dict_element('validation_error', current_val_error)
-        self.set_values_dict_element('validation_metrics', epoch_val_metric*100)
+        self.set_values_dict_element('validation_metrics', epoch_val_metric)
         return current_val_error
 
     def apply_stopping(self, current_loss_error, current_val_error):
@@ -621,9 +621,9 @@ class Adam(Optimizer):
         self.momentum_network_2 = self.model.get_empty_struct()
 
     def apply_adam(self, batch_index):
-        print('beta1: ' + str(self.beta1))
-        print('beta2: ' + str(self.beta2))
-        print('epsilon: ' + str(self.epsilon))
+        # print('beta1: ' + str(self.beta1))
+        # print('beta2: ' + str(self.beta2))
+        # print('epsilon: ' + str(self.epsilon))
         for grad_net_index in range(len(self.model.dense_configuration)):
             layer_index = self.model.dense_configuration[grad_net_index]
 
