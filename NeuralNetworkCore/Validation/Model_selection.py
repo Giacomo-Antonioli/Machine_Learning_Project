@@ -24,7 +24,7 @@ os.environ['WANDB_NAME'] = 'Machine_Learning_Project'
 #os.environ['WANDB_API_KEY'] = 'local-94c8ff41420f1a793c98053287704ca383313390'
 #malio 20eb6383f49b2e6f666de5b53b5db5ece12bb3a1
 os.environ['WANDB_API_KEY'] = '901293c0ca73c38b66f42c4cd465a7e11073915e'
-os.environ['WANDB_MODE']='offline'
+#os.environ['WANDB_MODE']='offline'
 os.environ["WANDB_SILENT"] = "true"
 os
 import wandb

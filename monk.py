@@ -25,8 +25,8 @@ columns = ['class', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'Id']
 #hyper-parameters
 #hyper-parameters
 opt = ['sgd','adam', 'rmsprop']
-mom = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-lr = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+mom = [0.1, 0.3,  0.001,0.01]
+lr = [ 0.7, 0.9,0.1,0.65]
 metrics = ['binary']
 loss = ['squared']
 beta1 = [0.95, 0.9]
@@ -35,16 +35,16 @@ epsilon = [1e-9, 1e-8]
 rho = [0.95, 0.9]
 
 n_layer = 2
-n_unit_1 = [10]
+n_unit_1 = [10,15]
 n_unit_2 = [1]
 ac_fun_1 = ['tanh','sigmoid']
 ac_fun_2 = ['sigmoid']
 weight_init = ['glorot_normal']
 bias_init = ['glorot_normal']
 drop_percent = [0.3,0.5]
-epochs = 500
+epochs = 100
 cross_validation = 5
-batch_size = [1, 30]
+batch_size = [ 30]
 reg = ['l1']
 reg_param = [0.0003]
 
