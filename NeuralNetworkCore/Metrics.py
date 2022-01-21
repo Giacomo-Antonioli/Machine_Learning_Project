@@ -53,7 +53,7 @@ def accuracy(predicted, target):
     if counter == 0:
         return counter
     else:
-        return counter / len(target)
+        return (counter / len(target))*100
 
 def true_false_positive(predicted, target):
     """
