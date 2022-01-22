@@ -23,7 +23,7 @@ from NeuralNetworkCore.Reguralizers import EarlyStopping
 os.environ['WANDB_NAME'] = 'Machine_Learning_Project'
 #os.environ['WANDB_API_KEY'] = 'local-94c8ff41420f1a793c98053287704ca383313390'
 #malio 20eb6383f49b2e6f666de5b53b5db5ece12bb3a1
-os.environ['WANDB_API_KEY'] = '901293c0ca73c38b66f42c4cd465a7e11073915e'
+os.environ['WANDB_API_KEY'] = '3d7e6046094467e3e7f7c71bc4d2e5f2aa025ba0'
 #os.environ['WANDB_MODE']='offline'
 os.environ["WANDB_SILENT"] = "true"
 os
@@ -623,7 +623,7 @@ class GridSearch(HyperparametersSearch):
             entity="ml_project",
             #Set the project where this run will be logged
             name="run number: "+str(run_number),
-            project="test" + self.__model.name,
+            project="cup-21-test" + self.__model.name,
             group="experiment_" + self.__model.name,
     	    #Track hyperparameters and run metadata
             config=config,reinit=True)
@@ -768,5 +768,5 @@ class GridSearch(HyperparametersSearch):
             pool.close()
             pool.join()
 
-        # print("--------------------------------------------")
-        # print("best params: " + str(self.best_param(result_pool)))
+        print("--------------------------------------------")
+        print("best params: " + str(self.best_param(result_pool)))
