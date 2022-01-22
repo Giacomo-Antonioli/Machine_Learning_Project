@@ -42,20 +42,20 @@ ac_fun_2 = ['sigmoid']
 weight_init = ['glorot_normal']
 bias_init = ['glorot_normal']
 drop_percent = [0.3,0.5]
-epochs = 100
+epochs = 200
 cross_validation = 5
 batch_size = [ 30]
 reg = ['l1']
 reg_param = [0.0003]
 
-for monk in ['monks-3']:#, 'monks-2', 'monks-3'
+for monk in ['monks-1']:#, 'monks-2', 'monks-3'
     monk_train = monk + '.train'
     monk_test = monk + '.test'
 
 
     print(os.getcwd())
-    monk_dataset, monk_labels= LoadCSVData.loadCSV(path = "./datasets/monks/", file_name = str(monk_train), separator=' ', column_names=columns, column_for_label='class', returnFit=True)   
-    monk_dataset_test, monk_labels_test= LoadCSVData.loadCSV(path = "./datasets/monks/", file_name = str(monk_test), separator=' ', column_names=columns, column_for_label='class', returnFit=True)
+    monk_dataset, monk_labels= LoadCSVData.loadCSV(path = "./datasets/monks/", file_name = str(monk_train), separator=' ', column_names=columns, column_for_label=0, returnFit=True)   
+    monk_dataset_test, monk_labels_test= LoadCSVData.loadCSV(path = "./datasets/monks/", file_name = str(monk_test), separator=' ', column_names=columns, column_for_label=0, returnFit=True)
 
     model = Model(monk)
     model.set_input_shape(17)
@@ -97,7 +97,9 @@ for monk in ['monks-3']:#, 'monks-2', 'monks-3'
         print("---------------------------MODEL---------------------------------")
         model.showLayers()
         print("-----------------------------------------------------------------")
-        gridsearch_1.fit(monk_dataset, monk_labels, epochs=epochs, batch_size=batch_size, shuffle=True, cv=cross_validation)
+        print(monk_dataset[0])
+
+        #gridsearch_1.fit(monk_dataset, monk_labels, epochs=epochs, batch_size=batch_size, shuffle=True, cv=cross_validation)
         print("Done")
         ''' best_1=gridsearch_1.best_model
         # int_test_1=best_1.evaluate(monk_dataset_test,monk_labels_test)

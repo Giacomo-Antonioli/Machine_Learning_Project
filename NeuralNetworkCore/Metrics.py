@@ -18,10 +18,10 @@ def binary_class_accuracy(predicted, target):
     result=0
     if isinstance(predicted, list) or isinstance(predicted,np.ndarray):
         for index in range(len(predicted)):
-            if np.abs(predicted[index] - target[index]) < 0.3:
+            if np.abs(predicted[index] - target[index]) < 0.5:
                 result+=1
     elif isinstance(predicted,float):
-        if np.abs(predicted - target) < 0.3:
+        if np.abs(predicted - target) < 0.5:
             result+=1
     
         
@@ -43,7 +43,7 @@ def binary_class_accuracy(predicted, target):
     # print("$$$$$$TOTAL$$$$$$$$$$$$$$$$$")
     # print(total*100)
     # print("$$$$$$TOTAL$$$$$$$$$$$$$$$$$")
-    return total
+    return total*100
 
 def accuracy(predicted, target):
     counter = 0
@@ -53,7 +53,7 @@ def accuracy(predicted, target):
     if counter == 0:
         return counter
     else:
-        return (counter / len(target))*100
+        return (counter / len(target))
 
 def true_false_positive(predicted, target):
     """

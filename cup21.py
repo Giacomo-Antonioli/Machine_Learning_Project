@@ -18,33 +18,37 @@ cupPath = "./datasets/cup/"
 opt = ['adam']
 mom = [0.15, 0.5]
 lr = [0.0001, 0.6]
+
 metrics = ['mee']
 loss = ['squared']
-beta1 = [0.95, 0.9]
+beta1 = [0.9]
 beta2 = [0.999, 0.995]
 epsilon = [1e-8]
 rho = [0.95, 0.9]
 
 n_layer = 2
-n_unit_1 = [20]
+
+n_unit_1 = [20, 30]
 n_unit_2 = [1]
 #n_unit_3 = [1]
 ac_fun_1 = ['sigmoid']
 ac_fun_2 = ['linear']
-ac_fun_3 = ['linear']
+
+#ac_fun_3 = ['linear']
 weight_init = ['glorot_normal']
 bias_init = ['glorot_normal']
 # drop_percent = [0.1,0.2,0.3]
 epochs = 150
-cross_validation = 4
+
+cross_validation = 3
 batch_size = [300]
 reg = ['l1']
-reg_param = [0.001]
+reg_param = [0.0003,0.0001]
 
 cup_dataset, cup_lables= LoadCSVData.loadCSV(path = "datasets/cup/", file_name = 'ML-CUP21-TR.csv', separator=',', column_names=None, column_for_label=10, drop_rows=[0,1,2,3,4,5,6], drop_cols = 11)
 cup_dataset1, cup_lables1= LoadCSVData.loadCSV(path = "datasets/cup/", file_name = 'ML-CUP21-TR.csv', separator=',', column_names=None, column_for_label=11, drop_rows=[0,1,2,3,4,5,6], drop_cols = 10)
 
-model = Model("cup1")
+model = Model("cup2_correct")
 
 ''' model.create_net(num_layer = n_layer, drop_frequency=1, num_unit=[10], act_func=['linear'], weight_init= ['glorot_normal'],
                      bias_init=['glorot_normal'], drop_percentage=[0.3]) '''
@@ -69,7 +73,7 @@ gridsearch_1 = GridSearch(model,
                               'rho': rho,
                               'weightinit_1': weight_init,
                               'weightinit_2': weight_init,
-                              #'weightinit_3': weight_init,
+                              #"weightinit_3": weight_init,
                               'biasinit_1': bias_init,
                               'biasinit_2': bias_init,
                               #'biasinit_3': bias_init,
@@ -78,7 +82,7 @@ gridsearch_1 = GridSearch(model,
                               #'actfun_3': ac_fun_3,
                               'units_1': n_unit_1,
                               'units_2': n_unit_2,
-                             # 'units_3': n_unit_3,
+                              #'units_3': n_unit_3,
                               'batchsize': batch_size,
                               'reg_1': reg,
                               'regparam_1': reg_param,
@@ -88,7 +92,5 @@ gridsearch_1 = GridSearch(model,
                             )
 
 if __name__ == '__main__':
-    
-    gridsearch_1.fit(cup_dataset, cup_lables1, epochs=epochs, batch_size=batch_size, shuffle=True, cv=cross_validation)
-    
-    '''best params: {'mom': 0.85, 'lr': 0.05, 'metrics': 'mee', 'loss': 'squared', 'weightinit_1': 'glorot_normal', 'biasinit_1': 'glorot_normal', 'actfun_1': 'sigmoid', 'actfun_2': 'sigmoid', 'actfun_3': 'linear', 'units_1': 50, 'batchsize': 150, 'reg_1': 'l1', 'reg_2': 'l1', 'epochs': 50, 'opt': 'sgd'}'''
+
+    gridsearch_1.fit(cup_dataset1, cup_lables1, epochs=epochs, batch_size=batch_size, shuffle=True, cv=cross_validation)
