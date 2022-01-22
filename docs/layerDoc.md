@@ -26,24 +26,11 @@ Classes documentation list:
 
 ## Layer
 
-Description: Class that represent a layer of a neural network
-
-<h3> Class variables</h3>
-<p>
-For each variable there is a getter and setter.
-
-| Method property                       | Explanation                                              |  
-| ------------------------------------- | ----------------------------   |
-| self.__type = type                    |                                |
-
-Class that represent a layer of a neural network
-</p>
+Description: The Layers class is the main building block of the given simulator. It implements a single layer of a MLP and specializes into two different types: a Dense layer and a Dropout layer. Due to the fact that the aim for the layers is to receive an input and calculate the output and finally doing the back-propagation to adjust the weights for each unit, the forward_pass and backwards_pass methods are present in both the layers implementation.
 
 ### Dense extends Layer
 
-In any neural network, a dense layer is a layer that is deeply connected with its preceding layer which means the
-neurons of the layer are connected to every neuron of its preceding layer. This layer is the most commonly used layer in
-artificial neural network networks.
+A dense layer is a layer that is deeply connected with its preceding layer which means the neurons of the layer are connected to all the neurons of its preceding layer. It contains the matrix for both weights and biases, based on the input dimension and the number of units contained in this layer. The input dimensions of each layer, except from the first one, are retrieved from the previous dense layer. The weight and biases matrices are initialized using different initialization methods and there are different options from which to choose(as discussed in section Initializer. To the internal propagation of the input through the layer an activation function is applied to the final computational result. Each layer has the possibility to implement some kinds of regularization independently from each other.
 
 <hr>
 <h3>Class variables</h3>
@@ -96,8 +83,7 @@ weights returns gradient_w: gradient wrt weights returns gradient_b: gradient wr
 
 ### Dropout extends Layer
 
-Dropout is an approach to regularization in neural networks which helps reducing interdependent learning amongst the
-neurons.
+The dropout layer is a special layer that only changes the input for the next dense layer zeroing some random inputs. It can be initialized with an user selected dropout ratio and with a specific seed for the random generator. This zeroing process is only applied to the feed-forward propagation. 
 
 <hr>
 <h3>Class variables</h3>

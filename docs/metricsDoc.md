@@ -26,7 +26,7 @@ Classes documentation list:
 
 ## Metrics
 
-Metrics are used to monitor and measure the performance of a model (during training and testing)
+Evaluating your machine learning algorithm is an essential part of any project. Your model may give you satisfying results when evaluated using a metric say accuracy_score but may give poor results when evaluated against other metrics such as logarithmic_loss or any other such metric. Most of the times we use classification accuracy to measure the performance of our model, however it is not enough to truly judge our model. In this post, we will cover different types of evaluation metrics available.
 
 <h3>binary_class_accuracy</h3>
 <p>
@@ -108,3 +108,9 @@ different datasets. Best possible score is 1.0 and it can be negative (because t
 constant model that always predicts the expected value of y, disregarding the input features, would get a R² score of
 0.0.
 </p>
+
+---
+
+<h3> References </h3>
+
+- <a href="https://towardsdatascience.com/metrics-to-evaluate-your-machine-learning-algorithm-f10ba6e38234"> https://towardsdatascience.com/metrics-to-evaluate-your-machine-learning-algorithm-f10ba6e38234 </a>
