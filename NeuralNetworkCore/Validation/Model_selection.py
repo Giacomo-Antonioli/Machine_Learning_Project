@@ -1,4 +1,4 @@
-#  Copyright (c) 2021.
+ #  Copyright (c) 2021.
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 #
@@ -19,14 +19,13 @@ import tqdm
 from NeuralNetworkCore.Model import Model
 from NeuralNetworkCore.Optimizers import optimizers, optimizers_attributes
 from NeuralNetworkCore.Reguralizers import EarlyStopping
+from NeuralNetworkCore.Metrics import metrics
+from NeuralNetworkCore.Loss import losses
 
 os.environ['WANDB_NAME'] = 'Machine_Learning_Project'
-#os.environ['WANDB_API_KEY'] = 'local-94c8ff41420f1a793c98053287704ca383313390'
-#malio 20eb6383f49b2e6f666de5b53b5db5ece12bb3a1
-os.environ['WANDB_API_KEY'] = '901293c0ca73c38b66f42c4cd465a7e11073915e'
+os.environ['WANDB_API_KEY'] = '20eb6383f49b2e6f666de5b53b5db5ece12bb3a1'
 #os.environ['WANDB_MODE']='offline'
 os.environ["WANDB_SILENT"] = "true"
-os
 import wandb
 
 def get_key(my_dict, val):
@@ -50,7 +49,6 @@ class NoDaemonProcess(multiprocessing.Process):
 # because the latter is only a wrapper function, not a proper class.
 class MyPool(multiprocessing.pool.Pool):
     Process = NoDaemonProcess
-
 
 class NoDaemonProcess(multiprocessing.Process):
     @property
@@ -362,7 +360,6 @@ class GridSearch(HyperparametersSearch):
         parameters_new = {}
         try:  ## Control if parameters list has to search over optimizers
             param_optmiziers = self.__param_list['opt']
-            ##print(param_optmiziers)
 
             for opti in param_optmiziers:  ## if so for each optimizer select attributes that are significant to him
                 if isinstance(opti, str):  # otherwise remove them from his cycles to avoid repeteade cycles
@@ -373,23 +370,13 @@ class GridSearch(HyperparametersSearch):
                     selected_opti = opti
                     current_key = get_key(optimizers, opti)
                     parameters_new[current_key] = {}
-                #print(current_key)
                 for key in self.__param_list:
                     #if key == 'act' or key == 'actfun' or key == 'activationfunction':
-                    ''' print("----skimming----")
-                    print(key)
-                    print('--------') '''
                     key_name = key.split('_')
                     if key != 'opt':
-                        #print("\tsearching key: " + key)
-                        #print(self.__param_list[key[0]])
                         try:
-                            #print(self.__look_up_dict[key])
                             if self.__look_up_dict[key_name[0]] in optimizers_attributes:
                                 if hasattr(selected_opti, self.__look_up_dict[key_name[0]]):
-
-                                    #print("\t\t" + key + " found")
-
                                     if not key in parameters_new[current_key]:
                                         parameters_new[current_key][key] = []
                                     parameters_new[current_key][key] = (self.__param_list[key])
@@ -416,47 +403,63 @@ class GridSearch(HyperparametersSearch):
     def add_optimizer_parameters(self, param_combination, param, x):
         if x[0] == 'mom' or x[0] == 'momentum' or x[0] == 'm':
             if self.__optimizer_seen:
-                self.__evaluated_optimizer().momentum = float(param_combination[param])
+                self.__evaluated_optimizer.momentum = float(param_combination[param])
             else:
                 self.__temp_suspended[param] = float(param_combination[param])
         if x[0] == 'learningrate' or x[0] == 'lr':
             if self.__optimizer_seen:
-                self.__evaluated_optimizer().lr = float(param_combination[param])
+                self.__evaluated_optimizer.lr = float(param_combination[param])
             else:
                 self.__temp_suspended[param] = float(param_combination[param])
+        if x[0] == 'metric' or x[0] == 'metrics':
+            if self.__optimizer_seen:
+                if isinstance(param_combination[param], str):
+                    self.__evaluated_optimizer.metric = metrics[param_combination[param]]
+                else:
+                    self.__evaluated_optimizer.metric = param_combination[param]
+            else:
+                self.__temp_suspended[param] = metrics[param_combination[param]]
+        if x[0] == 'loss' or x[0] == 'losses':
+            if self.__optimizer_seen:
+                if isinstance(param_combination[param], str):
+                    self.__evaluated_optimizer.loss = losses[param_combination[param]]
+                else:
+                    self.__evaluated_optimizer.loss = param_combination[param]
+            else:
+                self.__temp_suspended[param] = losses[param_combination[param]]
         if x[0] == 'nesterov':
             if self.__optimizer_seen:
-                if self.__evaluated_optimizer().name == 'sgd':
-                    self.__evaluated_optimizer().momentum = param_combination[param]
+                if self.__evaluated_optimizer.name == 'sgd':
+                    self.__evaluated_optimizer.momentum = param_combination[param]
                 else:
-                    warnings.warn(str(self.__evaluated_optimizer().name) + ' has no param ' + param + '.')
+                    warnings.warn(str(self.__evaluated_optimizer.name) + ' has no param ' + param + '.')
 
             else:
                 self.__temp_suspended[param] = param_combination[param]
         if x[0] == 'rho':
             if self.__optimizer_seen:
-                if self.__evaluated_optimizer().name == 'rmsprop':
-                    self.__evaluated_optimizer().rho = param_combination[param]
+                if self.__evaluated_optimizer.name == 'rmsprop':
+                    self.__evaluated_optimizer.rho = param_combination[param]
                 else:
-                    warnings.warn(str(self.__evaluated_optimizer().name) + ' has no param ' + param + '.')
+                    warnings.warn(str(self.__evaluated_optimizer.name) + ' has no param ' + param + '.')
 
             else:
                 self.__temp_suspended[param] = param_combination[param]
         if x[0] == 'beta1' or x[0] == 'b1':
             if self.__optimizer_seen:
-                if self.__evaluated_optimizer().name == 'adam':
-                    self.__evaluated_optimizer().beta1 = param_combination[param]
+                if self.__evaluated_optimizer.name == 'adam':
+                    self.__evaluated_optimizer.beta1 = param_combination[param]
                 else:
-                    message = str(self.__evaluated_optimizer().name) + ' has no param ' + param + '.'
+                    message = str(self.__evaluated_optimizer.name) + ' has no param ' + param + '.'
                     warnings.warn(message)
             else:
                 self.__temp_suspended[param] = param_combination[param]
         if x[0] == 'beta2' or x[0] == 'b2':
             if self.__optimizer_seen:
-                if self.__evaluated_optimizer().name == 'adam':
-                    self.__evaluated_optimizer().beta2 = param_combination[param]
+                if self.__evaluated_optimizer.name == 'adam':
+                    self.__evaluated_optimizer.beta2 = param_combination[param]
                 else:
-                    message = str(self.__evaluated_optimizer().name) + ' has no param ' + param + '.'
+                    message = str(self.__evaluated_optimizer.name) + ' has no param ' + param + '.'
                     warnings.warn(message)
 
 
@@ -464,10 +467,10 @@ class GridSearch(HyperparametersSearch):
                 self.__temp_suspended[param] = param_combination[param]
         if x[0] == 'epsilon' or x[0] == 'e':
             if self.__optimizer_seen:
-                if self.__evaluated_optimizer().name == 'adam':
-                    self.__evaluated_optimizer().epsilon = param_combination[param]
+                if self.__evaluated_optimizer.name == 'adam':
+                    self.__evaluated_optimizer.epsilon = param_combination[param]
                 else:
-                    warnings.warn(str(self.__evaluated_optimizer().name) + ' has no param ' + param + '.')
+                    warnings.warn(str(self.__evaluated_optimizer.name) + ' has no param ' + param + '.')
 
             else:
                 self.__temp_suspended[param] = param_combination[param]
@@ -501,12 +504,11 @@ class GridSearch(HyperparametersSearch):
 
             if x[0] == 'optimizers' or x[0] == 'optimizer' or x[0] == 'opt':
                 self.__optimizer_seen = True
-                self.__evaluated_optimizer = optimizers[param_combination[param]]
+                self.__evaluated_optimizer = optimizers[param_combination[param]]()
                 if len(self.__temp_suspended) > 0:
                     for suspended_parameter in self.__temp_suspended:
                         self.add_optimizer_parameters(self.__temp_suspended, suspended_parameter,
                                                       [suspended_parameter])
-
             if x[0] == 'loss' or x[0] == 'losses':
                 self.__current_loss = param_combination[param]
             if x[0] == 'metric' or x[0] == 'metrics':
@@ -546,7 +548,6 @@ class GridSearch(HyperparametersSearch):
             if x[0] == 'tol' or x[0] == 'tolerance' or x[0] == 'tollerance':
                 self.__tol = param_combination[param]
 
-        #print("__________-")
 
         for reg in self.__reguralizers:
             if self.__model.layers[self.__model.dense_configuration[int(reg) - 1]].regularizer != None:
@@ -563,13 +564,13 @@ class GridSearch(HyperparametersSearch):
     def reset_results(self):
         self.results = {}
 
+
     def set_results(self, res):
         self.results['training_error'] = np.asarray(res['training_error'])
         self.results['training_metrics'] = np.asarray(res['training_metrics'])
         self.results['validation_error'] = np.asarray(res['validation_error'])
         self.results['validation_metrics'] = np.asarray(res['validation_metrics'])
-        # print("££££££££££££££££££££££££££££££££££3Setting:")
-        # print(res['validation_metrics'][-1])
+
 
     def accumulate_results(self, res):
         self.results['training_error'] = np.add(self.results['training_error'], np.asarray(res['training_error']))
@@ -581,15 +582,12 @@ class GridSearch(HyperparametersSearch):
         self.results['validation_metrics'] = np.add(self.results['validation_metrics'],
                                                     np.asarray(res['validation_metrics']))
 
-        # print("££££££££££££££££££££££££££££££££££3ACCUMULATING:")
-        # print(res['validation_metrics'][-1])
-        
-
     def get_mean_error(self):
         self.results['training_error'] = np.divide(self.results['training_error'], self.__cv)
         self.results['training_metrics'] = np.divide(self.results['training_metrics'], self.__cv)
         self.results['validation_error'] = np.divide(self.results['validation_error'], self.__cv)
         self.results['validation_metrics'] = np.divide(self.results['validation_metrics'], self.__cv)
+
 
     def update_best(self, param_combination):
         self.__best_val = self.results['validation_metrics'][-1]
@@ -609,6 +607,25 @@ class GridSearch(HyperparametersSearch):
             if self.__best_val < self.results['validation_metrics'][-1]:
                 self.update_best(param_combination)
 
+    def wandb_save_predicted(self, input_value, target_value, cv):
+        predicted = []
+        data = [] 
+        counter = 0
+        for index, x in enumerate(input_value):
+            predicted.append(self.__model.predict(x))
+        
+        for index, x in enumerate(predicted):
+            for j in range(len(x)):
+                data.append([np.abs(x[j] - target_value[index][j]), index*len(x)+j])
+                wandb.log({
+                    "Predicted "+str(cv): x[j],
+                    "Target "+str(cv): target_value[index][j]
+                })
+        table = wandb.Table(data=data, columns=["x", "y"])
+        wandb.log({
+            "plot" : wandb.plot.line(table, "x", "y")
+        })
+
     def internal_runs(self, args):
         cv = args[1]
         total_runs = []
@@ -616,61 +633,40 @@ class GridSearch(HyperparametersSearch):
         run_number=args[2]
 
         config = param_combination
-        # print(config)
 
         wandb.init(
             #Set entity to specify your username or team name
             entity="ml_project",
             #Set the project where this run will be logged
             name="run number: "+str(run_number),
-            project="test" + self.__model.name,
+            project="test_cup_label0" + self.__model.name,
             group="experiment_" + self.__model.name,
     	    #Track hyperparameters and run metadata
             config=config,reinit=True)
         self.__optimizer_seen = False
         self.__reguralizers = {}
 
-        self.generate_current_experiment(param_combination)
-
-
-       
-        # self.__model.showLayers()
-
         self.reset_results()
         if cv is not None and cv > 0:
-            self.__model.compile(optimizer=self.__evaluated_optimizer, loss=self.__current_loss,
+            for index, training_set in enumerate(self.__training_set[0]):
+
+                self.generate_current_experiment(param_combination)
+                self.__model.compile(optimizer=self.__evaluated_optimizer, loss=self.__current_loss,
                                 metrics=self.__current_metric, early_stopping=self.__es, patience=self.__patience,
                                 tolerance=self.__tol, monitor=self.__monitor, mode=self.__es_mode)
-            for index, training_set in enumerate(self.__training_set[0]):
-                # print('Fold[' + str(index + 1) + ']')
-                # print('trainingSet: ' + str(len(training_set)))
-                # print('epochs: ' + str(self.__epochs))
                 res = self.__model.fit(training_set, self.__training_set[1][index],
                                         validation_data=(
                                             self.__validation_set[0][index], self.__validation_set[1][index]),
                                         epochs=self.__epochs,
                                         batch_size=self.__batch_size, shuffle=self.__shuffle)
-                # print("cccccccccccccccccccccccccc")
-                # print(self.__validation_set[1][index])
-                # print(self.__validation_set[0][index])
-                # print("cccccccccccccccccccccccc")
                 if index == 0:
-                    #print("setting: " + str(len(res['training_error'])))
                     self.set_results(res)
                 else:
-                    #print("adding: " + str(len(res['training_error'])))
                     self.accumulate_results(res)
-            #
-            # print("££££££££££££££££££££££££££££££££££££TOTAL")
-            # print(self.results['validation_metrics'][-1])
-            self.get_mean_error()
-            # print("££££££££££££££££££££££££££££££££££££££££MEAN")
-            # print(self.results['validation_metrics'][-1])
-            # print("-----------------------------------------------")
 
+            self.get_mean_error()
 
             total_runs.append([self.results, param_combination])
-
         elif self.__cv != -1:
 
             res = self.__model.fit(self.__training_set[0], self.__training_set[1],
@@ -682,8 +678,6 @@ class GridSearch(HyperparametersSearch):
             self.set_results(res)
             total_runs.append([self.results, param_combination])
         else:
-            #print(self.__model.optimizer.lr)
-            #print(self.__model.optimizer.momentum)
             res = self.__model.fit(self.__training_set[0], self.__training_set[1],
                                     epochs=self.__epochs,
                                     batch_size=self.__batch_size, shuffle=self.__shuffle)
@@ -701,7 +695,7 @@ class GridSearch(HyperparametersSearch):
                         "Valid Acc "+self.__current_metric: self.results['validation_metrics'][index]
             
             })
-            
+        self.wandb_save_predicted(self.__validation_set[0], self.__validation_set[1], cv=index)
         wandb.finish()
 
         return total_runs
@@ -753,7 +747,6 @@ class GridSearch(HyperparametersSearch):
         experiments = [dict(zip(keys, v)) for v in itertools.product(*values)]
 
         experiments = self.parameters_skimming()
-
         print("EVALUATING " + str(len(experiments)) + ' Combinations for a total of ' + str(
             len(experiments) * self.__cv) + ' times.')
 
@@ -762,11 +755,11 @@ class GridSearch(HyperparametersSearch):
         for index,x in enumerate(parallel_split):
             parallel_args.append((x, cv,index))
         
-
         with NestablePool(self.__pool_size) as pool:
             result_pool = list(tqdm.tqdm(pool.imap(self.internal_runs, parallel_args), total=len(experiments)))
             pool.close()
-            pool.join()
+            pool.join() 
 
         print("--------------------------------------------")
-        print("best params: " + str(self.best_param(result_pool)))
+        best_param = self.best_param(result_pool)
+        print("best params: " + str(best_param))

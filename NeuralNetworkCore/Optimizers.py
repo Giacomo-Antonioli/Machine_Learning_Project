@@ -1,7 +1,7 @@
 import math
+from matplotlib.pyplot import step
 
 import numpy as np
-#from tqdm import tqdm
 
 from NeuralNetworkCore.Loss import losses
 from NeuralNetworkCore.Metrics import metrics
@@ -27,7 +27,7 @@ class Optimizer:
     :param epoch_training_error_metric: metric used to calculate each epoch training error
     """
 
-    def __init__(self, learning_rate=0.1, name='', loss='', metric='', stop_flag=False):
+    def __init__(self, learning_rate=0.1, name='', loss='squared', metric='mee', stop_flag=False):
         self.type = 'optimizer'
         self.lr = learning_rate
         self.name = name
@@ -261,21 +261,16 @@ class Optimizer:
         net_outputs = self.model.forward(net_input=input, training=True)#calcolo l'output per l'elemento preso in input
 
         self.accumulate_errors(net_outputs,target)
-      
-        #print("metric " + str(self.__metric.function(predicted=net_outputs, target=target)))
-        #print("fit_with_gradient " + str(self.epoch_training_error_metric))
         # compute the delta for the outmost layer
         dErr_dOut = self.loss_function.derive(predicted=net_outputs, target=target)
         # accumulate all the deltas for each layer of the batch computation
         self.gradient_network = self.model.propagate_back(dErr_dOut, self.gradient_network)# calcolo tutti i delta e accumulo
+        return net_outputs
 
     def compute_training_error(self):
-        #ERROR
         self.epoch_training_error = np.sum(self.epoch_training_error_vector) / len(self.epoch_training_error_vector)
-       # current_loss_error = self.epoch_training_error / len(self.train_dataset)
         current_loss_error=self.epoch_training_error
         self.set_values_dict_element('training_error', current_loss_error)
-        #METRIC
         self.epoch_training_error_metric = np.sum(self.epoch_training_error_metric_vector) / len(self.epoch_training_error_metric_vector)
         self.set_values_dict_element('training_metrics', self.epoch_training_error_metric)
         return current_loss_error
@@ -287,6 +282,7 @@ class Optimizer:
     def validate(self, validation):
         val_x = validation[0][np.newaxis, :] if len(validation[0].shape) < 2 else validation[0]
         val_y = validation[1][np.newaxis, :] if len(validation[1].shape) < 2 else validation[1]
+
         epoch_val_error, epoch_val_metric = self.model.evaluate(validation_data=val_x, targets=val_y)
         current_val_error = epoch_val_error
         self.set_values_dict_element('validation_error', current_val_error)
@@ -306,12 +302,17 @@ class Optimizer:
         self.batch_training_error_metric=self.__metric.function(predicted=self.outputs,target=self.accumulate_labels)
 
 
+
     def do_epochs(self, validation, epochs, shuffle, early_stopping, optimizer):
+        print("-----------")
+        print(self.metric.name)
+        print(self.lr)
         self.reset_dict()#resetto per il training corrente
         current_val_error = 0
         epoch = 0
-        #self.pbar = tqdm(total=epochs)
-        
+        counter = 0 
+        total_output = []
+        total_label = []
         while epoch < epochs and not self.stop_flag:#ciclo sulle epoche
             self.init_epoch_training_error()#inizializzo gli errori a 0 per l'epoca corrente
             self.epoch_training_error_metric_vector=[]
@@ -325,13 +326,13 @@ class Optimizer:
                 self.accumulate_labels=[]
                 self.batch_training_error_vector=[]
                 
-                #print("do_epochs: ")
                 self.gradient_network = self.model.get_empty_struct()
                 for current_input, current_target in zip(train_batch, targets_batch):#ciclo su ogni elemento in una batch
-                    #print("do_epochs: ")
-                    #print(current_input)
-                    #print(current_target)
-                    self.fit_with_gradient(current_input, current_target)#calcolo il gradiente per ogni elemento in una batch
+                    output = self.fit_with_gradient(current_input, current_target)#calcolo il gradiente per ogni elemento in una batch
+                    total_label.append(current_target)
+                    total_output.append(output)
+                    
+                    counter+=1
                 self.compute_batch_errors()
                 self.epoch_training_error_vector.append(self.batch_trainig_error)
                 self.epoch_training_error_metric_vector.append(self.batch_training_error_metric)
@@ -344,9 +345,6 @@ class Optimizer:
             if early_stopping:#controllo l'early stopping
                 self.apply_stopping(current_loss_error, current_val_error)
             epoch += 1
-            #self.pbar.update(1)
-        #self.pbar.close()
-
 
 class StochasticGradientDescent(Optimizer):
     """
@@ -465,6 +463,7 @@ class StochasticGradientDescent(Optimizer):
         self.init_SGDnetwork_with_model(model)
         self.check_instances(early_stopping, check_stop)
         self.check_batch(train_dataset, train_labels, batch_size)
+
         self.do_epochs(validation, epochs, shuffle, early_stopping, optimizer=self.apply)
         return self.values_dict
 
@@ -621,9 +620,6 @@ class Adam(Optimizer):
         self.momentum_network_2 = self.model.get_empty_struct()
 
     def apply_adam(self, batch_index):
-        # print('beta1: ' + str(self.beta1))
-        # print('beta2: ' + str(self.beta2))
-        # print('epsilon: ' + str(self.epsilon))
         for grad_net_index in range(len(self.model.dense_configuration)):
             layer_index = self.model.dense_configuration[grad_net_index]
 
@@ -662,10 +658,12 @@ class Adam(Optimizer):
     def optimization_process(self, model, train_dataset, train_labels, epochs=1, batch_size=1, shuffle=False,
                              validation=None, early_stopping=False, check_stop=None):
         self.init_Adam_network_with_model(model)
+        model.showLayers()
         self.check_instances(early_stopping, check_stop)
         self.check_batch(train_dataset, train_labels, batch_size)
-        self.init_Adam_network_with_model(model)
+
         self.do_epochs(validation, epochs, shuffle, early_stopping, optimizer=self.apply_adam)
+       
         return self.values_dict
 
 

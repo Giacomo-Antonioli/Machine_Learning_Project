@@ -1,4 +1,5 @@
 
+from fileinput import filename
 from numpy import append, array
 import numpy as np
 import pandas as pd
@@ -18,9 +19,6 @@ class LoadCSVData:
         saveNewFile(path, file_name, df):                                                                           \n
         printSets(X_train, X_test):                                                                                 \n
     """
-    #columns = None
-    #monk_dataset, monk_labels= LoadCSVData.loadCSV(path = "datasets/cup/", file_name = 'ML-CUP21-TR.csv', separator=',', column_names=columns, column_for_label=10, drop_rows=[0,1,2,3,4,5,6], drop_cols = [11])
-     
     def loadCSV(path, file_name, size_for_split = 1, separator = ',',save_to_file = False, save_to_file_path = None, column_names = None, column_for_label = None, returnFit = False, drop_rows = [], drop_cols = None, shuffle_split = False):
 
         """
@@ -40,7 +38,7 @@ class LoadCSVData:
         :param shuffle_split: if true the values of the csv file will be shuffled before splitting
         :return: The splitted DataSets as different Dataframes. X_test and X_train for the actual data, y_test and y_train for the lables
     """
-
+        print(str(filename))
         rows = pd.read_csv(path+file_name, skiprows = drop_rows, sep=separator) #Reads the csv file
         df = pd.DataFrame(rows)                     #Create DataFrame                       
         
@@ -58,8 +56,6 @@ class LoadCSVData:
             while len(df.columns) < c:
                 columns_id.append("c" + str(c))
                 c += 1
-
-        
             
         #defines the header names for the csv file if the column names in input are less then the csv column count
         if(len(df.columns) - 1 > len(columns_id)):
@@ -73,107 +69,25 @@ class LoadCSVData:
         df.set_index('Id', inplace=True)
         columns_id.remove('Id')
 
-        #i select the lable column
-        
+        #select the lable column
         if column_for_label == None or column_for_label == []:
             column_for_label = len(df)
           
-        #print("-")  
-        #print(column_for_label)
         y = df.iloc[:, column_for_label]
         X = df
-
-        #print("--")  
-        #print(y)
-        
-        #print("-*")  
-        #print(X)
-
-        #print(column_for_label)
-        #print(drop_cols)
-        all_to_drop = [column_for_label, drop_cols]
-        #print(all_to_drop)
-        
-        X = df.drop(df.columns[all_to_drop], axis=1)  
-        #print("-*-")
-        #print(X) 
-        
-        '''
-        pos = columns_id.index('c'+str(drop_cols[0]+1))
-        if pos == len(columns_id):          
-            columns_id.remove('c'+str(drop_cols[0]+1))
-                
-        elif pos < len(columns_id):
-            columns_id = []
-            c = 1
-            while(len(df.columns) > len(columns_id)):
-                columns_id.append("c"+str(c))
-                c += 1
-                
-        
-        df.set_axis(columns_id, axis= 1, inplace=True)
-            
-            
-        
-        
-        
-        
-        print(columns_id)
-        '''
-        
-        """The following block of code checks if the value for the labels have been passed as an int 
-            if the labels are passed as int the code looks for the string version in the column_names
-            and passes the int index to y for the label selection and the string version for the x to make the drop
-            of the label column(s)
-      
-        column_for_y_index = list()
-        column_for_drop_index = ""
-        if isinstance(column_for_label, int):     
-            if drop_cols != None:
-                column_for_label -= len(drop_cols) 
-                print(column_for_label)
-                print("---")
-                print(drop_cols[0]-1)                  
-            column_for_y_index = column_for_label
-            
-            i = 0
-            for column_label in columns_id:
-                if i == column_for_label:
-                    column_for_drop_index = column_label
-                i += 1
-        else:
-            i = 0
-            for column_label in columns_id:
-                if column_label == column_for_label:
-                    column_for_y_index = i
-                i += 1
-            column_for_drop_index = column_for_label
+        if drop_cols != None:
+            all_to_drop = [column_for_label, drop_cols]
+        else: 
+            all_to_drop = column_for_label
 
         
-        if column_for_y_index == None or column_for_y_index == []:
-            y = df.iloc[:, 0]
-            X = df
+        X = df.drop(df.columns[all_to_drop], axis=1)
 
-        else:     
-            y = df.iloc[:,column_for_y_index]
-            #print(columns_id[drop_cols[0]])
-            #print("aaa")   
-            X = df.drop(column_for_drop_index, axis=1)     
-            #print(column_for_drop_index)   
-            #the dataframe except for the labels; axis is 1 for columns, 0 for rows  
-                     
-        """     
-        
         X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=size_for_split, shuffle = shuffle_split) #splits the dataset in test and train
         y_train = y_train.to_list()
         y_train = np.reshape(y_train, (len(y_train), 1)) 
-        y_test = y_test.to_list() 
+        y_test = y_test.to_list()
         y_test = np.reshape(y_test, (len(y_test), 1))
-
-        #print("x train")
-        #print(X_train)
-        #print("y train")
-        #print(y_train)
         
         if(save_to_file):
             LoadCSVData.saveNewFile(save_to_file_path,"X-train",X_train)
@@ -187,11 +101,11 @@ class LoadCSVData:
             X_train = OneHotEncoder().fit_transform(X_train).toarray().astype(np.float32)
             return X_train, y_train
         if returnFit == False:
-            return  X_train.to_numpy().astype(np.float32), X_test.to_numpy().astype(np.float32), y_train.astype(np.float32), y_test.astype(np.float32)
+            return  X_train.to_numpy().astype(np.float32),  y_train.astype(np.float32), X_test.to_numpy().astype(np.float32), y_test.astype(np.float32)
         else:
-             X_train = OneHotEncoder().fit_transform(X_train).toarray().astype(np.float32)
-             X_test = OneHotEncoder().fit_transform(X_test).toarray().astype(np.float32)
-             return  X_train, X_test, y_train, y_test
+            X_train = OneHotEncoder().fit_transform(X_train).toarray().astype(np.float32)
+            X_test = OneHotEncoder().fit_transform(X_test).toarray().astype(np.float32)
+            return  X_train, y_train, X_test, y_test
         
 
     def saveNewFile(path, file_name, df):
@@ -224,32 +138,3 @@ class LoadCSVData:
         print(dataFrame)
         print(dataFrame.shape)
         
-
-#the following code is for testing purpose only
-#columns = ['class', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'Id']
-#monk_dataset, monk_labels= LoadCSVData.loadCSV(path = "./datasets/monks/", file_name = "monks-1.train", separator=' ', column_names=columns, column_for_label=0, returnFit=True)   
-#print("-here-")
-#print(monk_labels)
-#print(monk_dataset)
-#cup_dataset, cup_lables= LoadCSVData.loadCSV(path = "datasets/cup/", file_name = 'ML-CUP21-TR.csv', separator=',', column_names=None, column_for_label=11, drop_rows=[0,1,2,3,4,5,6], drop_cols = 10)
-
-# the following code is for testing purpose only
-# columns = ['a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8', 'a9', 'a10', 'a11', 'a12', 'a13']
-# LoadCSVData.loadCSV("datasets\cup","\CUP-INTERNAL-TEST.csv", 0.5)
-# LoadCSVData.loadCSV("datasets\cup","\CUP-INTERNAL-TEST.csv", 0.5, True, save_to_file_path=None)
-
-cup_dataset, cup_lables= LoadCSVData.loadCSV(path = "datasets/cup/", file_name = 'ML-CUP21-TR.csv', separator=',', column_names=None, column_for_label=10, drop_rows=[0,1,2,3,4,5,6], drop_cols = 11)
-cup_dataset1, cup_lables1= LoadCSVData.loadCSV(path = "datasets/cup/", file_name = 'ML-CUP21-TR.csv', separator=',', column_names=None, column_for_label=11, drop_rows=[0,1,2,3,4,5,6], drop_cols = 10)
-
-'''print("cup_dataset")
-print(cup_dataset)
-print("cup_lables")
-print(cup_lables)
-
-print("cup_dataset1")
-print(cup_dataset1)
-print("cup_lables1")
-print(cup_lables1)
-
-if(cup_dataset.all() == cup_dataset1.all()):
-    print("IDENTICI")'''
