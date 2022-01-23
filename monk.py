@@ -6,6 +6,7 @@
 #
 #  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 from multiprocessing import freeze_support
+from pickle import ADDITEMS
 import numpy as np
 import pandas as pd
 import os
@@ -13,107 +14,79 @@ from sklearn.preprocessing import OneHotEncoder
 
 from NeuralNetworkCore.Layer import Dense
 from NeuralNetworkCore.Model import Model
-from NeuralNetworkCore.Optimizers import StochasticGradientDescent
+from NeuralNetworkCore.Optimizers import StochasticGradientDescent, Adam
 from NeuralNetworkCore.Validation.Model_selection import GridSearch
 
 from NeuralNetworkCore.Utils.LoadCSVData import LoadCSVData
-
+import wandb
 
 
 columns = ['class', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'Id']
 
 #hyper-parameters
-#hyper-parameters
-opt = ['sgd','adam', 'rmsprop']
-mom = [0.1, 0.3,  0.001,0.01]
-lr = [ 0.7, 0.9,0.1,0.65]
+opt = ['adam']
+mom = [0.7]
+lr = [ 0.00001]
 metrics = ['binary']
 loss = ['squared']
-beta1 = [0.95, 0.9]
-beta2 = [0.999, 0.995]
+beta1 = [0.9]
+beta2 = [0.999]
 epsilon = [1e-9, 1e-8]
 rho = [0.95, 0.9]
 
 n_layer = 2
-n_unit_1 = [10,15]
+n_unit_1 = [10]
 n_unit_2 = [1]
-ac_fun_1 = ['tanh','sigmoid']
+ac_fun_1 = ['tanh']
 ac_fun_2 = ['sigmoid']
-weight_init = ['glorot_normal']
-bias_init = ['glorot_normal']
+weight_init = ['uniform']
+bias_init = ['uniform']
 drop_percent = [0.3,0.5]
-epochs = 200
-cross_validation = 5
-batch_size = [ 30]
+epochs = 400
+cross_validation = 3
+batch_size = [ 1]
 reg = ['l1']
 reg_param = [0.0003]
 
-for monk in ['monks-1']:#, 'monks-2', 'monks-3'
+for monk in ['monks-3']:#, 'monks-2', 'monks-3'
     monk_train = monk + '.train'
     monk_test = monk + '.test'
-
-
-    print(os.getcwd())
-    monk_dataset, monk_labels= LoadCSVData.loadCSV(path = "./datasets/monks/", file_name = str(monk_train), separator=' ', column_names=columns, column_for_label=0, returnFit=True)   
-    monk_dataset_test, monk_labels_test= LoadCSVData.loadCSV(path = "./datasets/monks/", file_name = str(monk_test), separator=' ', column_names=columns, column_for_label=0, returnFit=True)
-
-    model = Model(monk)
-    model.set_input_shape(17)
-    # model.create_net(num_layer = n_layer, drop_frequency=1, num_unit=[10], act_func=['sigmoid', 'linear'], weight_init= ['glorot_normal'],
-    #                  bias_init=['glorot_normal'], drop_percentage=[1])
-    
-    model.add(Dense(10, activation_function='sigmoid'))
-    model.add(Dense(1, activation_function='tanh'))
-    optimizer = StochasticGradientDescent()
-    model.compile(optimizer=optimizer, metrics='binary', loss='squared')
-    
-    gridsearch_1 = GridSearch(model,
-                              {'opt': opt,
-                               'mom': mom,
-                               'lr': lr,
-                               'metrics': metrics,
-                               'loss': loss,
-                               'b1': beta1,
-                               'b2': beta2,
-                               'epsilon': epsilon,
-                               'rho': rho,
-                               'weightinit_1': weight_init,
-                               'weightinit_2': weight_init,
-                               'biasinit_1': bias_init,
-                               'biasinit_2': bias_init,
-                               'actfun_1': ac_fun_1,
-                               'actfun_2': ac_fun_2,
-                               'units_1': n_unit_1,
-                               'units_2': n_unit_2,
-                               'batchsize': batch_size,
-                              #  'reg_1': reg,
-                              #  'regparam_1': reg_param,
-                              #  'reg_2': reg,
-                              #  'regparam_2': reg_param
-                               }
-                            )
     
     if __name__ == '__main__':
         print("---------------------------MODEL---------------------------------")
         model.showLayers()
         print("-----------------------------------------------------------------")
-        print(monk_dataset[0])
+        monk_dataset, monk_labels= LoadCSVData.loadCSV(path = "./datasets/monks/", file_name = str(monk_train), separator=' ', column_names=columns, column_for_label=0, returnFit=True)   
+        monk_dataset_test, monk_labels_test= LoadCSVData.loadCSV(path = "./datasets/monks/", file_name = str(monk_test), separator=' ', column_names=columns, column_for_label=0, returnFit=True)
 
-        #gridsearch_1.fit(monk_dataset, monk_labels, epochs=epochs, batch_size=batch_size, shuffle=True, cv=cross_validation)
+        model = Model(monk)
+        model.set_input_shape(17)
+        
+        model.add(Dense(15, activation_function='tanh',weight_initializer='he_uniform',regularizer=('l1',0.01)))
+        model.add(Dense(1, activation_function='sigmoid'))
+        optimizer = Adam()
+        model.compile(optimizer=optimizer, metrics='binary', loss='squared')
+        res=model.fit(monk_dataset,monk_labels,validation_data=(monk_dataset_test, monk_labels_test), epochs=400, batch_size=30, shuffle=True)
+        wandb.login()
+        wandb.init(
+            #Set entity to specify your username or team name
+            entity="ml_project",
+            #Set the project where this run will be logged
+            
+            project="test._._" + model.name+"_with_reg",
+            group="experiment_" + model.name,
+    	    #Track hyperparameters and run metadata
+            reinit=True)
+        print(res["training_error"][-1])
+        print(res["training_metrics"][-1])
+        print(res["validation_error"][-1])
+        print(res["validation_metrics"][-1])
+        for index,x in enumerate(res["training_error"]):
+            wandb.log({ #'Epoch': epoch,
+                        "Train Loss": res['training_error'][index],
+                        "Train Acc ":res['training_metrics'][index],
+                        "Valid Loss": res['validation_error'][index],
+                        "Valid Acc ":res['validation_metrics'][index]
+            })
+        wandb.finish()  
         print("Done")
-        ''' best_1=gridsearch_1.best_model
-        # int_test_1=best_1.evaluate(monk_dataset_test,monk_labels_test)
-        print("#######################################")
-        print(monk)
-        print("Best TR metric")
-        print(gridsearch_1.best_tr_metric)
-        print("Best TR loss")
-        print(gridsearch_1.best_tr_loss)
-        print("Best Int metric")
-        print(int_test_1[1])
-        print("Best Int Loss")
-        print(int_test_1[0])
-        print("Best params")
-        print(gridsearch_1.best_params)
-        input() '''
-
